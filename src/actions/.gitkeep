@@ -1,0 +1,19 @@
+# Server Actions
+
+이 폴더에 모든 Server Action을 정의합니다.
+
+## 규칙
+- 파일 상단에 "use server" 지시문 필수
+- 입력 검증 필수
+- 에러 처리 (try-catch)
+- 반환 데이터 최소화
+
+## 예시
+```tsx
+"use server";
+
+export async function createProject(formData: FormData) {
+  const title = formData.get("title");
+  // 검증 및 처리...
+}
+```
