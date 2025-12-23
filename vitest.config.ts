@@ -9,6 +9,11 @@ export default defineConfig({
     setupFiles: ["./src/__tests__/setup.ts"],
     include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
     globals: true,
+    sequence: {
+      shuffle: false,
+    },
+    pool: "forks",
+    isolate: true,
   },
   resolve: {
     alias: {
