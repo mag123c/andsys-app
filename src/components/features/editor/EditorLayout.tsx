@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, ArrowLeft } from "lucide-react";
+import type { JSONContent } from "@tiptap/core";
+import { toast } from "sonner";
+import { Menu, ArrowLeft, Download, Copy, MoreVertical } from "lucide-react";
 import type { Project, Chapter } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -15,11 +23,13 @@ import {
 import { EditorSidebar } from "./EditorSidebar";
 import { SaveStatus } from "./SaveStatus";
 import { formatWordCount } from "@/lib/format";
+import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 
 interface EditorLayoutProps {
   project: Project;
   chapters: Chapter[];
   currentChapter: Chapter;
+  content: JSONContent | null;
   saveStatus: SaveStatusType;
   children: React.ReactNode;
 }
@@ -28,10 +38,25 @@ export function EditorLayout({
   project,
   chapters,
   currentChapter,
+  content,
   saveStatus,
   children,
 }: EditorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleExportTxt = () => {
+    exportChapterAsText(content, currentChapter.title);
+    toast.success("TXT 파일로 내보내기 완료");
+  };
+
+  const handleCopyToClipboard = async () => {
+    const success = await copyChapterToClipboard(content);
+    if (success) {
+      toast.success("클립보드에 복사되었습니다");
+    } else {
+      toast.error("클립보드 복사에 실패했습니다");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,11 +114,29 @@ export function EditorLayout({
                 <h1 className="font-medium truncate">{currentChapter.title}</h1>
               </div>
 
-              <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-3 shrink-0">
                 <span className="text-sm text-muted-foreground hidden sm:inline">
                   {formatWordCount(currentChapter.wordCount)}
                 </span>
                 <SaveStatus status={saveStatus} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">메뉴</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportTxt}>
+                      <Download className="mr-2 h-4 w-4" />
+                      TXT로 내보내기
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyToClipboard}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      클립보드에 복사
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

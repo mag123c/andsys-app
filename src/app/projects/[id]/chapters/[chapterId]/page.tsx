@@ -88,6 +88,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       project={project}
       chapters={chapters}
       currentChapter={chapter}
+      content={chapter.content}
       saveStatus={saveStatus}
     >
       <Editor initialContent={chapter.content} onUpdate={updateContent} />
