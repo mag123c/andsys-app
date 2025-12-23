@@ -33,30 +33,6 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
 
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-      {/* Undo / Redo */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-        title="실행 취소 (Ctrl+Z)"
-      >
-        <Undo className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-        title="다시 실행 (Ctrl+Y)"
-      >
-        <Redo className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="mx-1 h-6" />
-
       {/* 폰트 선택 */}
       <Select
         value={currentFont || "default"}
@@ -141,6 +117,31 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         title="가운데 정렬"
       >
         <AlignCenter className="h-4 w-4" />
+      </Button>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Undo / Redo */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => editor.chain().focus().undo().run()}
+        disabled={!editor.can().undo()}
+        title="실행 취소 (Ctrl+Z)"
+      >
+        <Undo className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => editor.chain().focus().redo().run()}
+        disabled={!editor.can().redo()}
+        title="다시 실행 (Ctrl+Y)"
+      >
+        <Redo className="h-4 w-4" />
       </Button>
     </div>
   );
