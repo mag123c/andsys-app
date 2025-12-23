@@ -11,8 +11,21 @@ import type { AuthState, User } from "@/repositories/types/user";
 import { createClient } from "@/storage/remote/client";
 import { getOrCreateGuestId, clearGuestId } from "@/lib/guest";
 
+interface SignInResult {
+  success: boolean;
+  error?: string;
+}
+
+interface SignUpResult {
+  success: boolean;
+  error?: string;
+  needsEmailConfirmation?: boolean;
+}
+
 interface AuthContextValue {
   auth: AuthState;
+  signIn: (email: string, password: string) => Promise<SignInResult>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
 }
 
@@ -73,6 +86,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
+  const signIn = useCallback(async (email: string, password: string): Promise<SignInResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }, []);
+
+  const signUp = useCallback(async (
+    email: string,
+    password: string,
+    displayName?: string
+  ): Promise<SignUpResult> => {
+    const supabase = createClient();
+    const { error, data } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: displayName,
+        },
+      },
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // 이메일 확인이 필요한 경우
+    const needsEmailConfirmation = !data.session;
+    return { success: true, needsEmailConfirmation };
+  }, []);
+
   const signOut = useCallback(async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -82,7 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ auth, signOut }}>
+    <AuthContext.Provider value={{ auth, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
