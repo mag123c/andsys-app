@@ -1,3 +1,17 @@
+/* 웹폰트 - 소설 에디터용 (반드시 최상단에 위치) */
+/* Pretendard - 현대적인 고딕체 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+/* 리디바탕 - 전자책 최적화 명조체 */
+@import url("https://cdn.jsdelivr.net/npm/@aspect-ratio/ridi-batang@1.0.0/fonts/ridi-batang.min.css");
+/* Google Fonts - Noto Sans/Serif KR */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap");
+/* 나눔스퀘어 네오 - 네이버 */
+@import url("https://hangeul.pstatic.net/hangeul_static/css/nanum-square-neo.css");
+/* Gmarket Sans */
+@import url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.css");
+/* 마루 부리 - 네이버 디지털 명조체 */
+@import url("https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
