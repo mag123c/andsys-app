@@ -107,7 +107,12 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="mx-auto max-w-5xl px-4 text-center text-sm text-muted-foreground">
-          <p>Andsys - 웹소설 작가를 위한 글쓰기 플랫폼</p>
+          <p>© 2025 Andsys</p>
+          <div className="mt-2 flex justify-center gap-4">
+            <Link href="/credits" className="hover:text-foreground">
+              크레딧
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
