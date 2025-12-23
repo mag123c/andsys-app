@@ -9,9 +9,9 @@ import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
 import { Button } from "@/components/ui/button";
 import {
-  ChapterCard,
   CreateChapterDialog,
   EmptyChapters,
+  SortableChapterList,
 } from "@/components/features/chapter";
 import { EditProjectDialog } from "@/components/features/project";
 
@@ -29,6 +29,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     createChapter,
     deleteChapter,
     updateChapter,
+    reorderChapters,
   } = useChapters(id);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -72,6 +73,17 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       }
     },
     [updateChapter]
+  );
+
+  const handleReorderChapters = useCallback(
+    async (chapterIds: string[]) => {
+      try {
+        await reorderChapters(chapterIds);
+      } catch {
+        toast.error("챕터 순서 변경에 실패했습니다.");
+      }
+    },
+    [reorderChapters]
   );
 
   if (isLoading) {
@@ -154,17 +166,13 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {chapters.length === 0 ? (
             <EmptyChapters />
           ) : (
-            <div className="space-y-2">
-              {chapters.map((chapter) => (
-                <ChapterCard
-                  key={chapter.id}
-                  chapter={chapter}
-                  projectId={project.id}
-                  onDelete={handleDeleteChapter}
-                  onUpdate={(data) => handleUpdateChapter(chapter.id, data)}
-                />
-              ))}
-            </div>
+            <SortableChapterList
+              chapters={chapters}
+              projectId={project.id}
+              onDelete={handleDeleteChapter}
+              onUpdate={handleUpdateChapter}
+              onReorder={handleReorderChapters}
+            />
           )}
         </section>
       </div>
