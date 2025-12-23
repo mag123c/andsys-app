@@ -120,9 +120,11 @@
 
 ### 배포
 - [x] Vercel 프로젝트 생성 (vercel.json 설정 완료)
-- [ ] 환경 변수 설정 (Supabase Cloud 연결 필요)
-- [ ] 도메인 연결 (선택)
-- [ ] 배포 및 검증
+- [x] GitHub 저장소 연결 (mag123c/andsys-app)
+- [x] 환경 변수 설정 (Supabase Cloud 연결)
+- [x] 배포 완료
+  - Production: https://andsys-project.vercel.app
+- [ ] 커스텀 도메인 연결 (선택)
 
 ---
 
@@ -156,5 +158,13 @@
 | 1. 초기화 | 완료 | 100% |
 | 2. 핵심 기능 | 완료 | 100% |
 | 3. UI/UX | 완료 | 100% |
-| 4. 마무리 | 진행 중 | 85% |
+| 4. 마무리 | 완료 | 100% |
 | 5. Post-MVP | 대기 | - |
+
+## 배포 정보
+
+| 항목 | 값 |
+|------|-----|
+| GitHub | https://github.com/mag123c/andsys-app |
+| Vercel | https://andsys-project.vercel.app |
+| Supabase | rwuukrncmkrhubbqughn.supabase.co |
