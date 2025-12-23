@@ -88,7 +88,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center py-16">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -96,7 +96,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center py-16">
         <p className="text-destructive">오류가 발생했습니다: {error.message}</p>
       </div>
     );
@@ -104,7 +104,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
   if (!project) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4 py-16">
         <p className="text-muted-foreground">프로젝트를 찾을 수 없습니다.</p>
         <Link href="/projects">
           <Button variant="outline">
@@ -119,63 +119,61 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const totalWordCount = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <nav className="mb-6">
-          <Link
-            href="/projects"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            프로젝트 목록
-          </Link>
-        </nav>
+    <>
+      <nav className="mb-6">
+        <Link
+          href="/projects"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          프로젝트 목록
+        </Link>
+      </nav>
 
-        <header className="mb-8">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold truncate">{project.title}</h1>
-              {project.description && (
-                <p className="mt-1 text-muted-foreground line-clamp-2">
-                  {project.description}
-                </p>
+      <header className="mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold truncate">{project.title}</h1>
+            {project.description && (
+              <p className="mt-1 text-muted-foreground line-clamp-2">
+                {project.description}
+              </p>
+            )}
+            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+              {project.genre && (
+                <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs">
+                  {project.genre}
+                </span>
               )}
-              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                {project.genre && (
-                  <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs">
-                    {project.genre}
-                  </span>
-                )}
-                <span>{chapters.length}개 챕터</span>
-                <span>총 {formatWordCount(totalWordCount)}</span>
-              </div>
+              <span>{chapters.length}개 챕터</span>
+              <span>총 {formatWordCount(totalWordCount)}</span>
             </div>
-            <Button variant="outline" size="icon" onClick={() => setShowEditDialog(true)}>
-              <Settings className="h-4 w-4" />
-              <span className="sr-only">프로젝트 설정</span>
-            </Button>
           </div>
-        </header>
+          <Button variant="outline" size="icon" onClick={() => setShowEditDialog(true)}>
+            <Settings className="h-4 w-4" />
+            <span className="sr-only">프로젝트 설정</span>
+          </Button>
+        </div>
+      </header>
 
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">챕터</h2>
-            <CreateChapterDialog onCreate={handleCreateChapter} />
-          </div>
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">챕터</h2>
+          <CreateChapterDialog onCreate={handleCreateChapter} />
+        </div>
 
-          {chapters.length === 0 ? (
-            <EmptyChapters />
-          ) : (
-            <SortableChapterList
-              chapters={chapters}
-              projectId={project.id}
-              onDelete={handleDeleteChapter}
-              onUpdate={handleUpdateChapter}
-              onReorder={handleReorderChapters}
-            />
-          )}
-        </section>
-      </div>
+        {chapters.length === 0 ? (
+          <EmptyChapters />
+        ) : (
+          <SortableChapterList
+            chapters={chapters}
+            projectId={project.id}
+            onDelete={handleDeleteChapter}
+            onUpdate={handleUpdateChapter}
+            onReorder={handleReorderChapters}
+          />
+        )}
+      </section>
 
       <EditProjectDialog
         project={project}
@@ -183,6 +181,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         onOpenChange={setShowEditDialog}
         onUpdate={handleUpdateProject}
       />
-    </div>
+    </>
   );
 }
