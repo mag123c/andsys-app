@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Settings } from "lucide-react";
@@ -13,6 +13,7 @@ import {
   CreateChapterDialog,
   EmptyChapters,
 } from "@/components/features/chapter";
+import { EditProjectDialog } from "@/components/features/project";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
@@ -20,14 +21,16 @@ interface ProjectDetailPageProps {
 
 export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = use(params);
-  const { project, isLoading: isProjectLoading, error: projectError } = useProject(id);
+  const { project, isLoading: isProjectLoading, error: projectError, updateProject } = useProject(id);
   const {
     chapters,
     isLoading: isChaptersLoading,
     error: chaptersError,
     createChapter,
     deleteChapter,
+    updateChapter,
   } = useChapters(id);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const isLoading = isProjectLoading || isChaptersLoading;
   const error = projectError || chaptersError;
@@ -49,6 +52,27 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       toast.error("챕터 삭제에 실패했습니다.");
     }
   };
+
+  const handleUpdateProject = async (data: Parameters<typeof updateProject>[0]) => {
+    try {
+      await updateProject(data);
+      toast.success("프로젝트가 수정되었습니다.");
+    } catch {
+      toast.error("프로젝트 수정에 실패했습니다.");
+    }
+  };
+
+  const handleUpdateChapter = useCallback(
+    async (chapterId: string, data: Parameters<typeof updateChapter>[1]) => {
+      try {
+        await updateChapter(chapterId, data);
+        toast.success("챕터가 수정되었습니다.");
+      } catch {
+        toast.error("챕터 수정에 실패했습니다.");
+      }
+    },
+    [updateChapter]
+  );
 
   if (isLoading) {
     return (
@@ -114,7 +138,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 <span>총 {formatWordCount(totalWordCount)}</span>
               </div>
             </div>
-            <Button variant="outline" size="icon" disabled>
+            <Button variant="outline" size="icon" onClick={() => setShowEditDialog(true)}>
               <Settings className="h-4 w-4" />
               <span className="sr-only">프로젝트 설정</span>
             </Button>
@@ -137,12 +161,20 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   chapter={chapter}
                   projectId={project.id}
                   onDelete={handleDeleteChapter}
+                  onUpdate={(data) => handleUpdateChapter(chapter.id, data)}
                 />
               ))}
             </div>
           )}
         </section>
       </div>
+
+      <EditProjectDialog
+        project={project}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onUpdate={handleUpdateProject}
+      />
     </div>
   );
 }

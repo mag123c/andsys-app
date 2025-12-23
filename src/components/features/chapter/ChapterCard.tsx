@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, MoreVertical, Trash2, GripVertical } from "lucide-react";
-import type { Chapter } from "@/repositories/types";
+import { FileText, MoreVertical, Trash2, GripVertical, Pencil } from "lucide-react";
+import type { Chapter, UpdateChapterInput } from "@/repositories/types";
 import { formatWordCount, formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -22,11 +24,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface ChapterCardProps {
   chapter: Chapter;
   projectId: string;
   onDelete: (id: string) => void;
+  onUpdate?: (data: UpdateChapterInput) => Promise<void>;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
@@ -34,9 +46,31 @@ export function ChapterCard({
   chapter,
   projectId,
   onDelete,
+  onUpdate,
   dragHandleProps,
 }: ChapterCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editTitle, setEditTitle] = useState(chapter.title);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTitle.trim() || !onUpdate) return;
+
+    setIsUpdating(true);
+    try {
+      await onUpdate({ title: editTitle.trim() });
+      setShowEditDialog(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleOpenEditDialog = () => {
+    setEditTitle(chapter.title);
+    setShowEditDialog(true);
+  };
 
   return (
     <>
@@ -87,6 +121,15 @@ export function ChapterCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {onUpdate && (
+              <>
+                <DropdownMenuItem onClick={handleOpenEditDialog}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  제목 수정
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => setShowDeleteDialog(true)}
@@ -119,6 +162,47 @@ export function ChapterCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <form onSubmit={handleEditSubmit}>
+            <DialogHeader>
+              <DialogTitle>챕터 제목 수정</DialogTitle>
+              <DialogDescription>
+                챕터의 제목을 수정합니다.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="chapter-title">제목</Label>
+                <Input
+                  id="chapter-title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  disabled={isUpdating}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowEditDialog(false)}
+                disabled={isUpdating}
+              >
+                취소
+              </Button>
+              <Button
+                type="submit"
+                disabled={isUpdating || !editTitle.trim() || editTitle.trim() === chapter.title}
+              >
+                저장
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
