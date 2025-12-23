@@ -23,11 +23,23 @@ interface SignUpResult {
   needsEmailConfirmation?: boolean;
 }
 
+interface ResetPasswordResult {
+  success: boolean;
+  error?: string;
+}
+
+interface UpdatePasswordResult {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextValue {
   auth: AuthState;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signUp: (email: string, password: string, displayName?: string) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<ResetPasswordResult>;
+  updatePassword: (newPassword: string) => Promise<UpdatePasswordResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -145,8 +157,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAuth({ status: "guest", guestId });
   }, []);
 
+  const resetPassword = useCallback(async (email: string): Promise<ResetPasswordResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string): Promise<UpdatePasswordResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ auth, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ auth, signIn, signUp, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );
