@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/sheet";
 import { EditorSidebar } from "./EditorSidebar";
 import { SaveStatus } from "./SaveStatus";
-import { formatWordCount } from "@/lib/format";
+import { formatCharacterCount } from "@/lib/format";
+import { extractText, countCharacters } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 
 interface EditorLayoutProps {
@@ -43,6 +44,13 @@ export function EditorLayout({
   children,
 }: EditorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [includeSpaces, setIncludeSpaces] = useState(false);
+
+  // 콘텐츠에서 글자수 계산
+  const characterCount = useMemo(() => {
+    const text = extractText(content);
+    return countCharacters(text, includeSpaces);
+  }, [content, includeSpaces]);
 
   const handleExportTxt = () => {
     exportChapterAsText(content, currentChapter.title);
@@ -115,9 +123,16 @@ export function EditorLayout({
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm text-muted-foreground hidden sm:inline">
-                  {formatWordCount(currentChapter.wordCount)}
-                </span>
+                <button
+                  onClick={() => setIncludeSpaces(!includeSpaces)}
+                  className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline transition-colors"
+                  title={includeSpaces ? "공백 포함 (클릭: 공백 제외)" : "공백 제외 (클릭: 공백 포함)"}
+                >
+                  {formatCharacterCount(characterCount)}
+                  <span className="ml-1 text-xs">
+                    ({includeSpaces ? "공백 포함" : "공백 제외"})
+                  </span>
+                </button>
                 <SaveStatus status={saveStatus} />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
