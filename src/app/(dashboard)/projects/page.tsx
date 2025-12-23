@@ -16,18 +16,18 @@ export default function ProjectsPage() {
   const handleCreate = async (data: Parameters<typeof createProject>[0]) => {
     try {
       await createProject(data);
-      toast.success("프로젝트가 생성되었습니다.");
+      toast.success("소설이 생성되었습니다.");
     } catch {
-      toast.error("프로젝트 생성에 실패했습니다.");
+      toast.error("소설 생성에 실패했습니다.");
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteProject(id);
-      toast.success("프로젝트가 삭제되었습니다.");
+      toast.success("소설이 삭제되었습니다.");
     } catch {
-      toast.error("프로젝트 삭제에 실패했습니다.");
+      toast.error("소설 삭제에 실패했습니다.");
     }
   };
 
@@ -51,11 +51,11 @@ export default function ProjectsPage() {
     <>
       <header className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">내 프로젝트</h1>
+          <h1 className="text-2xl font-bold">내 소설</h1>
           <p className="text-muted-foreground mt-1">
             {projects.length > 0
-              ? `${projects.length}개의 프로젝트`
-              : "프로젝트가 없습니다"}
+              ? `${projects.length}개의 소설`
+              : "소설이 없습니다"}
           </p>
         </div>
         <CreateProjectDialog onCreate={handleCreate} />

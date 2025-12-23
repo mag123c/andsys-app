@@ -83,10 +83,10 @@ src/
 │   │   ├── login/
 │   │   ├── signup/
 │   │   └── forgot-password/
-│   ├── projects/                 # 프로젝트 관련
-│   │   ├── page.tsx              # 프로젝트 목록
+│   ├── projects/                 # 소설 관련
+│   │   ├── page.tsx              # 소설 목록
 │   │   └── [projectId]/
-│   │       ├── page.tsx          # 프로젝트 상세 (리다이렉트)
+│   │       ├── page.tsx          # 소설 상세 (리다이렉트)
 │   │       └── chapters/
 │   │           └── [chapterId]/
 │   │               └── page.tsx  # 에디터 페이지
@@ -104,7 +104,7 @@ src/
 │   │   │   ├── Editor.tsx
 │   │   │   ├── EditorToolbar.tsx
 │   │   │   └── SaveStatus.tsx
-│   │   ├── project/              # 프로젝트 관련
+│   │   ├── project/              # 소설 관련
 │   │   │   ├── ProjectCard.tsx
 │   │   │   ├── ProjectList.tsx
 │   │   │   └── CreateProjectDialog.tsx

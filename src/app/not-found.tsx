@@ -21,7 +21,7 @@ export default function NotFound() {
           <Button variant="outline">홈으로</Button>
         </Link>
         <Link href="/projects">
-          <Button>프로젝트 목록</Button>
+          <Button>소설 목록</Button>
         </Link>
       </div>
     </main>

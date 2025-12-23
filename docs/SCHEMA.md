@@ -28,7 +28,7 @@ profiles
 ├── updated_at (timestamptz)
 ```
 
-### projects (소설/프로젝트)
+### projects (소설)
 
 ```sql
 projects

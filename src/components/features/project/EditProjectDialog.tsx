@@ -33,7 +33,7 @@ export function EditProjectDialog({
   const [description, setDescription] = useState(project.description ?? "");
   const [genre, setGenre] = useState(project.genre ?? "");
 
-  // 다이얼로그가 열릴 때 현재 프로젝트 값으로 초기화
+  // 다이얼로그가 열릴 때 현재 소설 값으로 초기화
   useEffect(() => {
     if (open) {
       setTitle(project.title);
@@ -70,9 +70,9 @@ export function EditProjectDialog({
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>프로젝트 설정</DialogTitle>
+            <DialogTitle>소설 설정</DialogTitle>
             <DialogDescription>
-              프로젝트 정보를 수정합니다.
+              소설 정보를 수정합니다.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -80,7 +80,7 @@ export function EditProjectDialog({
               <Label htmlFor="edit-title">제목 *</Label>
               <Input
                 id="edit-title"
-                placeholder="프로젝트 제목을 입력하세요"
+                placeholder="소설 제목을 입력하세요"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={isLoading}
@@ -91,7 +91,7 @@ export function EditProjectDialog({
               <Label htmlFor="edit-description">설명</Label>
               <Input
                 id="edit-description"
-                placeholder="프로젝트 설명 (선택)"
+                placeholder="소설 설명 (선택)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}

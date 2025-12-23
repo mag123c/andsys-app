@@ -39,15 +39,15 @@
 - [x] 비밀번호 재설정
 - [x] 게스트 → 회원 데이터 마이그레이션
 
-### 프로젝트 (Project)
+### 소설 (Project)
 - [x] Repository 인터페이스 정의
 - [x] 로컬 구현체 (Dexie)
 - [x] 리모트 구현체 (Supabase)
-- [x] 프로젝트 목록 페이지
-- [x] 프로젝트 생성 다이얼로그
-- [x] 프로젝트 카드 컴포넌트
-- [x] 프로젝트 삭제 (soft delete)
-- [x] 프로젝트 설정 수정
+- [x] 소설 목록 페이지
+- [x] 소설 생성 다이얼로그
+- [x] 소설 카드 컴포넌트
+- [x] 소설 삭제 (soft delete)
+- [x] 소설 설정 수정
 
 ### 챕터 (Chapter)
 - [x] Repository 인터페이스 정의
@@ -93,8 +93,8 @@
 - [x] 랜딩 페이지 (`/`)
 - [x] 로그인 페이지 (`/login`)
 - [x] 회원가입 페이지 (`/signup`)
-- [x] 프로젝트 목록 (`/projects`)
-- [x] 프로젝트 상세 (`/projects/[id]`)
+- [x] 소설 목록 (`/projects`)
+- [x] 소설 상세 (`/projects/[id]`)
 - [x] 에디터 페이지 (`/projects/[id]/chapters/[chapterId]`)
 - [x] 설정 페이지 (`/settings`)
 

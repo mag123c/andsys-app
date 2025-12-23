@@ -102,22 +102,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20">
-          <div className="mx-auto max-w-3xl px-4 text-center">
-            <h2 className="text-2xl font-bold md:text-3xl">
-              지금 바로 시작하세요
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              무료로 사용할 수 있으며, 게스트로 바로 시작할 수 있습니다
-            </p>
-            <div className="mt-8">
-              <Link href="/projects">
-                <Button size="lg">프로젝트 시작하기</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}

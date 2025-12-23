@@ -95,11 +95,11 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>프로젝트 삭제</AlertDialogTitle>
+            <AlertDialogTitle>소설 삭제</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{project.title}&quot; 프로젝트를 삭제하시겠습니까?
+              &quot;{project.title}&quot; 소설을 삭제하시겠습니까?
               <br />
-              삭제된 프로젝트는 복구할 수 없습니다.
+              삭제된 소설은 복구할 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

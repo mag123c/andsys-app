@@ -126,7 +126,7 @@ export default function SettingsPage() {
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          프로젝트 목록
+          소설 목록
         </Link>
       </nav>
 
@@ -245,13 +245,13 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>데이터 관리</CardTitle>
             <CardDescription>
-              프로젝트와 챕터 데이터를 백업합니다.
+              소설과 챕터 데이터를 백업합니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              모든 프로젝트와 챕터를 JSON 파일로 내보냅니다.
-              {projects.length > 0 && ` (${projects.length}개 프로젝트)`}
+              모든 소설과 챕터를 JSON 파일로 내보냅니다.
+              {projects.length > 0 && ` (${projects.length}개 소설)`}
             </p>
             <Button
               onClick={handleExportBackup}

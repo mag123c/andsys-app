@@ -57,9 +57,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const handleUpdateProject = async (data: Parameters<typeof updateProject>[0]) => {
     try {
       await updateProject(data);
-      toast.success("프로젝트가 수정되었습니다.");
+      toast.success("소설이 수정되었습니다.");
     } catch {
-      toast.error("프로젝트 수정에 실패했습니다.");
+      toast.error("소설 수정에 실패했습니다.");
     }
   };
 
@@ -105,11 +105,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16">
-        <p className="text-muted-foreground">프로젝트를 찾을 수 없습니다.</p>
+        <p className="text-muted-foreground">소설을 찾을 수 없습니다.</p>
         <Link href="/projects">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            프로젝트 목록으로
+            소설 목록으로
           </Button>
         </Link>
       </div>
@@ -126,7 +126,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          프로젝트 목록
+          소설 목록
         </Link>
       </nav>
 
@@ -151,7 +151,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </div>
           <Button variant="outline" size="icon" onClick={() => setShowEditDialog(true)}>
             <Settings className="h-4 w-4" />
-            <span className="sr-only">프로젝트 설정</span>
+            <span className="sr-only">소설 설정</span>
           </Button>
         </div>
       </header>
