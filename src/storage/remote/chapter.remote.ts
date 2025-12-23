@@ -6,7 +6,7 @@ import type {
   UpdateChapterInput,
 } from "@/repositories/types";
 import type { ChapterRepository } from "@/repositories/chapter.repository";
-import { extractText, countWords } from "@/lib/content-utils";
+import { extractText, countCharacters } from "@/lib/content-utils";
 
 // Supabase row type (snake_case)
 interface ChapterRow {
@@ -88,7 +88,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
       title: data.title,
       content,
       content_text: contentText,
-      word_count: countWords(contentText),
+      word_count: countCharacters(contentText),
       order: maxOrder + 1,
       status: "draft",
     };
@@ -120,7 +120,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
     if (data.content !== undefined) {
       updateData.content = data.content;
       updateData.content_text = extractText(data.content);
-      updateData.word_count = countWords(updateData.content_text as string);
+      updateData.word_count = countCharacters(updateData.content_text as string);
     }
 
     const { data: updated, error } = await this.supabase

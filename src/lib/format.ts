@@ -6,13 +6,6 @@ export function formatCharacterCount(count: number): string {
   return `${count.toLocaleString("ko-KR")}자`;
 }
 
-/**
- * @deprecated formatCharacterCount 사용 권장
- */
-export function formatWordCount(count: number): string {
-  return formatCharacterCount(count);
-}
-
 export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",

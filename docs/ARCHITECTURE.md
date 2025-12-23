@@ -4,14 +4,15 @@
 
 | 항목 | 선택 | 이유 |
 |------|------|------|
-| 프레임워크 | Next.js 15 (App Router) | SSR/SSG, 파일 기반 라우팅 |
+| 프레임워크 | Next.js 16 (App Router, Turbopack) | SSR/SSG, 파일 기반 라우팅 |
+| React | React 19 | 최신 기능 활용 |
 | UI 컴포넌트 | shadcn/ui | 커스터마이징 자유도, Tailwind 기반 |
 | 스타일링 | Tailwind CSS 4 | 빠른 개발, 일관된 디자인 |
-| 에디터 | Novel | Tiptap 기반, Notion 스타일, 쉬운 시작 |
+| 에디터 | Tiptap 3.14.0 | 순수 Tiptap (Novel 제거), 완전한 제어 |
 | 로컬 저장소 | IndexedDB (Dexie.js) | 오프라인 우선, 대용량 데이터 |
 | 백엔드/DB | Supabase | PostgreSQL + Auth + Realtime |
 | 호스팅 | Vercel | Next.js 최적화, 무료 티어 |
-| 테스트 | Vitest | 빠른 실행, Vite 호환 |
+| 테스트 | Vitest 4 | 빠른 실행, Vite 호환 |
 | 상태관리 | React Context + Hooks | 단순함, 추가 라이브러리 불필요 |
 
 ---
@@ -247,31 +248,60 @@ class SyncEngine {
 
 ## 에디터 구조
 
-### Novel 에디터 통합
+### Tiptap 에디터 통합
 
 ```typescript
 // components/features/editor/Editor.tsx
 "use client";
 
-import { Editor as NovelEditor } from "novel";
-import { useDebouncedCallback } from "use-debounce";
+import { useEditor, EditorContent } from "@tiptap/react";
+import { editorExtensions } from "./extensions";
+import { EditorToolbar } from "./EditorToolbar";
 
-export function Editor({ chapter, onSave }) {
-  const debouncedSave = useDebouncedCallback(
-    (content) => onSave(content),
-    2000
-  );
+export function Editor({ initialContent, onUpdate }) {
+  const editor = useEditor({
+    extensions: editorExtensions,
+    content: initialContent,
+    onUpdate: ({ editor }) => {
+      onUpdate?.(editor.getJSON());
+    },
+  });
 
   return (
-    <NovelEditor
-      defaultValue={chapter.content}
-      onUpdate={(editor) => {
-        debouncedSave(editor.getJSON());
-      }}
-    />
+    <div>
+      <EditorToolbar editor={editor} />
+      <EditorContent editor={editor} />
+    </div>
   );
 }
 ```
+
+### 에디터 확장 (extensions.ts)
+
+```typescript
+// 소설 에디터에 필요한 기능만 활성화
+export const editorExtensions = [
+  StarterKit.configure({
+    // 마크다운 기능 비활성화 (소설에 불필요)
+    heading: false,
+    bulletList: false,
+    orderedList: false,
+    blockquote: false,
+    codeBlock: false,
+  }),
+  Underline,
+  TextStyle,
+  FontFamily,  // 폰트 선택
+  TextAlign,   // 텍스트 정렬
+];
+```
+
+### 사용 가능한 폰트
+
+| 분류 | 폰트명 |
+|------|--------|
+| 고딕 | Pretendard, 본고딕, 나눔스퀘어 네오, Gmarket Sans |
+| 명조 | 리디바탕, 본명조, 마루 부리 |
 
 ---
 
@@ -408,23 +438,25 @@ export function ThemeProvider({ children }) {
 ```json
 {
   "dependencies": {
-    "next": "^15",
-    "react": "^19",
-    "novel": "latest",
-    "dexie": "^4",
-    "@supabase/supabase-js": "^2",
-    "next-themes": "^0.4",
-    "use-debounce": "^10",
-    "lucide-react": "latest",
-    "class-variance-authority": "latest",
-    "clsx": "latest",
-    "tailwind-merge": "latest"
+    "next": "16.1.0",
+    "react": "19.2.3",
+    "@tiptap/react": "^3.14.0",
+    "@tiptap/starter-kit": "^3.14.0",
+    "@tiptap/extension-font-family": "^3.14.0",
+    "@tiptap/extension-text-align": "^3.14.0",
+    "@tiptap/extension-underline": "^3.14.0",
+    "dexie": "^4.2.1",
+    "@supabase/supabase-js": "^2.89.0",
+    "next-themes": "^0.4.6",
+    "lucide-react": "^0.562.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0"
   },
   "devDependencies": {
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4",
-    "@testing-library/react": "latest"
+    "vitest": "^4.0.16",
+    "@testing-library/react": "^16.3.1"
   }
 }
 ```

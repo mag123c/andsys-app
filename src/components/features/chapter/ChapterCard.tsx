@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { FileText, MoreVertical, Trash2, GripVertical, Pencil } from "lucide-react";
 import type { Chapter, UpdateChapterInput } from "@/repositories/types";
-import { formatWordCount, formatDateTime } from "@/lib/format";
+import { formatCharacterCount, formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -96,7 +96,7 @@ export function ChapterCard({
               {chapter.title}
             </h3>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{formatWordCount(chapter.wordCount)}</span>
+              <span>{formatCharacterCount(chapter.wordCount)}</span>
               <span>·</span>
               <span>{formatDateTime(chapter.updatedAt)}</span>
               {chapter.status === "draft" && (

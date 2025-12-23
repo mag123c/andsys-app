@@ -5,7 +5,7 @@ import { FileText, FolderOpen } from "lucide-react";
 import type { Project } from "@/repositories/types";
 import type { Chapter } from "@/repositories/types";
 import { cn } from "@/lib/utils";
-import { formatWordCount } from "@/lib/format";
+import { formatCharacterCount } from "@/lib/format";
 
 interface EditorSidebarProps {
   project: Project;
@@ -50,7 +50,7 @@ export function EditorSidebar({
                   <FileText className="h-4 w-4 shrink-0" />
                   <span className="truncate flex-1">{chapter.title}</span>
                   <span className="text-xs text-muted-foreground shrink-0">
-                    {formatWordCount(chapter.wordCount)}
+                    {formatCharacterCount(chapter.wordCount)}
                   </span>
                 </Link>
               </li>
@@ -62,7 +62,7 @@ export function EditorSidebar({
       <div className="p-4 border-t text-xs text-muted-foreground">
         <p>
           총 {chapters.length}개 챕터 ·{" "}
-          {formatWordCount(chapters.reduce((sum, ch) => sum + ch.wordCount, 0))}
+          {formatCharacterCount(chapters.reduce((sum, ch) => sum + ch.wordCount, 0))}
         </p>
       </div>
     </aside>

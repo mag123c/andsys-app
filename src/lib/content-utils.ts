@@ -29,10 +29,3 @@ export function countCharacters(text: string, includeSpaces = false): number {
   return text.replace(/\s/g, "").length;
 }
 
-/**
- * 텍스트의 글자수 계산 (공백 제외) - 하위 호환성
- * @deprecated countCharacters 사용 권장
- */
-export function countWords(text: string): number {
-  return countCharacters(text, false);
-}

@@ -5,7 +5,7 @@ import type {
   UpdateChapterInput,
 } from "@/repositories/types";
 import type { ChapterRepository } from "@/repositories/chapter.repository";
-import { extractText, countWords } from "@/lib/content-utils";
+import { extractText, countCharacters } from "@/lib/content-utils";
 
 function toChapter(local: LocalChapter): Chapter {
   return {
@@ -62,7 +62,7 @@ export class ChapterLocalRepository implements ChapterRepository {
       title: data.title,
       content,
       contentText,
-      wordCount: countWords(contentText),
+      wordCount: countCharacters(contentText),
       order: maxOrder + 1,
       status: "draft",
       createdAt: now,
@@ -95,7 +95,7 @@ export class ChapterLocalRepository implements ChapterRepository {
 
     if (data.content) {
       updated.contentText = extractText(data.content);
-      updated.wordCount = countWords(updated.contentText);
+      updated.wordCount = countCharacters(updated.contentText);
     }
 
     await db.chapters.put(updated);

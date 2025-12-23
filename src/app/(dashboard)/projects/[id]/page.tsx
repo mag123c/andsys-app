@@ -4,7 +4,7 @@ import { use, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Settings } from "lucide-react";
-import { formatWordCount } from "@/lib/format";
+import { formatCharacterCount } from "@/lib/format";
 import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
 import { Button } from "@/components/ui/button";
@@ -146,7 +146,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 </span>
               )}
               <span>{chapters.length}개 챕터</span>
-              <span>총 {formatWordCount(totalWordCount)}</span>
+              <span>총 {formatCharacterCount(totalWordCount)}</span>
             </div>
           </div>
           <Button variant="outline" size="icon" onClick={() => setShowEditDialog(true)}>

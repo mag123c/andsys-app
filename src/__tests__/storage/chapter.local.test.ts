@@ -69,7 +69,7 @@ describe("ChapterLocalRepository", () => {
       });
 
       expect(chapter.content).toEqual(content);
-      // countWords는 공백 제외 글자수를 계산 (10 = "HelloWorld")
+      // countCharacters는 공백 제외 글자수를 계산 (10 = "HelloWorld")
       expect(chapter.wordCount).toBe(10);
       expect(chapter.contentText).toBe("Hello World");
     });
@@ -151,7 +151,7 @@ describe("ChapterLocalRepository", () => {
       });
 
       expect(updated.content).toEqual(newContent);
-      // countWords는 공백 제외 글자수 (19 = "Onetwothreefourfive")
+      // countCharacters는 공백 제외 글자수 (19 = "Onetwothreefourfive")
       expect(updated.wordCount).toBe(19);
     });
 
