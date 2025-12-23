@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useProjects } from "@/hooks/useProjects";
+import { chapterLocalRepository } from "@/storage/local/chapter.local";
+import { exportBackup, type BackupData } from "@/lib/export";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,12 +21,56 @@ import {
 
 export default function SettingsPage() {
   const { auth, updatePassword } = useAuth();
+  const { projects } = useProjects();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const isAuthenticated = auth.status === "authenticated";
   const isGuest = auth.status === "guest";
+
+  const handleExportBackup = async () => {
+    setIsExporting(true);
+
+    try {
+      const backupProjects = await Promise.all(
+        projects.map(async (project) => {
+          const chapters = await chapterLocalRepository.getByProjectId(project.id);
+          return {
+            id: project.id,
+            title: project.title,
+            description: project.description,
+            genre: project.genre,
+            createdAt: project.createdAt.toISOString(),
+            updatedAt: project.updatedAt.toISOString(),
+            chapters: chapters.map((chapter) => ({
+              id: chapter.id,
+              title: chapter.title,
+              content: chapter.content,
+              wordCount: chapter.wordCount,
+              order: chapter.order,
+              createdAt: chapter.createdAt.toISOString(),
+              updatedAt: chapter.updatedAt.toISOString(),
+            })),
+          };
+        })
+      );
+
+      const backup: BackupData = {
+        version: "1.0",
+        exportedAt: new Date().toISOString(),
+        projects: backupProjects,
+      };
+
+      exportBackup(backup);
+      toast.success("백업 파일이 다운로드되었습니다.");
+    } catch {
+      toast.error("백업 생성에 실패했습니다.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,6 +239,39 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* 데이터 관리 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>데이터 관리</CardTitle>
+            <CardDescription>
+              프로젝트와 챕터 데이터를 백업합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              모든 프로젝트와 챕터를 JSON 파일로 내보냅니다.
+              {projects.length > 0 && ` (${projects.length}개 프로젝트)`}
+            </p>
+            <Button
+              onClick={handleExportBackup}
+              disabled={isExporting || projects.length === 0}
+              variant="outline"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  백업 중...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  전체 백업 다운로드
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </>
   );

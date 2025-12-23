@@ -91,3 +91,56 @@ export async function copyChapterToClipboard(
   const text = jsonContentToText(content);
   return copyToClipboard(text);
 }
+
+/**
+ * 백업 데이터 타입
+ */
+export interface BackupData {
+  version: string;
+  exportedAt: string;
+  projects: BackupProject[];
+}
+
+export interface BackupProject {
+  id: string;
+  title: string;
+  description: string | null;
+  genre: string | null;
+  createdAt: string;
+  updatedAt: string;
+  chapters: BackupChapter[];
+}
+
+export interface BackupChapter {
+  id: string;
+  title: string;
+  content: JSONContent;
+  wordCount: number;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * JSON을 파일로 다운로드
+ */
+export function downloadAsJson(data: unknown, filename: string): void {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename.endsWith(".json") ? filename : `${filename}.json`;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * 전체 데이터를 백업 JSON으로 내보내기
+ */
+export function exportBackup(backup: BackupData): void {
+  const date = new Date().toISOString().split("T")[0];
+  downloadAsJson(backup, `andsys-backup-${date}`);
+}
