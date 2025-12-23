@@ -21,3 +21,71 @@ export async function getOrCreateGuestId(): Promise<string> {
 export async function clearGuestId(): Promise<void> {
   await db.settings.delete(GUEST_ID_KEY);
 }
+
+export interface MigrationResult {
+  success: boolean;
+  migratedProjects: number;
+  migratedChapters: number;
+  error?: string;
+}
+
+/**
+ * 게스트 데이터를 회원 데이터로 마이그레이션
+ * - 게스트 프로젝트/챕터의 guestId를 userId로 변경
+ * - syncStatus를 "pending"으로 설정하여 서버 동기화 대상으로 표시
+ */
+export async function migrateGuestDataToUser(
+  guestId: string,
+  userId: string
+): Promise<MigrationResult> {
+  const result: MigrationResult = {
+    success: true,
+    migratedProjects: 0,
+    migratedChapters: 0,
+  };
+
+  try {
+    // 게스트 프로젝트 조회
+    const guestProjects = await db.projects
+      .where("guestId")
+      .equals(guestId)
+      .toArray();
+
+    // 프로젝트 마이그레이션
+    for (const project of guestProjects) {
+      await db.projects.update(project.id, {
+        userId: userId,
+        guestId: null,
+        syncStatus: "pending",
+      });
+      result.migratedProjects++;
+
+      // 해당 프로젝트의 챕터도 마이그레이션
+      const chapters = await db.chapters
+        .where("projectId")
+        .equals(project.id)
+        .toArray();
+
+      for (const chapter of chapters) {
+        await db.chapters.update(chapter.id, {
+          syncStatus: "pending",
+        });
+        result.migratedChapters++;
+      }
+    }
+
+    // 마이그레이션 완료 후 게스트 ID 정리
+    if (result.migratedProjects > 0) {
+      await clearGuestId();
+    }
+
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      migratedProjects: 0,
+      migratedChapters: 0,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}

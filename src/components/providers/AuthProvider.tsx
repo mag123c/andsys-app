@@ -9,7 +9,8 @@ import {
 } from "react";
 import type { AuthState, User } from "@/repositories/types/user";
 import { createClient } from "@/storage/remote/client";
-import { getOrCreateGuestId, clearGuestId } from "@/lib/guest";
+import { getOrCreateGuestId, clearGuestId, getGuestId, migrateGuestDataToUser } from "@/lib/guest";
+import { syncEngine } from "@/sync";
 
 interface SignInResult {
   success: boolean;
@@ -74,6 +75,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
           createdAt: new Date(session.user.created_at),
           updatedAt: new Date(),
         };
+
+        // 게스트 데이터 마이그레이션
+        const currentGuestId = await getGuestId();
+        if (currentGuestId) {
+          const migrationResult = await migrateGuestDataToUser(currentGuestId, user.id);
+          if (migrationResult.success && migrationResult.migratedProjects > 0) {
+            // 마이그레이션된 데이터를 서버로 동기화
+            syncEngine.syncAll().catch(console.error);
+          }
+        }
+
         setAuth({ status: "authenticated", user });
       } else if (event === "SIGNED_OUT") {
         const guestId = await getOrCreateGuestId();
