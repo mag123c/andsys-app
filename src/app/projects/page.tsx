@@ -8,6 +8,7 @@ import {
   CreateProjectDialog,
   EmptyProjects,
 } from "@/components/features/project";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function ProjectsPage() {
   const { projects, isLoading, error, createProject, deleteProject } =
@@ -59,7 +60,10 @@ export default function ProjectsPage() {
                 : "프로젝트가 없습니다"}
             </p>
           </div>
-          <CreateProjectDialog onCreate={handleCreate} />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <CreateProjectDialog onCreate={handleCreate} />
+          </div>
         </header>
 
         {projects.length === 0 ? (
