@@ -51,6 +51,18 @@ export async function migrateGuestDataToUser(
       .equals(guestId)
       .toArray();
 
+    if (guestProjects.length === 0) {
+      return result;
+    }
+
+    const projectIds = guestProjects.map((p) => p.id);
+
+    // 모든 관련 챕터 한 번에 조회 (N+1 방지)
+    const allChapters = await db.chapters
+      .where("projectId")
+      .anyOf(projectIds)
+      .toArray();
+
     // 프로젝트 마이그레이션
     for (const project of guestProjects) {
       await db.projects.update(project.id, {
@@ -59,25 +71,18 @@ export async function migrateGuestDataToUser(
         syncStatus: "pending",
       });
       result.migratedProjects++;
+    }
 
-      // 해당 프로젝트의 챕터도 마이그레이션
-      const chapters = await db.chapters
-        .where("projectId")
-        .equals(project.id)
-        .toArray();
-
-      for (const chapter of chapters) {
-        await db.chapters.update(chapter.id, {
-          syncStatus: "pending",
-        });
-        result.migratedChapters++;
-      }
+    // 챕터 마이그레이션
+    for (const chapter of allChapters) {
+      await db.chapters.update(chapter.id, {
+        syncStatus: "pending",
+      });
+      result.migratedChapters++;
     }
 
     // 마이그레이션 완료 후 게스트 ID 정리
-    if (result.migratedProjects > 0) {
-      await clearGuestId();
-    }
+    await clearGuestId();
 
     return result;
   } catch (error) {
