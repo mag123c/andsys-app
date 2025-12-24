@@ -49,7 +49,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
           </Button>
         </div>
 
-        <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
       </div>
     </div>
   );
