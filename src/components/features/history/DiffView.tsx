@@ -16,40 +16,41 @@ function LineDiffBlock({ lines }: { lines: LineDiff[] }) {
   const hasChanges = lines.some((l) => l.type !== "unchanged");
   if (!hasChanges) return null;
 
+  // 변경된 라인만 표시 (컨텍스트 없이)
+  const changedLines = lines.filter((l) => l.type !== "unchanged");
+
   return (
-    <div className="space-y-1">
-      <h4 className="text-xs font-medium text-muted-foreground mb-2">
-        텍스트 변경
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-muted-foreground">
+        내용 변경
       </h4>
-      <div className="font-mono text-xs rounded-md border overflow-hidden">
-        {lines.map((line, idx) => (
+      <div className="rounded-lg border overflow-hidden">
+        {changedLines.map((line, idx) => (
           <div
             key={idx}
             className={cn(
-              "px-2 py-0.5 flex",
-              line.type === "added" && "bg-green-100 dark:bg-green-900/30",
-              line.type === "removed" && "bg-red-100 dark:bg-red-900/30"
+              "px-4 py-2 flex items-start gap-3",
+              line.type === "added" && "bg-green-50 dark:bg-green-900/20",
+              line.type === "removed" && "bg-red-50 dark:bg-red-900/20"
             )}
           >
             <span
               className={cn(
-                "w-4 shrink-0 select-none",
+                "shrink-0 select-none font-medium text-sm",
                 line.type === "added" && "text-green-600 dark:text-green-400",
-                line.type === "removed" && "text-red-600 dark:text-red-400",
-                line.type === "unchanged" && "text-muted-foreground"
+                line.type === "removed" && "text-red-600 dark:text-red-400"
               )}
             >
-              {line.type === "added" && "+"}
-              {line.type === "removed" && "-"}
-              {line.type === "unchanged" && " "}
+              {line.type === "added" ? "추가" : "삭제"}
             </span>
             <span
               className={cn(
-                "flex-1 whitespace-pre-wrap break-all",
-                line.type === "unchanged" && "text-muted-foreground"
+                "flex-1 text-sm whitespace-pre-wrap break-words",
+                line.type === "added" && "text-green-700 dark:text-green-300",
+                line.type === "removed" && "text-red-700 dark:text-red-300"
               )}
             >
-              {line.content || " "}
+              {line.content || "(빈 줄)"}
             </span>
           </div>
         ))}
@@ -58,26 +59,45 @@ function LineDiffBlock({ lines }: { lines: LineDiff[] }) {
   );
 }
 
+// JSON 객체 필드는 소설 작가에게 불필요하므로 필터링
+const HIDDEN_FIELDS = ["content", "snapshot"];
+
+function isSimpleValue(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") return true;
+  if (typeof value === "number") return true;
+  if (typeof value === "boolean") return true;
+  return false;
+}
+
 function FieldDiffBlock({ fields }: { fields: FieldDiff[] }) {
-  if (fields.length === 0) return null;
+  // JSON 객체 필드와 숨김 필드 제외
+  const visibleFields = fields.filter(
+    (f) =>
+      !HIDDEN_FIELDS.includes(f.field) &&
+      isSimpleValue(f.oldValue) &&
+      isSimpleValue(f.newValue)
+  );
+
+  if (visibleFields.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <h4 className="text-xs font-medium text-muted-foreground">필드 변경</h4>
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-muted-foreground">변경된 항목</h4>
       <div className="space-y-2">
-        {fields.map((field, idx) => (
-          <div key={idx} className="rounded-md border p-2 space-y-1">
-            <div className="text-xs font-medium">{getFieldLabel(field.field)}</div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+        {visibleFields.map((field, idx) => (
+          <div key={idx} className="rounded-lg border p-3 space-y-2">
+            <div className="text-sm font-medium">{getFieldLabel(field.field)}</div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="space-y-1">
-                <span className="text-muted-foreground">이전</span>
-                <div className="p-1.5 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 break-words">
+                <span className="text-xs text-muted-foreground">이전</span>
+                <div className="p-2 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
                   {formatFieldValue(field.oldValue)}
                 </div>
               </div>
               <div className="space-y-1">
-                <span className="text-muted-foreground">이후</span>
-                <div className="p-1.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 break-words">
+                <span className="text-xs text-muted-foreground">이후</span>
+                <div className="p-2 rounded-md bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300">
                   {formatFieldValue(field.newValue)}
                 </div>
               </div>

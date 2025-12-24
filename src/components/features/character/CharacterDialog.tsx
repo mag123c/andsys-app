@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CharacterForm } from "./CharacterForm";
-import { VersionHistoryPanel } from "@/components/features/history";
+import { VersionHistoryModal } from "@/components/features/history";
 
 interface CharacterDialogProps {
   open: boolean;
@@ -77,7 +77,6 @@ export function CharacterDialog({
     };
 
     await onUpdate(character.id, restoreData);
-    setShowHistory(false);
     onOpenChange(false);
   };
 
@@ -90,46 +89,47 @@ export function CharacterDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className={showHistory ? "max-w-4xl max-h-[90vh] overflow-hidden" : "max-w-2xl max-h-[90vh] overflow-y-auto"}>
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>
-              {isEditMode ? "등장인물 편집" : "등장인물 추가"}
-            </DialogTitle>
-            {isEditMode && (
-              <Button
-                variant={showHistory ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setShowHistory(!showHistory)}
-                className="mr-6"
-              >
-                <History className="h-4 w-4 mr-1" />
-                히스토리
-              </Button>
-            )}
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>
+                {isEditMode ? "등장인물 편집" : "등장인물 추가"}
+              </DialogTitle>
+              {isEditMode && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowHistory(true)}
+                  className="mr-6"
+                >
+                  <History className="h-4 w-4 mr-1" />
+                  히스토리
+                </Button>
+              )}
+            </div>
+          </DialogHeader>
 
-        {showHistory && character ? (
-          <div className="h-[60vh] border rounded-lg overflow-hidden">
-            <VersionHistoryPanel
-              entityType="character"
-              entityId={character.id}
-              entityName={character.name}
-              onRestore={handleRestore}
-              onClose={() => setShowHistory(false)}
-            />
-          </div>
-        ) : (
           <CharacterForm
             character={character}
             onSubmit={handleSubmit}
             onCancel={() => onOpenChange(false)}
             isSubmitting={isSubmitting}
           />
-        )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      {character && (
+        <VersionHistoryModal
+          open={showHistory}
+          onOpenChange={setShowHistory}
+          entityType="character"
+          entityId={character.id}
+          entityName={character.name}
+          onRestore={handleRestore}
+        />
+      )}
+    </>
   );
 }
