@@ -83,6 +83,7 @@ function RelationshipEdgeComponent({
           className="nodrag nopan"
         >
           <button
+            type="button"
             onClick={handleLabelClick}
             className="px-2 py-1 rounded text-xs font-medium bg-background border shadow-sm cursor-pointer hover:bg-accent transition-colors"
             style={{ borderColor: color, color }}

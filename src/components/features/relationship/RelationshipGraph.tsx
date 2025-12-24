@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState, useEffect, useRef } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -55,7 +55,6 @@ export function RelationshipGraph({
     RELATIONSHIP_TYPES.map((t) => t.type)
   );
   const [popover, setPopover] = useState<PopoverState | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggleType = useCallback((type: string) => {
     setSelectedTypes((prev) =>
@@ -204,7 +203,7 @@ export function RelationshipGraph({
         selectedTypes={selectedTypes}
         onToggleType={handleToggleType}
       />
-      <div ref={containerRef} className="relative h-[600px] border rounded-lg overflow-hidden">
+      <div className="relative h-[600px] border rounded-lg overflow-hidden">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -233,8 +232,8 @@ export function RelationshipGraph({
             data-popover
             className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 min-w-[200px]"
             style={{
-              left: popover.position.x,
-              top: popover.position.y,
+              left: Math.min(Math.max(popover.position.x, 120), window.innerWidth - 120),
+              top: Math.min(popover.position.y, window.innerHeight - 200),
               transform: "translate(-50%, 8px)",
             }}
           >
