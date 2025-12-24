@@ -46,6 +46,18 @@ export interface SyncQueueItem {
   createdAt: Date;
 }
 
+export interface LocalSynopsis {
+  id: string;
+  projectId: string;
+  content: JSONContent;
+  plainText: string | null;
+  wordCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  syncStatus: SyncStatus;
+  lastSyncedAt: Date | null;
+}
+
 export interface LocalSettings {
   key: string;
   value: unknown;
@@ -54,6 +66,7 @@ export interface LocalSettings {
 export class AppDatabase extends Dexie {
   projects!: Table<LocalProject>;
   chapters!: Table<LocalChapter>;
+  synopses!: Table<LocalSynopsis>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<LocalSettings>;
 
@@ -83,6 +96,15 @@ export class AppDatabase extends Dexie {
           project.coverImageBase64 = null;
         }
       });
+    });
+
+    // Version 3: Add synopses table
+    this.version(3).stores({
+      projects: "id, userId, guestId, updatedAt, syncStatus",
+      chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      synopses: "id, projectId, updatedAt, syncStatus",
+      syncQueue: "++id, entityType, entityId, createdAt",
+      settings: "key",
     });
   }
 }

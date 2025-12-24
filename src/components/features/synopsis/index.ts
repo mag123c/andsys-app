@@ -1,0 +1,1 @@
+export { SynopsisEditor } from "./SynopsisEditor";
