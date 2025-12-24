@@ -100,6 +100,40 @@ export interface LocalCharacter {
   lastSyncedAt: Date | null;
 }
 
+export type LocalRelationshipType =
+  | "family"
+  | "friend"
+  | "lover"
+  | "rival"
+  | "enemy"
+  | "colleague"
+  | "master"
+  | "custom";
+
+export interface LocalRelationship {
+  id: string;
+  projectId: string;
+
+  // 관계 당사자
+  fromCharacterId: string;
+  toCharacterId: string;
+
+  // 관계 정보
+  type: LocalRelationshipType;
+  label: string;
+  description: string | null;
+
+  // 양방향 여부
+  bidirectional: boolean;
+  reverseLabel: string | null;
+
+  // 메타
+  createdAt: Date;
+  updatedAt: Date;
+  syncStatus: SyncStatus;
+  lastSyncedAt: Date | null;
+}
+
 export interface LocalSettings {
   key: string;
   value: unknown;
@@ -110,6 +144,7 @@ export class AppDatabase extends Dexie {
   chapters!: Table<LocalChapter>;
   synopses!: Table<LocalSynopsis>;
   characters!: Table<LocalCharacter>;
+  relationships!: Table<LocalRelationship>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<LocalSettings>;
 
@@ -156,6 +191,18 @@ export class AppDatabase extends Dexie {
       chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
       synopses: "id, projectId, updatedAt, syncStatus",
       characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      syncQueue: "++id, entityType, entityId, createdAt",
+      settings: "key",
+    });
+
+    // Version 5: Add relationships table
+    this.version(5).stores({
+      projects: "id, userId, guestId, updatedAt, syncStatus",
+      chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      synopses: "id, projectId, updatedAt, syncStatus",
+      characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      relationships:
+        "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus",
       syncQueue: "++id, entityType, entityId, createdAt",
       settings: "key",
     });
