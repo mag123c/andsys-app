@@ -287,38 +287,43 @@ src/components/ui/scroll-area.tsx                  # 신규 (shadcn)
 
 ---
 
-## Phase 8: 관계도 UI (노드 그래프)
+## Phase 8: 관계도 UI (노드 그래프) ✅
 
 React Flow 기반 노드 그래프 시각화.
 
 ### 체크리스트
 
-- [ ] 의존성
-  - [ ] React Flow 설치
-- [ ] 노드/엣지
-  - [ ] CharacterNode 커스텀 노드
-  - [ ] RelationshipEdge 커스텀 엣지
-- [ ] 그래프 로직
-  - [ ] 자동 레이아웃 (dagre)
-  - [ ] 줌/팬 컨트롤
-  - [ ] 필터링 (관계 타입별)
-- [ ] UI
-  - [ ] 그래프 뷰 컨테이너
-  - [ ] 뷰 전환 (리스트 ↔ 그래프)
-  - [ ] 범례
-  - [ ] 노드 클릭 → 상세 보기
+- [x] 의존성
+  - [x] React Flow (@xyflow/react) 설치
+  - [x] dagre, @types/dagre 설치
+- [x] 노드/엣지
+  - [x] CharacterNode 커스텀 노드
+  - [x] RelationshipEdge 커스텀 엣지
+- [x] 그래프 로직
+  - [x] 자동 레이아웃 (dagre, graph-utils.ts)
+  - [x] 줌/팬 컨트롤 (React Flow Controls)
+  - [x] 필터링 (관계 타입별, GraphLegend)
+- [x] UI
+  - [x] 그래프 뷰 컨테이너 (RelationshipGraph)
+  - [x] 뷰 전환 (리스트 ↔ 그래프, ViewToggle)
+  - [x] 범례 (GraphLegend)
+  - [x] 미니맵 (MiniMap)
+  - [ ] 노드 클릭 → 상세 보기 (추후)
 
 ### 파일 목록
 
 ```
+src/lib/graph-utils.ts                                  # 신규
 src/app/(dashboard)/novels/[id]/relationships/page.tsx  # 수정
 src/components/features/relationship/
-├── RelationshipGraph.tsx
-├── CharacterNode.tsx
-├── RelationshipEdge.tsx
-├── GraphControls.tsx
-├── GraphLegend.tsx
-└── ViewToggle.tsx
+├── RelationshipGraph.tsx                               # 신규
+├── CharacterNode.tsx                                   # 신규
+├── RelationshipEdge.tsx                                # 신규
+├── GraphLegend.tsx                                     # 신규
+├── ViewToggle.tsx                                      # 신규
+└── index.ts                                            # 수정
+src/components/ui/toggle.tsx                            # 신규 (shadcn)
+src/components/ui/toggle-group.tsx                      # 신규 (shadcn)
 ```
 
 ---
