@@ -8,12 +8,9 @@ import { useCharacters } from "@/hooks/useCharacters";
 import type { Relationship, UpdateRelationshipInput } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
 import {
-  RelationshipList,
   RelationshipDialog,
   EmptyRelationships,
-  ViewToggle,
   RelationshipGraph,
-  type ViewMode,
 } from "@/components/features/relationship";
 
 interface RelationshipsPageProps {
@@ -40,7 +37,6 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingRelationship, setEditingRelationship] =
     useState<Relationship | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const isLoading = isRelationshipsLoading || isCharactersLoading;
   const error = relationshipsError || charactersError;
@@ -110,12 +106,7 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">관계도</h2>
-          {hasCharacters && relationships.length > 0 && (
-            <ViewToggle value={viewMode} onChange={setViewMode} />
-          )}
-        </div>
+        <h2 className="text-lg font-semibold">관계도</h2>
         <Button onClick={() => setShowCreateDialog(true)} disabled={!hasCharacters}>
           <Plus className="mr-2 h-4 w-4" />
           관계 추가
@@ -126,15 +117,10 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
         <EmptyRelationships hasCharacters={false} />
       ) : relationships.length === 0 ? (
         <EmptyRelationships hasCharacters={true} />
-      ) : viewMode === "graph" ? (
+      ) : (
         <RelationshipGraph
           characters={characters}
           relationships={relationships}
-        />
-      ) : (
-        <RelationshipList
-          relationships={relationships}
-          characters={characters}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

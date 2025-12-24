@@ -14,6 +14,7 @@ export interface RelationshipEdgeData extends Record<string, unknown> {
   reverseLabel?: string | null;
   color: string;
   bidirectional?: boolean;
+  onLabelClick?: (edgeId: string, position: { x: number; y: number }) => void;
 }
 
 export type RelationshipEdgeType = Edge<RelationshipEdgeData, "relationship">;
@@ -53,6 +54,14 @@ function RelationshipEdgeComponent({
   const color = data?.color || "#6B7280";
   const label = data?.label || "";
 
+  const handleLabelClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (data?.onLabelClick) {
+      // 뷰포트 기준 좌표 전달
+      data.onLabelClick(id, { x: e.clientX, y: e.clientY });
+    }
+  };
+
   return (
     <>
       <BaseEdge
@@ -73,12 +82,13 @@ function RelationshipEdgeComponent({
           }}
           className="nodrag nopan"
         >
-          <div
-            className="px-2 py-0.5 rounded text-xs font-medium bg-background border shadow-sm"
+          <button
+            onClick={handleLabelClick}
+            className="px-2 py-1 rounded text-xs font-medium bg-background border shadow-sm cursor-pointer hover:bg-accent transition-colors"
             style={{ borderColor: color, color }}
           >
             {label}
-          </div>
+          </button>
         </div>
       </EdgeLabelRenderer>
     </>
