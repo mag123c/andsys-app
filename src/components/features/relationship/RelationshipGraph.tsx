@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import {
   ReactFlow,
   Background,
@@ -55,6 +55,31 @@ export function RelationshipGraph({
     RELATIONSHIP_TYPES.map((t) => t.type)
   );
   const [popover, setPopover] = useState<PopoverState | null>(null);
+  const [showMiniMap, setShowMiniMap] = useState(true);
+  const miniMapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // MiniMap 자동 숨김 (3초 비활동 후)
+  const handleViewportChange = useCallback(() => {
+    setShowMiniMap(true);
+    if (miniMapTimeoutRef.current) {
+      clearTimeout(miniMapTimeoutRef.current);
+    }
+    miniMapTimeoutRef.current = setTimeout(() => {
+      setShowMiniMap(false);
+    }, 3000);
+  }, []);
+
+  // 컴포넌트 마운트 시 타이머 시작, 언마운트 시 정리
+  useEffect(() => {
+    miniMapTimeoutRef.current = setTimeout(() => {
+      setShowMiniMap(false);
+    }, 3000);
+    return () => {
+      if (miniMapTimeoutRef.current) {
+        clearTimeout(miniMapTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleToggleType = useCallback((type: string) => {
     setSelectedTypes((prev) =>
@@ -209,6 +234,7 @@ export function RelationshipGraph({
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onMove={handleViewportChange}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
@@ -222,7 +248,8 @@ export function RelationshipGraph({
           <MiniMap
             nodeColor="#6B7280"
             maskColor="rgb(0, 0, 0, 0.1)"
-            className="bg-background"
+            className="bg-background transition-opacity duration-300"
+            style={{ opacity: showMiniMap ? 1 : 0, pointerEvents: showMiniMap ? "auto" : "none" }}
           />
         </ReactFlow>
 
