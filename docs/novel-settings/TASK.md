@@ -242,45 +242,47 @@ src/components/features/workspace/
 
 ---
 
-## Phase 7: 히스토리 (diff)
+## Phase 7: 히스토리 (diff) ✅
 
 시놉시스/등장인물 버전 관리.
 
 ### 체크리스트
 
-- [ ] 데이터 레이어
-  - [ ] Version 타입 정의
-  - [ ] Dexie 스키마 추가
-  - [ ] Supabase 마이그레이션
-  - [ ] Repository 구현
-- [ ] Diff 계산
-  - [ ] 필드별 비교 유틸리티
-  - [ ] 텍스트 line diff
-- [ ] 버전 관리
-  - [ ] 자동 버전 생성
-  - [ ] 버전 병합 로직
-  - [ ] 복원 기능
-- [ ] UI
-  - [ ] 히스토리 패널
-  - [ ] Diff 뷰 (Git 스타일)
-  - [ ] 복원 확인 다이얼로그
+- [x] 데이터 레이어
+  - [x] Version 타입 정의
+  - [x] Dexie 스키마 추가 (v6)
+  - [ ] Supabase 마이그레이션 (추후)
+  - [x] Repository 구현 (로컬)
+- [x] Diff 계산
+  - [x] 필드별 비교 유틸리티
+  - [x] 텍스트 line diff (LCS 알고리즘)
+- [x] 버전 관리
+  - [x] 자동 버전 생성 (저장 시)
+  - [x] 최대 50개 버전 유지
+  - [x] 복원 기능
+- [x] UI
+  - [x] 히스토리 패널 (시놉시스 통합)
+  - [x] Diff 뷰 (Git 스타일)
+  - [x] 복원 확인 다이얼로그
 
 ### 파일 목록
 
 ```
-src/repositories/types/version.ts
-src/storage/local/version.local.ts
-src/storage/remote/version.remote.ts
-src/hooks/useVersionHistory.ts
-src/lib/diff-utils.ts
+src/repositories/types/version.ts                  # 신규
+src/repositories/version.repository.ts             # 신규
+src/storage/local/version.local.ts                 # 신규
+src/storage/local/db.ts                            # 수정 (v6)
+src/hooks/useVersionHistory.ts                     # 신규
+src/hooks/useSynopsis.ts                           # 수정 (버전 연동)
+src/hooks/useCharacters.ts                         # 수정 (버전 연동)
+src/lib/diff-utils.ts                              # 신규
 src/components/features/history/
-├── VersionHistoryPanel.tsx
-├── VersionListItem.tsx
-├── DiffView.tsx
-├── LineDiffBlock.tsx
-├── FieldDiffBlock.tsx
-└── RestoreVersionDialog.tsx
-supabase/migrations/XXX_add_versions.sql
+├── VersionHistoryPanel.tsx                        # 신규
+├── VersionListItem.tsx                            # 신규
+├── DiffView.tsx                                   # 신규
+└── RestoreVersionDialog.tsx                       # 신규
+src/components/features/synopsis/SynopsisEditor.tsx # 수정
+src/components/ui/scroll-area.tsx                  # 신규 (shadcn)
 ```
 
 ---
