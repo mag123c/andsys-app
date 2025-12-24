@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
+import { useCharacters } from "@/hooks/useCharacters";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,6 +27,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
 
   const { project } = useProject(projectId);
   const { chapters } = useChapters(projectId);
+  const { characters } = useCharacters(projectId);
 
   // 서버/클라이언트 일관성을 위해 초기값은 false, 클라이언트에서 localStorage 읽기
   const [collapsed, setCollapsed] = useState(false);
@@ -61,6 +63,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
         <NovelSidebar
           project={project}
           chapters={chapters}
+          characters={characters}
           collapsed={collapsed}
           onToggle={handleToggle}
         />
@@ -75,6 +78,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
           <NovelSidebar
             project={project}
             chapters={chapters}
+            characters={characters}
             collapsed={false}
             onToggle={() => setMobileOpen(false)}
           />
