@@ -58,6 +58,48 @@ export interface LocalSynopsis {
   lastSyncedAt: Date | null;
 }
 
+export interface LocalCustomField {
+  key: string;
+  value: string;
+}
+
+export interface LocalCharacter {
+  id: string;
+  projectId: string;
+
+  // 기본 정보
+  name: string;
+  nickname: string | null;
+  age: number | null;
+  gender: string | null;
+  race: string | null;
+  imageUrl: string | null;
+  imageBase64: string | null;
+  order: number;
+
+  // 외형
+  height: number | null;
+  weight: number | null;
+  appearance: string | null;
+
+  // 성격/배경
+  mbti: string | null;
+  personality: string | null;
+  education: string | null;
+  occupation: string | null;
+  affiliation: string | null;
+  background: string | null;
+
+  // 확장
+  customFields: LocalCustomField[];
+
+  // 메타
+  createdAt: Date;
+  updatedAt: Date;
+  syncStatus: SyncStatus;
+  lastSyncedAt: Date | null;
+}
+
 export interface LocalSettings {
   key: string;
   value: unknown;
@@ -67,6 +109,7 @@ export class AppDatabase extends Dexie {
   projects!: Table<LocalProject>;
   chapters!: Table<LocalChapter>;
   synopses!: Table<LocalSynopsis>;
+  characters!: Table<LocalCharacter>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<LocalSettings>;
 
@@ -103,6 +146,16 @@ export class AppDatabase extends Dexie {
       projects: "id, userId, guestId, updatedAt, syncStatus",
       chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
       synopses: "id, projectId, updatedAt, syncStatus",
+      syncQueue: "++id, entityType, entityId, createdAt",
+      settings: "key",
+    });
+
+    // Version 4: Add characters table
+    this.version(4).stores({
+      projects: "id, userId, guestId, updatedAt, syncStatus",
+      chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      synopses: "id, projectId, updatedAt, syncStatus",
+      characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
       syncQueue: "++id, entityType, entityId, createdAt",
       settings: "key",
     });
