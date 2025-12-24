@@ -6,6 +6,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
 import { useEditor } from "@/hooks/useEditor";
+import { useSynopsis } from "@/hooks/useSynopsis";
+import { useCharacters } from "@/hooks/useCharacters";
 import { Button } from "@/components/ui/button";
 import { Editor, EditorLayout } from "@/components/features/editor";
 
@@ -25,6 +27,8 @@ export default function EditorPage({ params }: EditorPageProps) {
     updateContent,
     saveNow,
   } = useEditor(chapterId);
+  const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
+  const { characters } = useCharacters(projectId);
 
   const isLoading = isProjectLoading || isChaptersLoading || isChapterLoading;
 
@@ -90,6 +94,9 @@ export default function EditorPage({ params }: EditorPageProps) {
       currentChapter={chapter}
       content={chapter.content}
       saveStatus={saveStatus}
+      synopsis={synopsis}
+      synopsisLoading={isSynopsisLoading}
+      characters={characters}
     >
       <Editor initialContent={chapter.content} onUpdate={updateContent} />
     </EditorLayout>

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
 import { Menu, ArrowLeft, Download, Copy, MoreVertical } from "lucide-react";
-import type { Project, Chapter } from "@/repositories/types";
+import type { Project, Chapter, Synopsis, Character } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,9 +22,12 @@ import {
 } from "@/components/ui/sheet";
 import { EditorSidebar } from "./EditorSidebar";
 import { SaveStatus } from "./SaveStatus";
+import { RightSidebar } from "@/components/features/workspace";
 import { formatCharacterCount } from "@/lib/format";
 import { extractText, countCharacters } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
+
+const RIGHT_SIDEBAR_COLLAPSED_KEY = "andsys:editor-right-sidebar-collapsed";
 
 interface EditorLayoutProps {
   project: Project;
@@ -32,6 +35,9 @@ interface EditorLayoutProps {
   currentChapter: Chapter;
   content: JSONContent | null;
   saveStatus: SaveStatusType;
+  synopsis: Synopsis | null;
+  synopsisLoading: boolean;
+  characters: Character[];
   children: React.ReactNode;
 }
 
@@ -41,10 +47,28 @@ export function EditorLayout({
   currentChapter,
   content,
   saveStatus,
+  synopsis,
+  synopsisLoading,
+  characters,
   children,
 }: EditorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
+
+  // 클라이언트에서만 localStorage 읽기
+  useEffect(() => {
+    const saved = localStorage.getItem(RIGHT_SIDEBAR_COLLAPSED_KEY);
+    if (saved === "false") {
+      setRightSidebarCollapsed(false);
+    }
+  }, []);
+
+  const handleRightSidebarToggle = () => {
+    const newValue = !rightSidebarCollapsed;
+    setRightSidebarCollapsed(newValue);
+    localStorage.setItem(RIGHT_SIDEBAR_COLLAPSED_KEY, String(newValue));
+  };
 
   // 콘텐츠에서 글자수 계산
   const characterCount = useMemo(() => {
@@ -67,9 +91,9 @@ export function EditorLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Desktop sidebar - fixed */}
-      <aside className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:flex-col lg:border-r lg:bg-background">
+    <div className="min-h-screen bg-background flex">
+      {/* Desktop left sidebar - fixed */}
+      <aside className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:flex-col lg:border-r lg:bg-background lg:z-20">
         <EditorSidebar
           project={project}
           chapters={chapters}
@@ -77,7 +101,7 @@ export function EditorLayout({
         />
       </aside>
 
-      {/* Mobile sidebar - Sheet */}
+      {/* Mobile left sidebar - Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="sr-only">
@@ -92,7 +116,11 @@ export function EditorLayout({
       </Sheet>
 
       {/* Main content area */}
-      <div className="lg:pl-64">
+      <div
+        className={`flex-1 lg:pl-64 transition-[padding] duration-200 ${
+          rightSidebarCollapsed ? "lg:pr-12" : "lg:pr-72"
+        }`}
+      >
         {/* Header */}
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="mx-auto max-w-4xl px-4">
@@ -159,6 +187,18 @@ export function EditorLayout({
 
         {/* Editor content */}
         <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+      </div>
+
+      {/* Desktop right sidebar - fixed */}
+      <div className="hidden lg:block lg:fixed lg:inset-y-0 lg:right-0 lg:z-20">
+        <RightSidebar
+          synopsis={synopsis}
+          synopsisLoading={synopsisLoading}
+          characters={characters}
+          collapsed={rightSidebarCollapsed}
+          onToggle={handleRightSidebarToggle}
+          className="h-full"
+        />
       </div>
     </div>
   );
