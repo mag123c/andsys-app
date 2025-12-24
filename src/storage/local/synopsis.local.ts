@@ -93,6 +93,10 @@ export class SynopsisLocalRepository implements SynopsisRepository {
     await db.synopses.delete(id);
     await db.projects.update(existing.projectId, { updatedAt: new Date() });
   }
+
+  async deleteByProjectId(projectId: string): Promise<void> {
+    await db.synopses.where("projectId").equals(projectId).delete();
+  }
 }
 
 export const synopsisLocalRepository = new SynopsisLocalRepository();

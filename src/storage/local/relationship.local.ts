@@ -137,6 +137,10 @@ export class RelationshipLocalRepository implements RelationshipRepository {
       await db.projects.update(projectId, { updatedAt: new Date() });
     }
   }
+
+  async deleteByProjectId(projectId: string): Promise<void> {
+    await db.relationships.where("projectId").equals(projectId).delete();
+  }
 }
 
 export const relationshipLocalRepository = new RelationshipLocalRepository();

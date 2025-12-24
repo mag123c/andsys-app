@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { processCoverImage } from "@/lib/image-utils";
+import { processCharacterImage } from "@/lib/image-utils";
 
 const MBTI_OPTIONS = [
   "INTJ",
@@ -134,7 +134,7 @@ export function CharacterForm({
 
     setIsUploading(true);
     try {
-      const base64 = await processCoverImage(file);
+      const base64 = await processCharacterImage(file);
       setFormData((prev) => ({ ...prev, imageUrl: base64 }));
     } catch (error) {
       console.error("Image upload failed:", error);

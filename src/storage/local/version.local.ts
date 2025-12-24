@@ -119,6 +119,10 @@ export class VersionLocalRepository implements VersionRepository {
 
     await db.versions.bulkDelete(idsToDelete);
   }
+
+  async deleteByProjectId(projectId: string): Promise<void> {
+    await db.versions.where("projectId").equals(projectId).delete();
+  }
 }
 
 export const versionLocalRepository = new VersionLocalRepository();

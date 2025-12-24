@@ -129,6 +129,10 @@ export class ChapterLocalRepository implements ChapterRepository {
       await db.projects.update(projectId, { updatedAt: now });
     });
   }
+
+  async deleteByProjectId(projectId: string): Promise<void> {
+    await db.chapters.where("projectId").equals(projectId).delete();
+  }
 }
 
 export const chapterLocalRepository = new ChapterLocalRepository();

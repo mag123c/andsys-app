@@ -3,6 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Project, CreateProjectInput } from "@/repositories/types";
 import { projectLocalRepository } from "@/storage/local/project.local";
+import { chapterLocalRepository } from "@/storage/local/chapter.local";
+import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
+import { characterLocalRepository } from "@/storage/local/character.local";
+import { relationshipLocalRepository } from "@/storage/local/relationship.local";
+import { versionLocalRepository } from "@/storage/local/version.local";
 import { useAuth } from "@/hooks/useAuth";
 
 interface UseProjectsReturn {
@@ -66,6 +71,12 @@ export function useProjects(): UseProjectsReturn {
   );
 
   const deleteProject = useCallback(async (id: string): Promise<void> => {
+    // 관련 데이터 cascade delete
+    await chapterLocalRepository.deleteByProjectId(id);
+    await synopsisLocalRepository.deleteByProjectId(id);
+    await versionLocalRepository.deleteByProjectId(id);
+    await relationshipLocalRepository.deleteByProjectId(id);
+    await characterLocalRepository.deleteByProjectId(id);
     await projectLocalRepository.delete(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
   }, []);

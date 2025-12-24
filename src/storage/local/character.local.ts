@@ -150,6 +150,10 @@ export class CharacterLocalRepository implements CharacterRepository {
       await db.projects.update(projectId, { updatedAt: now });
     });
   }
+
+  async deleteByProjectId(projectId: string): Promise<void> {
+    await db.characters.where("projectId").equals(projectId).delete();
+  }
 }
 
 export const characterLocalRepository = new CharacterLocalRepository();
