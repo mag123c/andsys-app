@@ -14,6 +14,7 @@ interface ProjectRow {
   title: string;
   description: string | null;
   genre: string | null;
+  cover_image_url: string | null;
   status: string;
   deleted_at: string | null;
   created_at: string;
@@ -28,6 +29,7 @@ function toProject(row: ProjectRow): Project {
     title: row.title,
     description: row.description,
     genre: row.genre,
+    coverImageUrl: row.cover_image_url,
     status: row.status as Project["status"],
     deletedAt: row.deleted_at ? new Date(row.deleted_at) : null,
     createdAt: new Date(row.created_at),
@@ -119,6 +121,7 @@ export class ProjectRemoteRepository implements ProjectRepository {
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.genre !== undefined) updateData.genre = data.genre;
+    if (data.coverImageUrl !== undefined) updateData.cover_image_url = data.coverImageUrl;
     if (data.status !== undefined) updateData.status = data.status;
 
     const { data: updated, error } = await this.supabase

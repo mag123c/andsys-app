@@ -5,6 +5,7 @@ export interface Project {
   title: string;
   description: string | null;
   genre: string | null;
+  coverImageUrl: string | null;
   status: "active" | "archived" | "deleted";
   deletedAt: Date | null;
   createdAt: Date;
@@ -15,5 +16,5 @@ export type CreateProjectInput = Pick<Project, "title"> &
   Partial<Pick<Project, "description" | "genre">>;
 
 export type UpdateProjectInput = Partial<
-  Pick<Project, "title" | "description" | "genre" | "status">
+  Pick<Project, "title" | "description" | "genre" | "status" | "coverImageUrl">
 >;

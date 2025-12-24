@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DefaultCoverImage } from "./DefaultCoverImage";
 
 interface ProjectCardProps {
   project: Project;
@@ -48,46 +49,61 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
   return (
     <>
       <Card className="group transition-shadow hover:shadow-md">
-        <CardHeader>
-          <Link
-            href={`/novels/${project.id}`}
-            className="block space-y-1"
-          >
-            <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
-              {project.title}
-            </CardTitle>
-            <CardDescription className="line-clamp-2">
-              {project.description || "설명 없음"}
-            </CardDescription>
-          </Link>
-          <CardAction>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">메뉴 열기</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  삭제
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardAction>
-        </CardHeader>
-        <div className="px-6 pb-4">
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            {project.genre && (
-              <span className="rounded-full bg-secondary px-2 py-0.5">
-                {project.genre}
-              </span>
+        <div className="flex p-4 gap-4">
+          {/* Cover Image */}
+          <Link href={`/novels/${project.id}`} className="shrink-0">
+            {project.coverImageUrl ? (
+              <img
+                src={project.coverImageUrl}
+                alt={`${project.title} 표지`}
+                className="w-[50px] h-[75px] rounded object-cover"
+              />
+            ) : (
+              <DefaultCoverImage size="sm" />
             )}
-            <span>수정: {formatDate(project.updatedAt)}</span>
+          </Link>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <CardHeader className="p-0">
+              <Link href={`/novels/${project.id}`} className="block space-y-1">
+                <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
+                  {project.title}
+                </CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {project.description || "설명 없음"}
+                </CardDescription>
+              </Link>
+              <CardAction>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">메뉴 열기</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      삭제
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CardAction>
+            </CardHeader>
+            <div className="mt-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {project.genre && (
+                  <span className="rounded-full bg-secondary px-2 py-0.5">
+                    {project.genre}
+                  </span>
+                )}
+                <span>수정: {formatDate(project.updatedAt)}</span>
+              </div>
+            </div>
           </div>
         </div>
       </Card>

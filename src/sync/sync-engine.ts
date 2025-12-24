@@ -351,6 +351,7 @@ export class SyncEngine {
           // 로컬에 없으면 추가
           await db.projects.add({
             ...remote,
+            coverImageBase64: null,
             syncStatus: "synced",
             lastSyncedAt: new Date(),
           });
@@ -358,6 +359,7 @@ export class SyncEngine {
           // 서버가 더 최신이면 업데이트
           await db.projects.update(remote.id, {
             ...remote,
+            coverImageBase64: local.coverImageBase64,
             syncStatus: "synced",
             lastSyncedAt: new Date(),
           });

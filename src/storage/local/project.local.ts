@@ -14,6 +14,7 @@ function toProject(local: LocalProject): Project {
     title: local.title,
     description: local.description,
     genre: local.genre,
+    coverImageUrl: local.coverImageBase64 ?? local.coverImageUrl ?? null,
     status: local.status,
     deletedAt: local.deletedAt,
     createdAt: local.createdAt,
@@ -62,6 +63,8 @@ export class ProjectLocalRepository implements ProjectRepository {
       title: data.title,
       description: data.description ?? null,
       genre: data.genre ?? null,
+      coverImageUrl: null,
+      coverImageBase64: null,
       status: "active",
       deletedAt: null,
       createdAt: now,
@@ -81,9 +84,18 @@ export class ProjectLocalRepository implements ProjectRepository {
     }
 
     const isGuest = existing.guestId !== null;
+
+    // Handle cover image: store as base64 locally
+    const { coverImageUrl, ...rest } = data;
+    const coverImageUpdate =
+      coverImageUrl !== undefined
+        ? { coverImageBase64: coverImageUrl }
+        : {};
+
     const updated: LocalProject = {
       ...existing,
-      ...data,
+      ...rest,
+      ...coverImageUpdate,
       updatedAt: new Date(),
       syncStatus: isGuest ? "synced" : "pending",
     };

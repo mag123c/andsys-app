@@ -10,6 +10,8 @@ export interface LocalProject {
   title: string;
   description: string | null;
   genre: string | null;
+  coverImageUrl: string | null;
+  coverImageBase64: string | null;
   status: "active" | "archived" | "deleted";
   deletedAt: Date | null;
   createdAt: Date;
@@ -63,6 +65,24 @@ export class AppDatabase extends Dexie {
       chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
       syncQueue: "++id, entityType, entityId, createdAt",
       settings: "key",
+    });
+
+    // Version 2: Add cover image fields to projects
+    this.version(2).stores({
+      projects: "id, userId, guestId, updatedAt, syncStatus",
+      chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      syncQueue: "++id, entityType, entityId, createdAt",
+      settings: "key",
+    }).upgrade((tx) => {
+      // Add default null values for new fields
+      return tx.table("projects").toCollection().modify((project) => {
+        if (project.coverImageUrl === undefined) {
+          project.coverImageUrl = null;
+        }
+        if (project.coverImageBase64 === undefined) {
+          project.coverImageBase64 = null;
+        }
+      });
     });
   }
 }

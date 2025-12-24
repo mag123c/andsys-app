@@ -174,35 +174,40 @@ supabase/migrations/XXX_add_relationships.sql
 
 ---
 
-## Phase 5: 표지 이미지
+## Phase 5: 표지 이미지 ✅
 
 소설 표지 이미지 업로드.
 
 ### 체크리스트
 
-- [ ] 데이터 레이어
-  - [ ] Project 타입에 coverImageUrl 추가
-  - [ ] Dexie 스키마 업데이트
-  - [ ] Supabase 마이그레이션
-- [ ] 이미지 처리
-  - [ ] 리사이즈 유틸리티 (100x150)
-  - [ ] Base64 변환
-  - [ ] Supabase Storage 업로드
-- [ ] UI
-  - [ ] CoverImageUpload 컴포넌트
-  - [ ] 디폴트 이미지 컴포넌트
-  - [ ] EditProjectDialog에 통합
-  - [ ] 소설 목록에 표지 표시
+- [x] 데이터 레이어
+  - [x] Project 타입에 coverImageUrl 추가
+  - [x] Dexie 스키마 업데이트 (version 2)
+  - [ ] Supabase 마이그레이션 (추후)
+- [x] 이미지 처리
+  - [x] 리사이즈 유틸리티 (100x150)
+  - [x] Base64 변환
+  - [ ] Supabase Storage 업로드 (추후)
+- [x] UI
+  - [x] CoverImageUpload 컴포넌트
+  - [x] DefaultCoverImage 컴포넌트
+  - [x] EditProjectDialog에 통합
+  - [x] 소설 목록에 표지 표시
 
 ### 파일 목록
 
 ```
 src/repositories/types/project.ts              # 수정
-src/lib/image-utils.ts                        # 신규
+src/storage/local/db.ts                        # 수정 (version 2)
+src/storage/local/project.local.ts             # 수정
+src/storage/remote/project.remote.ts           # 수정
+src/sync/sync-engine.ts                        # 수정
+src/lib/image-utils.ts                         # 신규
 src/components/features/project/
-├── CoverImageUpload.tsx
-└── DefaultCoverImage.tsx
-supabase/migrations/XXX_add_cover_image.sql
+├── CoverImageUpload.tsx                       # 신규
+├── DefaultCoverImage.tsx                      # 신규
+├── EditProjectDialog.tsx                      # 수정
+└── ProjectCard.tsx                            # 수정
 ```
 
 ---
