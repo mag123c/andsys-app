@@ -210,35 +210,34 @@ src/components/features/project/
 
 ---
 
-## Phase 6: 우측 사이드바
+## Phase 6: 우측 사이드바 ✅
 
 에디터에서 설정 참조용 우측 사이드바.
 
 ### 체크리스트
 
-- [ ] 레이아웃
-  - [ ] EditorLayout에 우측 사이드바 추가
-  - [ ] 접기/펴기 토글
-  - [ ] 상태 localStorage 저장
-- [ ] 검색
-  - [ ] 통합 검색 입력
-  - [ ] 시놉시스 검색
-  - [ ] 등장인물 검색
-- [ ] 미리보기
-  - [ ] 시놉시스 읽기 전용 뷰
-  - [ ] 등장인물 목록
-  - [ ] 캐릭터 상세 미리보기
+- [x] 레이아웃
+  - [x] EditorLayout에 우측 사이드바 추가
+  - [x] 접기/펴기 토글
+  - [x] 상태 localStorage 저장
+- [x] 검색
+  - [x] 등장인물 검색 (탭 내 검색)
+- [x] 미리보기
+  - [x] 시놉시스 읽기 전용 뷰
+  - [x] 등장인물 목록
+  - [x] 캐릭터 상세 미리보기
 
 ### 파일 목록
 
 ```
-src/components/features/editor/EditorLayout.tsx  # 수정
+src/app/(editor)/novels/[id]/chapters/[chapterId]/page.tsx  # 수정
+src/components/features/editor/EditorLayout.tsx             # 수정
 src/components/features/workspace/
-├── RightSidebar.tsx
-├── RightSidebarSearch.tsx
-├── RightSidebarSynopsis.tsx
-├── RightSidebarCharacters.tsx
-└── CharacterPreviewCard.tsx
+├── RightSidebar.tsx                                        # 신규
+├── RightSidebarSynopsis.tsx                                # 신규
+├── RightSidebarCharacters.tsx                              # 신규
+├── CharacterPreviewCard.tsx                                # 신규
+└── index.ts                                                # 수정
 ```
 
 ---
