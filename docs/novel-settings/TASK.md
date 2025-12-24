@@ -50,126 +50,124 @@ src/components/features/workspace/
 
 ---
 
-## Phase 2: 시놉시스
+## Phase 2: 시놉시스 ✅
 
 Tiptap 에디터를 재활용한 시놉시스 편집기.
 
 ### 체크리스트
 
-- [ ] 데이터 레이어
-  - [ ] Synopsis 타입 정의
-  - [ ] Dexie 스키마 추가
-  - [ ] Supabase 마이그레이션
-  - [ ] Repository 구현
-- [ ] 훅
-  - [ ] `useSynopsis(projectId)` 구현
-- [ ] UI
-  - [ ] 시놉시스 페이지 (`/novels/[id]/synopsis`)
-  - [ ] 에디터 컴포넌트 (기존 재활용)
-  - [ ] 자동 저장 연동
-- [ ] 히스토리 (기본)
+- [x] 데이터 레이어
+  - [x] Synopsis 타입 정의
+  - [x] Dexie 스키마 추가 (v3)
+  - [ ] Supabase 마이그레이션 (추후)
+  - [x] Repository 구현 (로컬)
+- [x] 훅
+  - [x] `useSynopsis(projectId)` 구현
+- [x] UI
+  - [x] 시놉시스 페이지 (`/novels/[id]/synopsis`)
+  - [x] 에디터 컴포넌트 (기존 재활용)
+  - [x] 자동 저장 연동 (2000ms debounce)
+- [ ] 히스토리 (기본) - Phase 7로 이동
   - [ ] 버전 저장 로직
   - [ ] 버전 목록 UI
 
 ### 파일 목록
 
 ```
-src/repositories/types/synopsis.ts
-src/storage/local/synopsis.local.ts
-src/storage/remote/synopsis.remote.ts
-src/hooks/useSynopsis.ts
-src/app/(dashboard)/novels/[id]/synopsis/page.tsx
+src/repositories/types/synopsis.ts                 # 신규
+src/repositories/synopsis.repository.ts            # 신규
+src/storage/local/synopsis.local.ts                # 신규
+src/storage/local/db.ts                            # 수정 (v3)
+src/hooks/useSynopsis.ts                           # 신규
+src/app/(dashboard)/novels/[id]/synopsis/page.tsx  # 신규
 src/components/features/synopsis/
-├── SynopsisEditor.tsx
-└── SynopsisHistoryPanel.tsx
-supabase/migrations/XXX_add_synopsis.sql
+├── SynopsisEditor.tsx                             # 신규
+└── index.ts                                       # 신규
+src/components/ui/skeleton.tsx                     # 신규 (shadcn)
 ```
 
 ---
 
-## Phase 3: 등장인물 CRUD
+## Phase 3: 등장인물 CRUD ✅
 
 캐릭터 생성, 조회, 수정, 삭제 기능.
 
 ### 체크리스트
 
-- [ ] 데이터 레이어
-  - [ ] Character 타입 정의
-  - [ ] Dexie 스키마 추가
-  - [ ] Supabase 마이그레이션
-  - [ ] Repository 구현
-- [ ] 훅
-  - [ ] `useCharacters(projectId)` 구현
-  - [ ] `useCharacter(characterId)` 구현
-- [ ] UI
-  - [ ] 등장인물 목록 페이지
-  - [ ] 등장인물 상세 페이지
-  - [ ] 캐릭터 카드
-  - [ ] 생성 다이얼로그
-  - [ ] 편집 폼
-  - [ ] 드래그 정렬
-- [ ] 이미지
-  - [ ] 이미지 업로드 컴포넌트
-  - [ ] 리사이즈 로직 (100x150)
-  - [ ] Base64 저장 (오프라인)
-  - [ ] Supabase Storage 업로드
+- [x] 데이터 레이어
+  - [x] Character 타입 정의 (CustomField 포함)
+  - [x] Dexie 스키마 추가 (v4)
+  - [ ] Supabase 마이그레이션 (추후)
+  - [x] Repository 구현 (로컬)
+- [x] 훅
+  - [x] `useCharacters(projectId)` 구현 (CRUD + reorder)
+- [x] UI
+  - [x] 등장인물 목록 페이지 (`/novels/[id]/characters`)
+  - [x] 캐릭터 카드 (CharacterCard)
+  - [x] 생성/편집 다이얼로그 (CharacterDialog)
+  - [x] 편집 폼 (CharacterForm)
+  - [x] 드래그 정렬 (SortableCharacterGrid, @dnd-kit)
+- [x] 이미지
+  - [x] 이미지 업로드 (CharacterForm 내장)
+  - [x] 리사이즈 로직 (image-utils.ts 재활용)
+  - [x] Base64 저장 (오프라인)
+  - [ ] Supabase Storage 업로드 (추후)
 
 ### 파일 목록
 
 ```
-src/repositories/types/character.ts
-src/storage/local/character.local.ts
-src/storage/remote/character.remote.ts
-src/hooks/useCharacters.ts
-src/hooks/useCharacter.ts
-src/app/(dashboard)/novels/[id]/characters/page.tsx
-src/app/(dashboard)/novels/[id]/characters/[characterId]/page.tsx
+src/repositories/types/character.ts                # 신규
+src/repositories/character.repository.ts           # 신규
+src/storage/local/character.local.ts               # 신규
+src/storage/local/db.ts                            # 수정 (v4)
+src/hooks/useCharacters.ts                         # 신규
+src/app/(dashboard)/novels/[id]/characters/page.tsx # 신규
 src/components/features/character/
-├── CharacterCard.tsx
-├── CharacterForm.tsx
-├── CharacterImageUpload.tsx
-├── CreateCharacterDialog.tsx
-├── SortableCharacterList.tsx
-└── CharacterCustomFields.tsx
-supabase/migrations/XXX_add_characters.sql
+├── CharacterCard.tsx                              # 신규
+├── CharacterForm.tsx                              # 신규
+├── CharacterDialog.tsx                            # 신규
+├── SortableCharacterGrid.tsx                      # 신규
+├── EmptyCharacters.tsx                            # 신규
+└── index.ts                                       # 신규
 ```
 
 ---
 
-## Phase 4: 관계 설정 (리스트)
+## Phase 4: 관계 설정 (리스트) ✅
 
 캐릭터 간 관계 설정 (리스트 형태).
 
 ### 체크리스트
 
-- [ ] 데이터 레이어
-  - [ ] Relationship 타입 정의
-  - [ ] Dexie 스키마 추가
-  - [ ] Supabase 마이그레이션
-  - [ ] Repository 구현
-- [ ] 훅
-  - [ ] `useRelationships(projectId)` 구현
-- [ ] UI
-  - [ ] 관계 목록 페이지
-  - [ ] 관계 추가 다이얼로그
-  - [ ] 관계 편집 다이얼로그
-  - [ ] 관계 타입 선택 UI
-  - [ ] 양방향 관계 처리
+- [x] 데이터 레이어
+  - [x] Relationship 타입 정의 (RELATIONSHIP_TYPES 8종)
+  - [x] Dexie 스키마 추가 (v5)
+  - [ ] Supabase 마이그레이션 (추후)
+  - [x] Repository 구현 (로컬, deleteByCharacterId 포함)
+- [x] 훅
+  - [x] `useRelationships(projectId)` 구현
+- [x] UI
+  - [x] 관계 목록 페이지 (`/novels/[id]/relationships`)
+  - [x] 관계 추가/편집 다이얼로그 (RelationshipDialog)
+  - [x] 관계 타입 선택 UI (RELATIONSHIP_TYPES)
+  - [x] 양방향 관계 처리 (bidirectional, reverseLabel)
 
 ### 파일 목록
 
 ```
-src/repositories/types/relationship.ts
-src/storage/local/relationship.local.ts
-src/storage/remote/relationship.remote.ts
-src/hooks/useRelationships.ts
-src/app/(dashboard)/novels/[id]/relationships/page.tsx
+src/repositories/types/relationship.ts             # 신규
+src/repositories/relationship.repository.ts        # 신규
+src/storage/local/relationship.local.ts            # 신규
+src/storage/local/db.ts                            # 수정 (v5)
+src/hooks/useRelationships.ts                      # 신규
+src/app/(dashboard)/novels/[id]/relationships/page.tsx # 신규
 src/components/features/relationship/
-├── RelationshipList.tsx
-├── RelationshipCard.tsx
-├── CreateRelationshipDialog.tsx
-└── EditRelationshipDialog.tsx
-supabase/migrations/XXX_add_relationships.sql
+├── RelationshipList.tsx                           # 신규
+├── RelationshipCard.tsx                           # 신규
+├── RelationshipDialog.tsx                         # 신규
+├── EmptyRelationships.tsx                         # 신규
+└── index.ts                                       # 신규
+src/components/ui/checkbox.tsx                     # 신규 (shadcn)
 ```
 
 ---
