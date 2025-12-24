@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Project, UpdateProjectInput } from "@/repositories/types";
-import { processeCoverImage } from "@/lib/image-utils";
+import { processCoverImage } from "@/lib/image-utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -51,7 +51,7 @@ export function EditProjectDialog({
 
   const handleCoverUpload = async (file: File) => {
     try {
-      const base64 = await processeCoverImage(file);
+      const base64 = await processCoverImage(file);
       setCoverImageUrl(base64);
     } catch {
       toast.error("이미지 처리에 실패했습니다.");

@@ -7,6 +7,7 @@ import type {
   UpdateCharacterInput,
 } from "@/repositories/types";
 import { characterLocalRepository } from "@/storage/local/character.local";
+import { relationshipLocalRepository } from "@/storage/local/relationship.local";
 
 interface UseCharactersReturn {
   characters: Character[];
@@ -75,6 +76,8 @@ export function useCharacters(projectId: string): UseCharactersReturn {
   );
 
   const deleteCharacter = useCallback(async (id: string): Promise<void> => {
+    // 해당 캐릭터와 연결된 관계들도 함께 삭제
+    await relationshipLocalRepository.deleteByCharacterId(id);
     await characterLocalRepository.delete(id);
     setCharacters((prev) => prev.filter((ch) => ch.id !== id));
   }, []);

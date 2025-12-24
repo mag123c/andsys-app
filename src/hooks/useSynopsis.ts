@@ -59,10 +59,15 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      // 언마운트 시 저장되지 않은 내용 저장 (에러 발생 시 콘솔 로깅)
       if (pendingContentRef.current && synopsisIdRef.current) {
-        synopsisLocalRepository.update(synopsisIdRef.current, {
-          content: pendingContentRef.current,
-        });
+        synopsisLocalRepository
+          .update(synopsisIdRef.current, {
+            content: pendingContentRef.current,
+          })
+          .catch((err) => {
+            console.error("Failed to save synopsis on unmount:", err);
+          });
       }
     };
   }, [projectId]);

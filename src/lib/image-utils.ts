@@ -81,7 +81,7 @@ export function blobToBase64(blob: Blob): Promise<string> {
 /**
  * 이미지 파일을 리사이즈하고 Base64로 변환
  */
-export async function processeCoverImage(file: File): Promise<string> {
+export async function processCoverImage(file: File): Promise<string> {
   const resized = await resizeCoverImage(file);
   return blobToBase64(resized);
 }

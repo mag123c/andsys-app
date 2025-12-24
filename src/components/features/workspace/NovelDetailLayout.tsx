@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
@@ -16,11 +16,6 @@ import { NovelSidebar } from "./NovelSidebar";
 
 const SIDEBAR_COLLAPSED_KEY = "andsys:novel-sidebar-collapsed";
 
-function getInitialCollapsed(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
-}
-
 interface NovelDetailLayoutProps {
   children: React.ReactNode;
 }
@@ -32,8 +27,16 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
   const { project } = useProject(projectId);
   const { chapters } = useChapters(projectId);
 
-  const [collapsed, setCollapsed] = useState(getInitialCollapsed);
+  // 서버/클라이언트 일관성을 위해 초기값은 false, 클라이언트에서 localStorage 읽기
+  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    if (saved === "true") {
+      setCollapsed(true);
+    }
+  }, []);
 
   const handleToggle = () => {
     const newValue = !collapsed;
