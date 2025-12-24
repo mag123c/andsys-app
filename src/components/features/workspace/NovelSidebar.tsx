@@ -86,11 +86,9 @@ export function NovelSidebar({
   // 해당 페이지 진입 시 자동 펼침
   useEffect(() => {
     if (isChaptersActive && chapters.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- 페이지 진입 시 자동 펼침을 위한 의도적 패턴
-      setExpandedChapters(true);
+      setExpandedChapters(true); // eslint-disable-line react-hooks/set-state-in-effect -- 페이지 진입 시 자동 펼침을 위한 의도적 패턴
     }
     if (isCharactersActive && characters.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- 페이지 진입 시 자동 펼침을 위한 의도적 패턴
       setExpandedCharacters(true);
     }
   }, [isChaptersActive, isCharactersActive, chapters.length, characters.length]);

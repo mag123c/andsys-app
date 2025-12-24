@@ -56,6 +56,9 @@ interface RelationshipDialogProps {
   onOpenChange: (open: boolean) => void;
   characters: Character[];
   relationship?: Relationship;
+  /** 사전 선택된 캐릭터 (노드 연결 시 사용) */
+  initialFromCharacterId?: string;
+  initialToCharacterId?: string;
   onCreate?: (
     data: Omit<CreateRelationshipInput, "projectId">
   ) => Promise<Relationship>;
@@ -67,6 +70,8 @@ export function RelationshipDialog({
   onOpenChange,
   characters,
   relationship,
+  initialFromCharacterId,
+  initialToCharacterId,
   onCreate,
   onUpdate,
 }: RelationshipDialogProps) {
@@ -79,9 +84,17 @@ export function RelationshipDialog({
 
   useEffect(() => {
     if (open) {
-      setFormData(getInitialFormData(relationship));
+      const initial = getInitialFormData(relationship);
+      // 사전 선택된 캐릭터가 있으면 적용
+      if (initialFromCharacterId && !relationship) {
+        initial.fromCharacterId = initialFromCharacterId;
+      }
+      if (initialToCharacterId && !relationship) {
+        initial.toCharacterId = initialToCharacterId;
+      }
+      setFormData(initial);
     }
-  }, [open, relationship]);
+  }, [open, relationship, initialFromCharacterId, initialToCharacterId]);
 
   const handleChange = (field: keyof RelationshipFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

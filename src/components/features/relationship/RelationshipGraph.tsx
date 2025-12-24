@@ -12,7 +12,11 @@ import {
   type Edge,
   type NodeTypes,
   type EdgeTypes,
+  type Connection,
+  type OnConnect,
   MarkerType,
+  useReactFlow,
+  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Pencil, Trash2, X } from "lucide-react";
@@ -24,12 +28,14 @@ import { Button } from "@/components/ui/button";
 import { CharacterNode, type CharacterNodeData } from "./CharacterNode";
 import { RelationshipEdge, type RelationshipEdgeData } from "./RelationshipEdge";
 import { GraphLegend } from "./GraphLegend";
+import { CharacterPanel } from "./CharacterPanel";
 
 interface RelationshipGraphProps {
   characters: Character[];
   relationships: Relationship[];
   onEdit?: (relationship: Relationship) => void;
   onDelete?: (id: string) => void;
+  onCreate?: (fromCharacterId: string, toCharacterId: string) => void;
 }
 
 interface PopoverState {
@@ -45,18 +51,24 @@ const edgeTypes: EdgeTypes = {
   relationship: RelationshipEdge,
 };
 
-export function RelationshipGraph({
+function RelationshipGraphInner({
   characters,
   relationships,
   onEdit,
   onDelete,
+  onCreate,
 }: RelationshipGraphProps) {
+  const { screenToFlowPosition } = useReactFlow();
+
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     RELATIONSHIP_TYPES.map((t) => t.type)
   );
   const [popover, setPopover] = useState<PopoverState | null>(null);
   const [showMiniMap, setShowMiniMap] = useState(true);
   const miniMapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 그래프에 있는 노드 ID들
+  const [graphNodeIds, setGraphNodeIds] = useState<Set<string>>(new Set());
 
   // MiniMap 자동 숨김 (3초 비활동 후)
   const handleViewportChange = useCallback(() => {
@@ -69,7 +81,6 @@ export function RelationshipGraph({
     }, 3000);
   }, []);
 
-  // 컴포넌트 마운트 시 타이머 시작, 언마운트 시 정리
   useEffect(() => {
     miniMapTimeoutRef.current = setTimeout(() => {
       setShowMiniMap(false);
@@ -127,16 +138,21 @@ export function RelationshipGraph({
     return relationships.find((r) => r.id === popover.relationshipId) || null;
   }, [popover, relationships]);
 
-  const { initialNodes, initialEdges } = useMemo(() => {
-    // Create nodes for characters that have relationships
-    const connectedCharacterIds = new Set<string>();
-    filteredRelationships.forEach((r) => {
-      connectedCharacterIds.add(r.fromCharacterId);
-      connectedCharacterIds.add(r.toCharacterId);
+  // 초기화: 관계가 있는 캐릭터들을 그래프에 추가
+  useEffect(() => {
+    const connectedIds = new Set<string>();
+    relationships.forEach((r) => {
+      connectedIds.add(r.fromCharacterId);
+      connectedIds.add(r.toCharacterId);
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 관계가 있는 캐릭터를 그래프에 추가하기 위한 의도적 패턴
+    setGraphNodeIds(connectedIds);
+  }, [relationships]);
 
+  const { initialNodes, initialEdges } = useMemo(() => {
+    // 그래프에 있는 캐릭터만 노드로 생성
     const nodes: Node<CharacterNodeData>[] = characters
-      .filter((c) => connectedCharacterIds.has(c.id))
+      .filter((c) => graphNodeIds.has(c.id))
       .map((character) => ({
         id: character.id,
         type: "character",
@@ -149,53 +165,156 @@ export function RelationshipGraph({
         },
       }));
 
-    const edges: Edge<RelationshipEdgeData>[] = filteredRelationships.map(
-      (relationship) => {
-        const typeConfig = RELATIONSHIP_TYPES.find(
-          (t) => t.type === relationship.type
-        );
-        const color = typeConfig?.color || "#6B7280";
+    // 양방향 관계는 2개의 엣지로 분리
+    const edges: Edge<RelationshipEdgeData>[] = [];
 
-        return {
-          id: relationship.id,
-          source: relationship.fromCharacterId,
-          target: relationship.toCharacterId,
+    filteredRelationships.forEach((relationship) => {
+      const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
+      const color = typeConfig?.color || "#6B7280";
+
+      // 정방향 엣지
+      edges.push({
+        id: relationship.id,
+        source: relationship.fromCharacterId,
+        target: relationship.toCharacterId,
+        type: "relationship",
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color,
+        },
+        data: {
+          label: relationship.label,
+          color,
+          bidirectional: relationship.bidirectional,
+          isReverse: false,
+          onLabelClick: handleLabelClick,
+        },
+      });
+
+      // 역방향 엣지 (양방향이고 역라벨이 있을 때)
+      if (relationship.bidirectional && relationship.reverseLabel) {
+        edges.push({
+          id: `${relationship.id}-reverse`,
+          source: relationship.toCharacterId,
+          target: relationship.fromCharacterId,
           type: "relationship",
           markerEnd: {
             type: MarkerType.ArrowClosed,
             color,
           },
           data: {
-            label: relationship.label,
-            reverseLabel: relationship.reverseLabel,
+            label: relationship.reverseLabel,
             color,
-            bidirectional: relationship.bidirectional,
-            onLabelClick: handleLabelClick,
+            bidirectional: true,
+            isReverse: true,
+            parentId: relationship.id,
+            onLabelClick: (_, pos) => handleLabelClick(relationship.id, pos),
           },
-        };
+        });
       }
-    );
+    });
 
-    // Apply dagre layout
-    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-      nodes,
-      edges,
-      { direction: "TB", rankSep: 100, nodeSep: 80 }
-    );
+    // dagre 레이아웃 적용
+    if (nodes.length > 0) {
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        nodes,
+        edges,
+        { direction: "TB", rankSep: 150, nodeSep: 100 }
+      );
+      return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
+    }
 
-    return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
-  }, [characters, filteredRelationships, handleLabelClick]);
+    return { initialNodes: nodes, initialEdges: edges };
+  }, [characters, filteredRelationships, graphNodeIds, handleLabelClick]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  // Update nodes and edges when data changes
+  // 데이터 변경 시 노드/엣지 업데이트
   useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // Close popover when clicking outside
+  // 드래그 앤 드롭으로 노드 추가
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const characterId = event.dataTransfer.getData("application/character-id");
+      if (!characterId) return;
+
+      const character = characters.find((c) => c.id === characterId);
+      if (!character) return;
+
+      // 이미 그래프에 있으면 무시
+      if (graphNodeIds.has(characterId)) return;
+
+      // 드롭 위치 계산
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // 새 노드 추가
+      const newNode: Node<CharacterNodeData> = {
+        id: character.id,
+        type: "character",
+        position,
+        data: {
+          name: character.name,
+          imageUrl: character.imageUrl,
+          nickname: character.nickname,
+          occupation: character.occupation,
+        },
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+      setGraphNodeIds((prev) => new Set([...prev, characterId]));
+    },
+    [characters, graphNodeIds, screenToFlowPosition, setNodes]
+  );
+
+  // 드래그 시작 핸들러 (CharacterPanel에서 사용)
+  const handleDragStart = useCallback(
+    (event: React.DragEvent, character: Character) => {
+      event.dataTransfer.setData("application/character-id", character.id);
+      event.dataTransfer.effectAllowed = "move";
+    },
+    []
+  );
+
+  // 엣지 연결 시 관계 생성 다이얼로그 열기
+  const handleConnect: OnConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+      if (connection.source === connection.target) return;
+
+      // 이미 관계가 있는지 확인
+      const existingRelationship = relationships.find(
+        (r) =>
+          (r.fromCharacterId === connection.source && r.toCharacterId === connection.target) ||
+          (r.fromCharacterId === connection.target && r.toCharacterId === connection.source)
+      );
+
+      if (existingRelationship) {
+        // 기존 관계가 있으면 편집
+        onEdit?.(existingRelationship);
+      } else {
+        // 새 관계 생성
+        onCreate?.(connection.source, connection.target);
+      }
+    },
+    [relationships, onEdit, onCreate]
+  );
+
+
+  // 팝오버 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -207,117 +326,142 @@ export function RelationshipGraph({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [popover]);
 
-  if (characters.length === 0 || relationships.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[500px] border rounded-lg bg-muted/20">
-        <p className="text-muted-foreground">
-          표시할 관계가 없습니다.
-        </p>
-      </div>
-    );
-  }
-
   // 캐릭터 이름 찾기
   const getCharacterName = (id: string) => {
     return characters.find((c) => c.id === id)?.name || "알 수 없음";
   };
 
   return (
-    <div className="space-y-4">
-      <GraphLegend
-        selectedTypes={selectedTypes}
-        onToggleType={handleToggleType}
-      />
-      <div className="relative h-[600px] border rounded-lg overflow-hidden">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onMove={handleViewportChange}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          minZoom={0.1}
-          maxZoom={2}
-          proOptions={{ hideAttribution: true }}
-        >
-          <Background gap={16} size={1} />
-          <Controls showInteractive={false} />
-          <MiniMap
-            nodeColor="#6B7280"
-            maskColor="rgb(0, 0, 0, 0.1)"
-            className="bg-background transition-opacity duration-300"
-            style={{ opacity: showMiniMap ? 1 : 0, pointerEvents: showMiniMap ? "auto" : "none" }}
-          />
-        </ReactFlow>
-
-        {/* 관계 팝오버 */}
-        {popover && selectedRelationship && (
-          <div
-            data-popover
-            className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 min-w-[200px]"
-            style={{
-              left: Math.min(Math.max(popover.position.x, 120), window.innerWidth - 120),
-              top: Math.min(popover.position.y, window.innerHeight - 200),
-              transform: "translate(-50%, 8px)",
+    <div className="flex h-[600px] border rounded-lg overflow-hidden">
+      {/* 그래프 영역 */}
+      <div className="flex-1 flex flex-col">
+        <GraphLegend
+          selectedTypes={selectedTypes}
+          onToggleType={handleToggleType}
+        />
+        <div className="flex-1 relative">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={handleConnect}
+            onMove={handleViewportChange}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+            minZoom={0.1}
+            maxZoom={2}
+            proOptions={{ hideAttribution: true }}
+            connectionLineStyle={{ stroke: "#6B7280", strokeWidth: 2 }}
+            defaultEdgeOptions={{
+              type: "relationship",
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-sm">관계 정보</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={handleClosePopover}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Background gap={16} size={1} />
+            <Controls showInteractive={false} />
+            <MiniMap
+              nodeColor="#6B7280"
+              maskColor="rgb(0, 0, 0, 0.1)"
+              className="bg-background transition-opacity duration-300"
+              style={{ opacity: showMiniMap ? 1 : 0, pointerEvents: showMiniMap ? "auto" : "none" }}
+            />
+          </ReactFlow>
 
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">관계</span>
-                <span className="font-medium">{selectedRelationship.label}</span>
+          {/* 빈 상태 */}
+          {nodes.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center text-muted-foreground">
+                <p className="text-lg mb-2">관계도가 비어있습니다</p>
+                <p className="text-sm">우측 패널에서 캐릭터를 드래그하여 추가하세요</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">대상</span>
-                <span>
-                  {getCharacterName(selectedRelationship.fromCharacterId)} → {getCharacterName(selectedRelationship.toCharacterId)}
-                </span>
+            </div>
+          )}
+
+          {/* 관계 팝오버 */}
+          {popover && selectedRelationship && (
+            <div
+              data-popover
+              className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 min-w-[200px]"
+              style={{
+                left: Math.min(Math.max(popover.position.x, 120), window.innerWidth - 120),
+                top: Math.min(popover.position.y, window.innerHeight - 200),
+                transform: "translate(-50%, 8px)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-medium text-sm">관계 정보</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={handleClosePopover}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              {selectedRelationship.bidirectional && selectedRelationship.reverseLabel && (
+
+              <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">역관계</span>
-                  <span>{selectedRelationship.reverseLabel}</span>
+                  <span className="text-muted-foreground">관계</span>
+                  <span className="font-medium">{selectedRelationship.label}</span>
                 </div>
-              )}
-            </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">대상</span>
+                  <span>
+                    {getCharacterName(selectedRelationship.fromCharacterId)} → {getCharacterName(selectedRelationship.toCharacterId)}
+                  </span>
+                </div>
+                {selectedRelationship.bidirectional && selectedRelationship.reverseLabel && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">역관계</span>
+                    <span>{selectedRelationship.reverseLabel}</span>
+                  </div>
+                )}
+              </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={handleEdit}
-              >
-                <Pencil className="h-3 w-3 mr-1" />
-                편집
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-destructive hover:text-destructive"
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                삭제
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleEdit}
+                >
+                  <Pencil className="h-3 w-3 mr-1" />
+                  편집
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-destructive hover:text-destructive"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  삭제
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* 캐릭터 패널 */}
+      <CharacterPanel
+        characters={characters}
+        nodesOnGraph={graphNodeIds}
+        onDragStart={handleDragStart}
+      />
     </div>
+  );
+}
+
+export function RelationshipGraph(props: RelationshipGraphProps) {
+  return (
+    <ReactFlowProvider>
+      <RelationshipGraphInner {...props} />
+    </ReactFlowProvider>
   );
 }
