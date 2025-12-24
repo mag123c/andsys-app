@@ -1,9 +1,8 @@
 "use client";
 
 import { use, useState, useCallback } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Settings } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { formatCharacterCount } from "@/lib/format";
 import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
@@ -106,12 +105,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16">
         <p className="text-muted-foreground">소설을 찾을 수 없습니다.</p>
-        <Link href="/novels">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            소설 목록으로
-          </Button>
-        </Link>
       </div>
     );
   }
@@ -120,16 +113,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
   return (
     <>
-      <nav className="mb-6">
-        <Link
-          href="/novels"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          소설 목록
-        </Link>
-      </nav>
-
       <header className="mb-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
