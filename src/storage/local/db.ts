@@ -139,12 +139,38 @@ export interface LocalSettings {
   value: unknown;
 }
 
+export type LocalVersionEntityType = "synopsis" | "character";
+
+export interface LocalVersionDiff {
+  fields?: Array<{
+    field: string;
+    oldValue: unknown;
+    newValue: unknown;
+  }>;
+  lines?: Array<{
+    type: "added" | "removed" | "unchanged";
+    content: string;
+    lineNumber?: number;
+  }>;
+}
+
+export interface LocalVersion {
+  id: string;
+  projectId: string;
+  entityType: LocalVersionEntityType;
+  entityId: string;
+  snapshot: Record<string, unknown>;
+  diff: LocalVersionDiff | null;
+  createdAt: Date;
+}
+
 export class AppDatabase extends Dexie {
   projects!: Table<LocalProject>;
   chapters!: Table<LocalChapter>;
   synopses!: Table<LocalSynopsis>;
   characters!: Table<LocalCharacter>;
   relationships!: Table<LocalRelationship>;
+  versions!: Table<LocalVersion>;
   syncQueue!: Table<SyncQueueItem>;
   settings!: Table<LocalSettings>;
 
@@ -203,6 +229,19 @@ export class AppDatabase extends Dexie {
       characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
       relationships:
         "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus",
+      syncQueue: "++id, entityType, entityId, createdAt",
+      settings: "key",
+    });
+
+    // Version 6: Add versions table for history tracking
+    this.version(6).stores({
+      projects: "id, userId, guestId, updatedAt, syncStatus",
+      chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      synopses: "id, projectId, updatedAt, syncStatus",
+      characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+      relationships:
+        "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus",
+      versions: "id, projectId, [entityType+entityId], createdAt",
       syncQueue: "++id, entityType, entityId, createdAt",
       settings: "key",
     });

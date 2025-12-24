@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import type { JSONContent } from "@tiptap/core";
 import type { Synopsis, UpdateSynopsisInput } from "@/repositories/types";
 import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
+import { createVersion } from "./useVersionHistory";
 
 export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
@@ -27,6 +28,7 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
   const pendingContentRef = useRef<JSONContent | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const synopsisIdRef = useRef<string | null>(null);
+  const previousSnapshotRef = useRef<Record<string, unknown> | null>(null);
 
   const fetchOrCreateSynopsis = useCallback(async () => {
     setIsLoading(true);
@@ -41,6 +43,12 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
 
       setSynopsis(result);
       synopsisIdRef.current = result.id;
+      // 초기 스냅샷 저장
+      previousSnapshotRef.current = {
+        content: result.content,
+        plainText: result.plainText,
+        wordCount: result.wordCount,
+      };
     } catch (err) {
       setError(
         err instanceof Error ? err : new Error("Failed to fetch synopsis")
@@ -81,6 +89,23 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
         const updated = await synopsisLocalRepository.update(synopsis.id, data);
         setSynopsis(updated);
         setSaveStatus("saved");
+
+        // 버전 생성 (백그라운드에서 실행, 에러 무시)
+        const currentSnapshot = {
+          content: updated.content,
+          plainText: updated.plainText,
+          wordCount: updated.wordCount,
+        };
+        createVersion(
+          projectId,
+          "synopsis",
+          synopsis.id,
+          currentSnapshot,
+          previousSnapshotRef.current || undefined
+        ).catch(() => {
+          // 버전 생성 실패는 무시
+        });
+        previousSnapshotRef.current = currentSnapshot;
       } catch (err) {
         setError(
           err instanceof Error ? err : new Error("Failed to save synopsis")
@@ -88,7 +113,7 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
         setSaveStatus("error");
       }
     },
-    [synopsis]
+    [synopsis, projectId]
   );
 
   const saveNow = useCallback(async () => {

@@ -34,6 +34,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
   useEffect(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     if (saved === "true") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration 안전을 위한 의도적 패턴
       setCollapsed(true);
     }
   }, []);

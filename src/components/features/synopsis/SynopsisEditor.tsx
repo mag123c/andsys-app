@@ -1,7 +1,12 @@
 "use client";
 
+import { useState, useCallback } from "react";
+import { History } from "lucide-react";
+import type { JSONContent } from "@tiptap/core";
 import { useSynopsis } from "@/hooks/useSynopsis";
 import { Editor } from "@/components/features/editor/Editor";
+import { VersionHistoryPanel } from "@/components/features/history";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +18,20 @@ interface SynopsisEditorProps {
 export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
   const { synopsis, isLoading, error, saveStatus, updateContent } =
     useSynopsis(projectId);
+  const [showHistory, setShowHistory] = useState(false);
+  const [editorKey, setEditorKey] = useState(0);
+
+  const handleRestore = useCallback(
+    async (snapshot: Record<string, unknown>) => {
+      const content = snapshot.content as JSONContent;
+      if (content) {
+        updateContent(content);
+        // Force editor re-render with restored content
+        setEditorKey((prev) => prev + 1);
+      }
+    },
+    [updateContent]
+  );
 
   if (isLoading) {
     return (
@@ -32,18 +51,47 @@ export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
   }
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">시놉시스</h2>
-        <SaveStatusIndicator status={saveStatus} />
+    <div className={cn("flex h-full", className)}>
+      {/* Main editor area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">시놉시스</h2>
+          <div className="flex items-center gap-2">
+            <SaveStatusIndicator status={saveStatus} />
+            <Button
+              variant={showHistory ? "secondary" : "ghost"}
+              size="sm"
+              className="h-8"
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="h-4 w-4 mr-1" />
+              히스토리
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 border rounded-lg overflow-hidden">
+          <Editor
+            key={editorKey}
+            initialContent={synopsis?.content}
+            onUpdate={updateContent}
+            className="h-full"
+          />
+        </div>
       </div>
-      <div className="flex-1 border rounded-lg overflow-hidden">
-        <Editor
-          initialContent={synopsis?.content}
-          onUpdate={updateContent}
-          className="h-full"
-        />
-      </div>
+
+      {/* History panel */}
+      {showHistory && (
+        <div className="w-80 ml-4 border rounded-lg overflow-hidden shrink-0">
+          <VersionHistoryPanel
+            entityType="synopsis"
+            entityId={synopsis?.id || null}
+            entityName="시놉시스"
+            onRestore={handleRestore}
+            onClose={() => setShowHistory(false)}
+            className="h-full"
+          />
+        </div>
+      )}
     </div>
   );
 }

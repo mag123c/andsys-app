@@ -56,10 +56,11 @@ export function EditorLayout({
   const [includeSpaces, setIncludeSpaces] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
 
-  // 클라이언트에서만 localStorage 읽기
+  // 클라이언트에서만 localStorage 읽기 (hydration 안전 패턴)
   useEffect(() => {
     const saved = localStorage.getItem(RIGHT_SIDEBAR_COLLAPSED_KEY);
     if (saved === "false") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration 안전을 위한 의도적 패턴
       setRightSidebarCollapsed(false);
     }
   }, []);

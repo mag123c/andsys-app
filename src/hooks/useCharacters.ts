@@ -8,6 +8,28 @@ import type {
 } from "@/repositories/types";
 import { characterLocalRepository } from "@/storage/local/character.local";
 import { relationshipLocalRepository } from "@/storage/local/relationship.local";
+import { createVersion, deleteVersionsByEntity } from "./useVersionHistory";
+
+function characterToSnapshot(character: Character): Record<string, unknown> {
+  return {
+    name: character.name,
+    nickname: character.nickname,
+    age: character.age,
+    gender: character.gender,
+    race: character.race,
+    imageUrl: character.imageUrl,
+    height: character.height,
+    weight: character.weight,
+    appearance: character.appearance,
+    mbti: character.mbti,
+    personality: character.personality,
+    education: character.education,
+    occupation: character.occupation,
+    affiliation: character.affiliation,
+    background: character.background,
+    customFields: character.customFields,
+  };
+}
 
 interface UseCharactersReturn {
   characters: Character[];
@@ -66,18 +88,37 @@ export function useCharacters(projectId: string): UseCharactersReturn {
 
   const updateCharacter = useCallback(
     async (id: string, data: UpdateCharacterInput): Promise<Character> => {
+      // 이전 스냅샷 저장
+      const existing = characters.find((ch) => ch.id === id);
+      const previousSnapshot = existing
+        ? characterToSnapshot(existing)
+        : undefined;
+
       const updated = await characterLocalRepository.update(id, data);
       setCharacters((prev) =>
         prev.map((ch) => (ch.id === id ? updated : ch))
       );
+
+      // 버전 생성 (백그라운드에서 실행, 에러 무시)
+      createVersion(
+        projectId,
+        "character",
+        id,
+        characterToSnapshot(updated),
+        previousSnapshot
+      ).catch(() => {
+        // 버전 생성 실패는 무시
+      });
+
       return updated;
     },
-    []
+    [characters, projectId]
   );
 
   const deleteCharacter = useCallback(async (id: string): Promise<void> => {
-    // 해당 캐릭터와 연결된 관계들도 함께 삭제
+    // 해당 캐릭터와 연결된 관계들 및 버전들도 함께 삭제
     await relationshipLocalRepository.deleteByCharacterId(id);
+    await deleteVersionsByEntity("character", id);
     await characterLocalRepository.delete(id);
     setCharacters((prev) => prev.filter((ch) => ch.id !== id));
   }, []);
