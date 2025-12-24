@@ -23,7 +23,7 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-4xl px-4">
         <div className="flex h-14 items-center justify-between">
-          <Link href="/projects" className="text-xl font-bold">
+          <Link href="/novels" className="text-xl font-bold">
             Andsys
           </Link>
 

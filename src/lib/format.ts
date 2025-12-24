@@ -22,3 +22,11 @@ export function formatDateTime(date: Date): string {
     minute: "2-digit",
   }).format(date);
 }
+
+/**
+ * 회차 순서를 001화, 002화 형식으로 포맷팅
+ * order는 1-indexed (1, 2, 3, ...)
+ */
+export function formatEpisodeNumber(order: number): string {
+  return `${String(order).padStart(3, "0")}화`;
+}

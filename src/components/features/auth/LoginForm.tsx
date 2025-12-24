@@ -35,7 +35,7 @@ export function LoginForm() {
       }
 
       toast.success("로그인되었습니다.");
-      router.push("/projects");
+      router.push("/novels");
     } catch {
       toast.error("로그인 중 오류가 발생했습니다.");
     } finally {

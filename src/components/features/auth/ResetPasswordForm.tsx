@@ -44,7 +44,7 @@ export function ResetPasswordForm() {
       }
 
       toast.success("비밀번호가 변경되었습니다.");
-      router.push("/projects");
+      router.push("/novels");
     } catch {
       toast.error("오류가 발생했습니다.");
     } finally {

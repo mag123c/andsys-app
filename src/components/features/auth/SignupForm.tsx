@@ -51,7 +51,7 @@ export function SignupForm() {
         router.push("/login");
       } else {
         toast.success("회원가입이 완료되었습니다.");
-        router.push("/projects");
+        router.push("/novels");
       }
     } catch {
       toast.error("회원가입 중 오류가 발생했습니다.");

@@ -71,9 +71,9 @@ export default function EditorPage({ params }: EditorPageProps) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">
-          {!project ? "소설을" : "챕터를"} 찾을 수 없습니다.
+          {!project ? "소설을" : "회차를"} 찾을 수 없습니다.
         </p>
-        <Link href={project ? `/projects/${projectId}` : "/projects"}>
+        <Link href={project ? `/novels/${projectId}` : "/novels"}>
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             {project ? "소설로 돌아가기" : "소설 목록으로"}

@@ -81,7 +81,7 @@ export function EditorLayout({
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="sr-only">
-            <SheetTitle>챕터 목록</SheetTitle>
+            <SheetTitle>회차 목록</SheetTitle>
           </SheetHeader>
           <EditorSidebar
             project={project}
@@ -111,7 +111,7 @@ export function EditorLayout({
 
                 {/* Desktop back link */}
                 <Link
-                  href={`/projects/${project.id}`}
+                  href={`/novels/${project.id}`}
                   className="hidden lg:flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
                 >
                   <ArrowLeft className="mr-1 h-4 w-4" />

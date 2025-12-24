@@ -50,7 +50,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
       <Card className="group transition-shadow hover:shadow-md">
         <CardHeader>
           <Link
-            href={`/projects/${project.id}`}
+            href={`/novels/${project.id}`}
             className="block space-y-1"
           >
             <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">

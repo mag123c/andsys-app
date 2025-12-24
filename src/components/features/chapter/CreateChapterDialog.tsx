@@ -47,15 +47,15 @@ export function CreateChapterDialog({ onCreate }: CreateChapterDialogProps) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          새 챕터
+          추가
         </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>새 챕터 만들기</DialogTitle>
+            <DialogTitle>새 회차 추가</DialogTitle>
             <DialogDescription>
-              새로운 챕터를 추가하세요.
+              새로운 회차를 추가하세요.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -63,7 +63,7 @@ export function CreateChapterDialog({ onCreate }: CreateChapterDialogProps) {
               <Label htmlFor="chapter-title">제목 *</Label>
               <Input
                 id="chapter-title"
-                placeholder="챕터 제목을 입력하세요"
+                placeholder="회차 제목을 입력하세요"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={isLoading}

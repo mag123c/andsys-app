@@ -60,7 +60,7 @@ export default function LandingPage() {
               오프라인에서도 작업하고, 어디서든 이어서 쓰세요.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Link href="/projects">
+              <Link href="/novels">
                 <Button size="lg" className="w-full sm:w-auto">
                   지금 시작하기
                 </Button>

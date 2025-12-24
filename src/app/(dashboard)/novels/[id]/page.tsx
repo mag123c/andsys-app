@@ -39,18 +39,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const handleCreateChapter = async (data: Parameters<typeof createChapter>[0]) => {
     try {
       await createChapter(data);
-      toast.success("챕터가 생성되었습니다.");
+      toast.success("회차가 생성되었습니다.");
     } catch {
-      toast.error("챕터 생성에 실패했습니다.");
+      toast.error("회차 생성에 실패했습니다.");
     }
   };
 
   const handleDeleteChapter = async (chapterId: string) => {
     try {
       await deleteChapter(chapterId);
-      toast.success("챕터가 삭제되었습니다.");
+      toast.success("회차가 삭제되었습니다.");
     } catch {
-      toast.error("챕터 삭제에 실패했습니다.");
+      toast.error("회차 삭제에 실패했습니다.");
     }
   };
 
@@ -67,9 +67,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     async (chapterId: string, data: Parameters<typeof updateChapter>[1]) => {
       try {
         await updateChapter(chapterId, data);
-        toast.success("챕터가 수정되었습니다.");
+        toast.success("회차가 수정되었습니다.");
       } catch {
-        toast.error("챕터 수정에 실패했습니다.");
+        toast.error("회차 수정에 실패했습니다.");
       }
     },
     [updateChapter]
@@ -80,7 +80,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       try {
         await reorderChapters(chapterIds);
       } catch {
-        toast.error("챕터 순서 변경에 실패했습니다.");
+        toast.error("회차 순서 변경에 실패했습니다.");
       }
     },
     [reorderChapters]
@@ -106,7 +106,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16">
         <p className="text-muted-foreground">소설을 찾을 수 없습니다.</p>
-        <Link href="/projects">
+        <Link href="/novels">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             소설 목록으로
@@ -122,7 +122,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     <>
       <nav className="mb-6">
         <Link
-          href="/projects"
+          href="/novels"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
@@ -145,7 +145,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   {project.genre}
                 </span>
               )}
-              <span>{chapters.length}개 챕터</span>
+              <span>{chapters.length}개 회차</span>
               <span>총 {formatCharacterCount(totalWordCount)}</span>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">챕터</h2>
+          <h2 className="text-lg font-semibold">회차 목록</h2>
           <CreateChapterDialog onCreate={handleCreateChapter} />
         </div>
 

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, MoreVertical, Trash2, GripVertical, Pencil } from "lucide-react";
+import { MoreVertical, Trash2, GripVertical, Pencil } from "lucide-react";
 import type { Chapter, UpdateChapterInput } from "@/repositories/types";
-import { formatCharacterCount, formatDateTime } from "@/lib/format";
+import { formatCharacterCount, formatDateTime, formatEpisodeNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -85,11 +85,13 @@ export function ChapterCard({
         )}
 
         <Link
-          href={`/projects/${projectId}/chapters/${chapter.id}`}
+          href={`/novels/${projectId}/chapters/${chapter.id}`}
           className="flex flex-1 items-center gap-3 min-w-0"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-secondary">
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <div className="flex h-8 shrink-0 items-center justify-center rounded bg-secondary px-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              {formatEpisodeNumber(chapter.order)}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-medium truncate group-hover:text-primary transition-colors">
@@ -144,11 +146,11 @@ export function ChapterCard({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>챕터 삭제</AlertDialogTitle>
+            <AlertDialogTitle>회차 삭제</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{chapter.title}&quot; 챕터를 삭제하시겠습니까?
+              &quot;{chapter.title}&quot; 회차를 삭제하시겠습니까?
               <br />
-              삭제된 챕터는 복구할 수 없습니다.
+              삭제된 회차는 복구할 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -167,9 +169,9 @@ export function ChapterCard({
         <DialogContent>
           <form onSubmit={handleEditSubmit}>
             <DialogHeader>
-              <DialogTitle>챕터 제목 수정</DialogTitle>
+              <DialogTitle>회차 제목 수정</DialogTitle>
               <DialogDescription>
-                챕터의 제목을 수정합니다.
+                회차의 제목을 수정합니다.
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">

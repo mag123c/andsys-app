@@ -21,7 +21,7 @@ export default function AuthLayout({
 
       <footer className="border-t py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <Link href="/projects" className="hover:underline">
+          <Link href="/novels" className="hover:underline">
             게스트로 시작하기
           </Link>
         </div>

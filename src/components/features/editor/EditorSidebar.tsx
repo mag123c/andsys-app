@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, FolderOpen } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import type { Project } from "@/repositories/types";
 import type { Chapter } from "@/repositories/types";
 import { cn } from "@/lib/utils";
-import { formatCharacterCount } from "@/lib/format";
+import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
 
 interface EditorSidebarProps {
   project: Project;
@@ -24,7 +24,7 @@ export function EditorSidebar({
     <aside className={cn("flex flex-col h-full", className)}>
       <div className="p-4 border-b">
         <Link
-          href={`/projects/${project.id}`}
+          href={`/novels/${project.id}`}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <FolderOpen className="h-4 w-4" />
@@ -39,7 +39,7 @@ export function EditorSidebar({
             return (
               <li key={chapter.id}>
                 <Link
-                  href={`/projects/${project.id}/chapters/${chapter.id}`}
+                  href={`/novels/${project.id}/chapters/${chapter.id}`}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
                     isActive
@@ -47,7 +47,9 @@ export function EditorSidebar({
                       : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                   )}
                 >
-                  <FileText className="h-4 w-4 shrink-0" />
+                  <span className="text-xs shrink-0 w-10 text-center">
+                    {formatEpisodeNumber(chapter.order)}
+                  </span>
                   <span className="truncate flex-1">{chapter.title}</span>
                   <span className="text-xs text-muted-foreground shrink-0">
                     {formatCharacterCount(chapter.wordCount)}
@@ -61,7 +63,7 @@ export function EditorSidebar({
 
       <div className="p-4 border-t text-xs text-muted-foreground">
         <p>
-          총 {chapters.length}개 챕터 ·{" "}
+          총 {chapters.length}개 회차 ·{" "}
           {formatCharacterCount(chapters.reduce((sum, ch) => sum + ch.wordCount, 0))}
         </p>
       </div>
