@@ -40,7 +40,8 @@ export function CharacterCard({
 
   return (
     <>
-      <div className="group relative flex flex-col rounded-lg border bg-card overflow-hidden transition-colors hover:bg-accent/50">
+      <div className="group relative flex flex-row rounded-lg border bg-card overflow-hidden transition-colors hover:bg-accent/50">
+        {/* 드래그 핸들 */}
         {dragHandleProps && (
           <div
             {...dragHandleProps}
@@ -50,8 +51,9 @@ export function CharacterCard({
           </div>
         )}
 
+        {/* 이미지 영역 (좌측) */}
         <div
-          className="relative aspect-[2/3] bg-muted cursor-pointer"
+          className="relative w-20 h-24 shrink-0 bg-muted cursor-pointer"
           onClick={() => onEdit(character)}
         >
           {character.imageUrl ? (
@@ -62,24 +64,33 @@ export function CharacterCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <User className="h-12 w-12 text-muted-foreground" />
+              <User className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
         </div>
 
-        <div className="p-3 flex items-center justify-between gap-2">
+        {/* 텍스트 영역 (우측) */}
+        <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
           <div
-            className="flex-1 min-w-0 cursor-pointer"
+            className="cursor-pointer"
             onClick={() => onEdit(character)}
           >
-            <h3 className="font-medium truncate">{character.name}</h3>
+            <h3 className="font-medium leading-tight">{character.name}</h3>
             {character.nickname && (
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {character.nickname}
               </p>
             )}
+            {character.occupation && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {character.occupation}
+              </p>
+            )}
           </div>
+        </div>
 
+        {/* 메뉴 버튼 */}
+        <div className="flex items-center pr-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
