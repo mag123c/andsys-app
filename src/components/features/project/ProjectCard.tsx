@@ -66,13 +66,15 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <CardHeader className="p-0">
-              <Link href={`/novels/${project.id}`} className="block space-y-1">
+              <Link href={`/novels/${project.id}`} className="block">
                 <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
                   {project.title}
                 </CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {project.description || "설명 없음"}
-                </CardDescription>
+                {project.description && (
+                  <CardDescription className="line-clamp-2 mt-1">
+                    {project.description}
+                  </CardDescription>
+                )}
               </Link>
               <CardAction>
                 <DropdownMenu>
