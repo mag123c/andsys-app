@@ -214,11 +214,13 @@ function RelationshipGraphInner({
     // dagre 레이아웃 적용 (수동 배치된 노드는 제외)
     if (nodes.length > 0) {
       // 수동 위치가 없는 노드만 dagre 레이아웃 적용
+      // 모든 노드가 수동 배치인 경우 nodesForLayout은 빈 배열이 되어 dagre 스킵
       const nodesForLayout = nodes.filter((n) => !manualPositionsRef.current.has(n.id));
       const manualNodes = nodes.filter((n) => manualPositionsRef.current.has(n.id));
 
       let layoutedNodes: Node<CharacterNodeData>[] = [];
 
+      // 자동 레이아웃이 필요한 노드가 있을 때만 dagre 적용
       if (nodesForLayout.length > 0) {
         const { nodes: dagredNodes } = getLayoutedElements(
           nodesForLayout,
@@ -228,7 +230,7 @@ function RelationshipGraphInner({
         layoutedNodes = dagredNodes as Node<CharacterNodeData>[];
       }
 
-      // 수동 위치가 있는 노드는 해당 위치 적용
+      // 수동 위치가 있는 노드는 저장된 위치 적용
       const manualLayoutedNodes = manualNodes.map((node) => ({
         ...node,
         position: manualPositionsRef.current.get(node.id) || node.position,
@@ -342,6 +344,7 @@ function RelationshipGraphInner({
   // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
   const handleEdgesDelete = useCallback(
     (deletedEdges: Edge[]) => {
+      // 삭제 실패해도 UI에서는 이미 제거됨 (새로고침 시 복원)
       deletedEdges.forEach((edge) => {
         onDelete?.(edge.id);
       });
