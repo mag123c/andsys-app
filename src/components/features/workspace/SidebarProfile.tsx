@@ -62,10 +62,10 @@ export function SidebarProfile({
           {isLoading ? (
             <div className="h-4 w-20 bg-muted rounded animate-pulse" />
           ) : isGuest ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">게스트</span>
+            <div className="flex items-center gap-2 flex-nowrap">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">게스트</span>
               <Link href="/signup">
-                <Button size="sm" variant="outline" className="h-7 text-xs">
+                <Button size="sm" variant="outline" className="h-7 text-xs whitespace-nowrap">
                   회원가입
                 </Button>
               </Link>
