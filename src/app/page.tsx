@@ -1,6 +1,21 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PenLine, Cloud, Smartphone, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
+const GUEST_NOTICE_KEY = "andsys:guest-notice-shown";
 
 const features = [
   {
@@ -26,6 +41,29 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [showGuestNotice, setShowGuestNotice] = useState(false);
+  const [hasSeenNotice, setHasSeenNotice] = useState(true); // 초기값 true로 hydration 문제 방지
+
+  useEffect(() => {
+    const seen = localStorage.getItem(GUEST_NOTICE_KEY);
+    setHasSeenNotice(!!seen);
+  }, []);
+
+  const handleStartClick = () => {
+    if (hasSeenNotice) {
+      router.push("/novels");
+    } else {
+      setShowGuestNotice(true);
+    }
+  };
+
+  const handleGuestConfirm = () => {
+    localStorage.setItem(GUEST_NOTICE_KEY, "true");
+    setShowGuestNotice(false);
+    router.push("/novels");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -60,20 +98,15 @@ export default function LandingPage() {
               오프라인에서도 작업하고, 어디서든 이어서 쓰세요.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Link href="/novels">
-                <Button size="lg" className="w-full sm:w-auto">
-                  지금 시작하기
-                </Button>
-              </Link>
+              <Button size="lg" className="w-full sm:w-auto" onClick={handleStartClick}>
+                지금 시작하기
+              </Button>
               <Link href="/login">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   로그인
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              회원가입 없이 바로 시작할 수 있어요
-            </p>
           </div>
         </section>
 
@@ -115,6 +148,31 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* 게스트 안내 다이얼로그 */}
+      <AlertDialog open={showGuestNotice} onOpenChange={setShowGuestNotice}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>잠깐, 알아두세요!</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              지금 작성하는 내용은 이 기기에만 저장돼요.
+              <br />
+              <span className="text-foreground font-medium">
+                다른 기기에서도 이어쓰려면 회원가입
+              </span>
+              을 해주세요.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Link href="/signup">
+              <Button variant="outline">회원가입하기</Button>
+            </Link>
+            <AlertDialogAction onClick={handleGuestConfirm}>
+              이대로 시작하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

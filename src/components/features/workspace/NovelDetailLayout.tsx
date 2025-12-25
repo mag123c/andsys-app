@@ -59,7 +59,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:block lg:pt-14">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:block">
         <NovelSidebar
           project={project}
           chapters={chapters}
@@ -94,7 +94,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
         }
       >
         {/* Mobile menu button */}
-        <div className="lg:hidden sticky top-14 z-10 border-b bg-background px-4 py-2">
+        <div className="lg:hidden sticky top-0 z-10 border-b bg-background px-4 py-2">
           <Button
             variant="ghost"
             size="sm"
