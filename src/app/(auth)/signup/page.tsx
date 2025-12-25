@@ -3,8 +3,8 @@ import Link from "next/link";
 import { SocialLoginButtons } from "@/components/features/auth";
 
 export const metadata: Metadata = {
-  title: "회원가입 - Andsys",
-  description: "Andsys에 가입하세요",
+  title: "회원가입 - 4ndSYS",
+  description: "4ndSYS에 가입하세요",
 };
 
 export default function SignupPage() {

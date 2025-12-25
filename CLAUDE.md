@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Andsys - 웹소설 작가를 위한 오프라인 우선(Local-First) 글쓰기 플랫폼.
+4ndSYS - 웹소설 작가를 위한 오프라인 우선(Local-First) 글쓰기 플랫폼.
 
 ## Commands
 

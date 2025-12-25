@@ -115,7 +115,7 @@ export default function CreditsPage() {
       <main className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-3xl font-bold">크레딧</h1>
         <p className="mt-2 text-muted-foreground">
-          Andsys는 다음의 오픈소스 프로젝트와 폰트를 사용합니다.
+          4ndSYS는 다음의 오픈소스 프로젝트와 폰트를 사용합니다.
         </p>
 
         {/* 폰트 섹션 */}
@@ -207,7 +207,7 @@ export default function CreditsPage() {
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-3xl px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Andsys</p>
+          <p>© 2025 4ndSYS</p>
         </div>
       </footer>
     </div>

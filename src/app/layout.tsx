@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Andsys - 소설 쓰기 플랫폼",
+  title: "4ndSYS - 소설 쓰기 플랫폼",
   description: "웹소설 작가를 위한 무료 글쓰기 플랫폼",
 };
 

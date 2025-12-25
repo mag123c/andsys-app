@@ -84,7 +84,7 @@ Frequency: 매 발생 시
 ### 4. 알림 메시지 예시
 
 ```
-🚨 [Andsys] New Error
+🚨 [4ndSYS] New Error
 
 Title: TypeError: Cannot read property 'id' of undefined
 Level: error

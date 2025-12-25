@@ -3,8 +3,8 @@ import Link from "next/link";
 import { SocialLoginButtons } from "@/components/features/auth";
 
 export const metadata: Metadata = {
-  title: "로그인 - Andsys",
-  description: "Andsys에 로그인하세요",
+  title: "로그인 - 4ndSYS",
+  description: "4ndSYS에 로그인하세요",
 };
 
 interface LoginPageProps {

@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { PenLine, Cloud, Smartphone, Zap } from "lucide-react";
+import { FilePenLine, PenLine, Cloud, Smartphone, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -70,15 +69,9 @@ export default function LandingPage() {
       {/* Hero Section */}
       <header className="border-b">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="Andsys"
-              width={100}
-              height={32}
-              className="h-8 w-auto"
-              priority
-            />
+          <Link href="/" className="flex items-center gap-2">
+            <FilePenLine className="h-6 w-6" />
+            <span className="text-xl font-bold">4ndSYS</span>
           </Link>
           <nav className="flex items-center gap-2">
             <Link href="/login">
@@ -150,7 +143,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="mx-auto max-w-5xl px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Andsys</p>
+          <p>© 2025 4ndSYS</p>
           <div className="mt-2 flex justify-center gap-4">
             <Link href="/credits" className="hover:text-foreground">
               크레딧
