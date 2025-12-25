@@ -68,6 +68,9 @@ function RelationshipGraphInner({
   // 수동으로 배치된 노드 위치 (드래그 드롭으로 추가된 노드)
   const manualPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
+  // 노드 삭제 중인지 추적 (노드 삭제로 인한 엣지 삭제는 IndexedDB에 반영하지 않음)
+  const isDeletingNodesRef = useRef(false);
+
   // MiniMap 자동 숨김 (3초 비활동 후)
   const handleViewportChange = useCallback(() => {
     setShowMiniMap(true);
@@ -289,6 +292,9 @@ function RelationshipGraphInner({
   // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
   const handleEdgesDelete = useCallback(
     (deletedEdges: Edge[]) => {
+      // 노드 삭제로 인한 엣지 삭제는 IndexedDB에 반영하지 않음 (관계 데이터 유지)
+      if (isDeletingNodesRef.current) return;
+
       // 삭제 실패해도 UI에서는 이미 제거됨 (새로고침 시 복원)
       deletedEdges.forEach((edge) => {
         onDelete?.(edge.id);
@@ -300,6 +306,9 @@ function RelationshipGraphInner({
   // 노드 삭제 시 그래프에서만 제거 (관계 데이터는 IndexedDB에 유지)
   const handleNodesDelete = useCallback(
     (deletedNodes: Node[]) => {
+      // 노드 삭제 중임을 표시 (연결된 엣지 삭제 시 IndexedDB 반영 방지)
+      isDeletingNodesRef.current = true;
+
       const deletedIds = new Set(deletedNodes.map((n) => n.id));
 
       // 그래프에서 노드 제거
@@ -311,6 +320,11 @@ function RelationshipGraphInner({
 
       // 수동 위치 정보도 제거
       deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
+
+      // 다음 틱에서 플래그 해제 (React Flow의 엣지 삭제 이벤트 처리 후)
+      setTimeout(() => {
+        isDeletingNodesRef.current = false;
+      }, 0);
     },
     []
   );

@@ -51,16 +51,26 @@ function RelationshipEdgeComponent({
   const color = data?.color || "#6B7280";
 
   return (
-    <BaseEdge
-      id={id}
-      path={edgePath}
-      markerStart={markerStart}
-      markerEnd={markerEnd}
-      style={{
-        stroke: color,
-        strokeWidth: 2,
-      }}
-    />
+    <>
+      {/* 클릭 영역 확대를 위한 투명한 두꺼운 선 */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={20}
+        className="react-flow__edge-interaction"
+      />
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerStart={markerStart}
+        markerEnd={markerEnd}
+        style={{
+          stroke: color,
+          strokeWidth: 2,
+        }}
+      />
+    </>
   );
 }
 

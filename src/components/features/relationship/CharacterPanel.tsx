@@ -62,9 +62,12 @@ export function CharacterPanel({
         )}
       </div>
 
-      <div className="p-3 border-t bg-muted/30">
+      <div className="p-3 border-t bg-muted/30 space-y-1">
         <p className="text-xs text-muted-foreground text-center">
           캐릭터를 그래프로 드래그하세요
+        </p>
+        <p className="text-xs text-muted-foreground text-center">
+          선택 후 Delete로 삭제
         </p>
       </div>
     </div>
