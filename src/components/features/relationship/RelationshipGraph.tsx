@@ -362,7 +362,10 @@ function RelationshipGraphInner({
             }}
           >
             <Background gap={16} size={1} />
-            <Controls showInteractive={false} />
+            <Controls
+              showInteractive={false}
+              className="!bg-background !border-border !shadow-md [&>button]:!bg-background [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-muted"
+            />
             <MiniMap
               nodeColor="#6B7280"
               maskColor="rgb(0, 0, 0, 0.1)"
