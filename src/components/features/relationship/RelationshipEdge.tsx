@@ -13,8 +13,6 @@ export interface RelationshipEdgeData extends Record<string, unknown> {
   reverseLabel?: string | null;
   color: string;
   bidirectional?: boolean;
-  isReverse?: boolean;
-  parentId?: string;
   onLabelClick?: (edgeId: string, position: { x: number; y: number }) => void;
 }
 
@@ -29,6 +27,7 @@ interface RelationshipEdgeProps {
   sourcePosition: Position;
   targetPosition: Position;
   data?: RelationshipEdgeData;
+  markerStart?: string;
   markerEnd?: string;
 }
 
@@ -38,42 +37,24 @@ function RelationshipEdgeComponent({
   sourceY,
   targetX,
   targetY,
-  sourcePosition: _sourcePosition,
-  targetPosition: _targetPosition,
   data,
+  markerStart,
   markerEnd,
-}: RelationshipEdgeProps) {
-  const isReverse = data?.isReverse ?? false;
+}: Omit<RelationshipEdgeProps, "sourcePosition" | "targetPosition">) {
+  // 직선 경로
+  const edgePath = `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`;
 
-  // 양방향 관계의 경우 곡률 조정 (정방향: 위로 곡선, 역방향: 아래로 곡선)
-  const curvature = data?.bidirectional ? (isReverse ? -0.25 : 0.25) : 0;
-
-  // 중점 계산
-  const midX = (sourceX + targetX) / 2;
-  const midY = (sourceY + targetY) / 2;
-
-  // 수직 방향 벡터
-  const dx = targetX - sourceX;
-  const dy = targetY - sourceY;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1; // 0 방지 (동일 위치 노드 NaN 방지)
-
-  // 곡선 제어점 오프셋 (노드 사이 거리에 비례)
-  const offset = len * curvature;
-  const normalX = -dy / len;
-  const normalY = dx / len;
-
-  const controlX = midX + normalX * offset;
-  const controlY = midY + normalY * offset;
-
-  // 커스텀 Bezier 패스 (2차 베지어)
-  const edgePath = `M ${sourceX} ${sourceY} Q ${controlX} ${controlY} ${targetX} ${targetY}`;
-
-  // 라벨 위치 (곡선 중앙)
-  const labelX = (sourceX + 2 * controlX + targetX) / 4;
-  const labelY = (sourceY + 2 * controlY + targetY) / 4;
+  // 라벨 위치 (선 중앙)
+  const labelX = (sourceX + targetX) / 2;
+  const labelY = (sourceY + targetY) / 2;
 
   const color = data?.color || "#6B7280";
   const label = data?.label || "";
+  const reverseLabel = data?.reverseLabel;
+  const bidirectional = data?.bidirectional ?? false;
+
+  // 양방향이고 역라벨이 다른 경우 두 라벨 표시
+  const showBothLabels = bidirectional && reverseLabel && reverseLabel !== label;
 
   const handleLabelClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,6 +68,7 @@ function RelationshipEdgeComponent({
       <BaseEdge
         id={id}
         path={edgePath}
+        markerStart={markerStart}
         markerEnd={markerEnd}
         style={{
           stroke: color,
@@ -102,14 +84,28 @@ function RelationshipEdgeComponent({
           }}
           className="nodrag nopan"
         >
-          <button
-            type="button"
-            onClick={handleLabelClick}
-            className="px-2 py-1 rounded text-xs font-medium bg-background border shadow-sm cursor-pointer hover:bg-accent transition-colors"
-            style={{ borderColor: color, color }}
-          >
-            {label}
-          </button>
+          {showBothLabels ? (
+            // 양방향 + 다른 라벨: 두 라벨을 세로로 표시
+            <button
+              type="button"
+              onClick={handleLabelClick}
+              className="flex flex-col gap-0.5 px-2 py-1 rounded text-xs font-medium bg-background border shadow-sm cursor-pointer hover:bg-accent transition-colors"
+              style={{ borderColor: color, color }}
+            >
+              <span>{label}</span>
+              <span className="border-t pt-0.5" style={{ borderColor: color }}>{reverseLabel}</span>
+            </button>
+          ) : (
+            // 단방향 또는 동일 라벨: 하나의 라벨
+            <button
+              type="button"
+              onClick={handleLabelClick}
+              className="px-2 py-1 rounded text-xs font-medium bg-background border shadow-sm cursor-pointer hover:bg-accent transition-colors"
+              style={{ borderColor: color, color }}
+            >
+              {label}
+            </button>
+          )}
         </div>
       </EdgeLabelRenderer>
     </>

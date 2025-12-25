@@ -51,6 +51,10 @@ const edgeTypes: EdgeTypes = {
   relationship: RelationshipEdge,
 };
 
+// 노드 크기 상수
+const NODE_WIDTH = 120;
+const NODE_HEIGHT = 60;
+
 function RelationshipGraphInner({
   characters,
   relationships,
@@ -59,6 +63,7 @@ function RelationshipGraphInner({
   onCreate,
 }: RelationshipGraphProps) {
   const { screenToFlowPosition } = useReactFlow();
+  const reactFlowRef = useRef<HTMLDivElement>(null);
 
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     RELATIONSHIP_TYPES.map((t) => t.type)
@@ -165,53 +170,42 @@ function RelationshipGraphInner({
         },
       }));
 
-    // 양방향 관계는 2개의 엣지로 분리
+    // 관계를 단일 엣지로 생성 (양방향은 양쪽 화살표)
     const edges: Edge<RelationshipEdgeData>[] = [];
 
     filteredRelationships.forEach((relationship) => {
       const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
       const color = typeConfig?.color || "#6B7280";
 
-      // 정방향 엣지
+      // 역라벨: 비어있으면 정방향 라벨과 동일하게 사용
+      const effectiveReverseLabel = relationship.bidirectional
+        ? (relationship.reverseLabel || relationship.label)
+        : null;
+
       edges.push({
         id: relationship.id,
         source: relationship.fromCharacterId,
         target: relationship.toCharacterId,
         type: "relationship",
+        // 양방향이면 양쪽 화살표
+        ...(relationship.bidirectional && {
+          markerStart: {
+            type: MarkerType.ArrowClosed,
+            color,
+          },
+        }),
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color,
         },
         data: {
           label: relationship.label,
+          reverseLabel: effectiveReverseLabel,
           color,
           bidirectional: relationship.bidirectional,
-          isReverse: false,
           onLabelClick: handleLabelClick,
         },
       });
-
-      // 역방향 엣지 (양방향이고 역라벨이 있을 때)
-      if (relationship.bidirectional && relationship.reverseLabel) {
-        edges.push({
-          id: `${relationship.id}-reverse`,
-          source: relationship.toCharacterId,
-          target: relationship.fromCharacterId,
-          type: "relationship",
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color,
-          },
-          data: {
-            label: relationship.reverseLabel,
-            color,
-            bidirectional: true,
-            isReverse: true,
-            parentId: relationship.id,
-            onLabelClick: (_, pos) => handleLabelClick(relationship.id, pos),
-          },
-        });
-      }
     });
 
     // dagre 레이아웃 적용
@@ -255,17 +249,22 @@ function RelationshipGraphInner({
       // 이미 그래프에 있으면 무시
       if (graphNodeIds.has(characterId)) return;
 
-      // 드롭 위치 계산
+      // 드롭 위치 계산 - React Flow 컨테이너 기준으로 변환
+      if (!reactFlowRef.current) return;
+
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
 
-      // 새 노드 추가
+      // 새 노드 추가 (노드 크기의 절반만큼 오프셋 적용하여 마우스 위치 중심에 배치)
       const newNode: Node<CharacterNodeData> = {
         id: character.id,
         type: "character",
-        position,
+        position: {
+          x: position.x - NODE_WIDTH / 2,
+          y: position.y - NODE_HEIGHT / 2,
+        },
         data: {
           name: character.name,
           imageUrl: character.imageUrl,
@@ -331,6 +330,9 @@ function RelationshipGraphInner({
     return characters.find((c) => c.id === id)?.name || "알 수 없음";
   };
 
+  // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)
+  const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
+
   return (
     <div className="flex h-[600px] border rounded-lg overflow-hidden">
       {/* 그래프 영역 */}
@@ -339,7 +341,7 @@ function RelationshipGraphInner({
           selectedTypes={selectedTypes}
           onToggleType={handleToggleType}
         />
-        <div className="flex-1 relative">
+        <div ref={reactFlowRef} className="flex-1 relative">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -352,7 +354,7 @@ function RelationshipGraphInner({
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
             minZoom={0.1}
             maxZoom={2}
             proOptions={{ hideAttribution: true }}
@@ -418,10 +420,10 @@ function RelationshipGraphInner({
                     {getCharacterName(selectedRelationship.fromCharacterId)} → {getCharacterName(selectedRelationship.toCharacterId)}
                   </span>
                 </div>
-                {selectedRelationship.bidirectional && selectedRelationship.reverseLabel && (
+                {selectedRelationship.bidirectional && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">역관계</span>
-                    <span>{selectedRelationship.reverseLabel}</span>
+                    <span>{selectedRelationship.reverseLabel || selectedRelationship.label}</span>
                   </div>
                 )}
               </div>
@@ -454,7 +456,7 @@ function RelationshipGraphInner({
       {/* 캐릭터 패널 */}
       <CharacterPanel
         characters={characters}
-        nodesOnGraph={graphNodeIds}
+        nodesOnGraph={nodesOnGraph}
         onDragStart={handleDragStart}
       />
     </div>
