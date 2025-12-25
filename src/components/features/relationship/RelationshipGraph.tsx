@@ -19,12 +19,10 @@ import {
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Pencil, Trash2, X } from "lucide-react";
 
 import type { Character, Relationship } from "@/repositories/types";
 import { RELATIONSHIP_TYPES } from "@/repositories/types";
 import { getLayoutedElements } from "@/lib/graph-utils";
-import { Button } from "@/components/ui/button";
 import { CharacterNode, type CharacterNodeData } from "./CharacterNode";
 import { RelationshipEdge, type RelationshipEdgeData } from "./RelationshipEdge";
 import { GraphLegend } from "./GraphLegend";
@@ -33,14 +31,8 @@ import { CharacterPanel } from "./CharacterPanel";
 interface RelationshipGraphProps {
   characters: Character[];
   relationships: Relationship[];
-  onEdit?: (relationship: Relationship) => void;
   onDelete?: (id: string) => void;
   onCreate?: (fromCharacterId: string, toCharacterId: string) => void;
-}
-
-interface PopoverState {
-  relationshipId: string;
-  position: { x: number; y: number };
 }
 
 const nodeTypes: NodeTypes = {
@@ -58,7 +50,6 @@ const NODE_HEIGHT = 60;
 function RelationshipGraphInner({
   characters,
   relationships,
-  onEdit,
   onDelete,
   onCreate,
 }: RelationshipGraphProps) {
@@ -68,7 +59,6 @@ function RelationshipGraphInner({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     RELATIONSHIP_TYPES.map((t) => t.type)
   );
-  const [popover, setPopover] = useState<PopoverState | null>(null);
   const [showMiniMap, setShowMiniMap] = useState(true);
   const miniMapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -108,43 +98,10 @@ function RelationshipGraphInner({
     );
   }, []);
 
-  const handleLabelClick = useCallback(
-    (edgeId: string, position: { x: number; y: number }) => {
-      setPopover({ relationshipId: edgeId, position });
-    },
-    []
-  );
-
-  const handleClosePopover = useCallback(() => {
-    setPopover(null);
-  }, []);
-
-  const handleEdit = useCallback(() => {
-    if (popover && onEdit) {
-      const relationship = relationships.find((r) => r.id === popover.relationshipId);
-      if (relationship) {
-        onEdit(relationship);
-      }
-    }
-    setPopover(null);
-  }, [popover, onEdit, relationships]);
-
-  const handleDelete = useCallback(() => {
-    if (popover && onDelete) {
-      onDelete(popover.relationshipId);
-    }
-    setPopover(null);
-  }, [popover, onDelete]);
-
   const filteredRelationships = useMemo(
     () => relationships.filter((r) => selectedTypes.includes(r.type)),
     [relationships, selectedTypes]
   );
-
-  const selectedRelationship = useMemo(() => {
-    if (!popover) return null;
-    return relationships.find((r) => r.id === popover.relationshipId) || null;
-  }, [popover, relationships]);
 
   // 초기화: 관계가 있는 캐릭터들을 그래프에 추가
   useEffect(() => {
@@ -180,11 +137,6 @@ function RelationshipGraphInner({
       const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
       const color = typeConfig?.color || "#6B7280";
 
-      // 역라벨: 비어있으면 정방향 라벨과 동일하게 사용
-      const effectiveReverseLabel = relationship.bidirectional
-        ? (relationship.reverseLabel || relationship.label)
-        : null;
-
       edges.push({
         id: relationship.id,
         source: relationship.fromCharacterId,
@@ -202,11 +154,7 @@ function RelationshipGraphInner({
           color,
         },
         data: {
-          label: relationship.label,
-          reverseLabel: effectiveReverseLabel,
           color,
-          bidirectional: relationship.bidirectional,
-          onLabelClick: handleLabelClick,
         },
       });
     });
@@ -243,7 +191,7 @@ function RelationshipGraphInner({
     }
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [characters, filteredRelationships, graphNodeIds, handleLabelClick]);
+  }, [characters, filteredRelationships, graphNodeIds]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -330,15 +278,12 @@ function RelationshipGraphInner({
           (r.fromCharacterId === connection.target && r.toCharacterId === connection.source)
       );
 
-      if (existingRelationship) {
-        // 기존 관계가 있으면 편집
-        onEdit?.(existingRelationship);
-      } else {
-        // 새 관계 생성
+      // 기존 관계가 없으면 새 관계 생성
+      if (!existingRelationship) {
         onCreate?.(connection.source, connection.target);
       }
     },
-    [relationships, onEdit, onCreate]
+    [relationships, onCreate]
   );
 
   // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
@@ -352,7 +297,7 @@ function RelationshipGraphInner({
     [onDelete]
   );
 
-  // 노드 삭제 시 노드 + 연결된 관계 모두 삭제
+  // 노드 삭제 시 그래프에서만 제거 (관계 데이터는 IndexedDB에 유지)
   const handleNodesDelete = useCallback(
     (deletedNodes: Node[]) => {
       const deletedIds = new Set(deletedNodes.map((n) => n.id));
@@ -366,33 +311,9 @@ function RelationshipGraphInner({
 
       // 수동 위치 정보도 제거
       deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
-
-      // 삭제된 노드와 연결된 관계도 IndexedDB에서 삭제
-      relationships.forEach((rel) => {
-        if (deletedIds.has(rel.fromCharacterId) || deletedIds.has(rel.toCharacterId)) {
-          onDelete?.(rel.id);
-        }
-      });
     },
-    [relationships, onDelete]
+    []
   );
-
-  // 팝오버 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (popover && !target.closest("[data-popover]")) {
-        setPopover(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [popover]);
-
-  // 캐릭터 이름 찾기
-  const getCharacterName = (id: string) => {
-    return characters.find((c) => c.id === id)?.name || "알 수 없음";
-  };
 
   // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)
   const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
@@ -448,71 +369,6 @@ function RelationshipGraphInner({
               <div className="text-center text-muted-foreground">
                 <p className="text-lg mb-2">관계도가 비어있습니다</p>
                 <p className="text-sm">우측 패널에서 캐릭터를 드래그하여 추가하세요</p>
-              </div>
-            </div>
-          )}
-
-          {/* 관계 팝오버 */}
-          {popover && selectedRelationship && (
-            <div
-              data-popover
-              className="fixed z-50 bg-background border rounded-lg shadow-lg p-4 min-w-[200px]"
-              style={{
-                left: Math.min(Math.max(popover.position.x, 120), window.innerWidth - 120),
-                top: Math.min(popover.position.y, window.innerHeight - 200),
-                transform: "translate(-50%, 8px)",
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-sm">관계 정보</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={handleClosePopover}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">관계</span>
-                  <span className="font-medium">{selectedRelationship.label}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">대상</span>
-                  <span>
-                    {getCharacterName(selectedRelationship.fromCharacterId)} → {getCharacterName(selectedRelationship.toCharacterId)}
-                  </span>
-                </div>
-                {selectedRelationship.bidirectional && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">역관계</span>
-                    <span>{selectedRelationship.reverseLabel || selectedRelationship.label}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={handleEdit}
-                >
-                  <Pencil className="h-3 w-3 mr-1" />
-                  편집
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-destructive hover:text-destructive"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  삭제
-                </Button>
               </div>
             </div>
           )}

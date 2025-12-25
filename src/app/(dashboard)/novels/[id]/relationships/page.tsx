@@ -127,7 +127,6 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
         <RelationshipGraph
           characters={characters}
           relationships={relationships}
-          onEdit={handleEdit}
           onDelete={handleDelete}
           onCreate={handleCreateFromGraph}
         />
