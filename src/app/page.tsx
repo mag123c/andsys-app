@@ -145,6 +145,12 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 text-center text-sm text-muted-foreground">
           <p>© 2025 4ndSYS</p>
           <div className="mt-2 flex justify-center gap-4">
+            <Link href="/terms" className="hover:text-foreground">
+              이용약관
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              개인정보처리방침
+            </Link>
             <Link href="/credits" className="hover:text-foreground">
               크레딧
             </Link>
