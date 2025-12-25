@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FolderOpen } from "lucide-react";
-import type { Project } from "@/repositories/types";
-import type { Chapter } from "@/repositories/types";
+import type { Project, Chapter } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { SidebarProfile } from "@/components/features/workspace";
 
 interface EditorSidebarProps {
   project: Project;
@@ -20,6 +21,12 @@ export function EditorSidebar({
   currentChapterId,
   className,
 }: EditorSidebarProps) {
+  const { auth } = useAuth();
+
+  const isLoading = auth.status === "loading";
+  const isGuest = auth.status === "guest";
+  const userName = auth.status === "authenticated" ? auth.user.displayName || auth.user.email : null;
+
   return (
     <aside className={cn("flex flex-col h-full", className)}>
       <div className="p-4 border-b">
@@ -61,12 +68,13 @@ export function EditorSidebar({
         </ul>
       </nav>
 
-      <div className="p-4 border-t text-xs text-muted-foreground">
-        <p>
-          총 {chapters.length}개 회차 ·{" "}
-          {formatCharacterCount(chapters.reduce((sum, ch) => sum + ch.wordCount, 0))}
-        </p>
-      </div>
+      <SidebarProfile
+        isLoading={isLoading}
+        isGuest={isGuest}
+        userName={userName}
+        collapsed={false}
+        showToggle={false}
+      />
     </aside>
   );
 }

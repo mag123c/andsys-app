@@ -16,66 +16,10 @@ import type { Project, Chapter, Character } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Button } from "@/components/ui/button";
 import { SidebarToggle } from "./SidebarToggle";
+import { SidebarProfile } from "./SidebarProfile";
 
 const MAX_LIST_ITEMS = 20;
-
-interface SidebarProfileProps {
-  isLoading: boolean;
-  isGuest: boolean;
-  userName: string | null;
-  collapsed: boolean;
-  onToggle: () => void;
-}
-
-function SidebarProfile({ isLoading, isGuest, userName, collapsed, onToggle }: SidebarProfileProps) {
-  if (collapsed) {
-    return (
-      <div className="p-2 border-t flex flex-col items-center gap-2">
-        {isLoading ? (
-          <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
-        ) : (
-          <Link
-            href={isGuest ? "/signup" : "/settings"}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-accent transition-colors"
-            title={isGuest ? "회원가입" : userName ?? "프로필"}
-          >
-            <User className="h-4 w-4 text-muted-foreground" />
-          </Link>
-        )}
-        <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-3 border-t">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted shrink-0">
-          {isLoading ? null : <User className="h-4 w-4 text-muted-foreground" />}
-        </div>
-        <div className="flex-1 min-w-0">
-          {isLoading ? (
-            <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-          ) : isGuest ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">게스트</span>
-              <Link href="/signup">
-                <Button size="sm" variant="outline" className="h-7 text-xs">
-                  회원가입
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <span className="text-sm truncate block">{userName}</span>
-          )}
-        </div>
-        <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
-      </div>
-    </div>
-  );
-}
 
 // 메뉴별 색상 정의
 const MENU_COLORS = {

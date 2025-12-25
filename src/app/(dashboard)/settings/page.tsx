@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ArrowLeft, Download, Loader2, Sun, Moon, Monitor } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useProjects } from "@/hooks/useProjects";
@@ -22,6 +23,7 @@ import {
 export default function SettingsPage() {
   const { auth, updatePassword } = useAuth();
   const { projects } = useProjects();
+  const { theme, setTheme } = useTheme();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -166,6 +168,45 @@ export default function SettingsPage() {
                 하면 데이터를 클라우드에 저장할 수 있습니다.
               </p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* 테마 설정 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>테마</CardTitle>
+            <CardDescription>앱의 외관을 설정합니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Button
+                variant={theme === "light" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTheme("light")}
+                className="flex-1"
+              >
+                <Sun className="mr-2 h-4 w-4" />
+                라이트
+              </Button>
+              <Button
+                variant={theme === "dark" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTheme("dark")}
+                className="flex-1"
+              >
+                <Moon className="mr-2 h-4 w-4" />
+                다크
+              </Button>
+              <Button
+                variant={theme === "system" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTheme("system")}
+                className="flex-1"
+              >
+                <Monitor className="mr-2 h-4 w-4" />
+                시스템
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
