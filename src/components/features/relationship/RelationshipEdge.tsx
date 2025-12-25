@@ -55,7 +55,7 @@ function RelationshipEdgeComponent({
   // 수직 방향 벡터
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
-  const len = Math.sqrt(dx * dx + dy * dy);
+  const len = Math.sqrt(dx * dx + dy * dy) || 1; // 0 방지 (동일 위치 노드 NaN 방지)
 
   // 곡선 제어점 오프셋 (노드 사이 거리에 비례)
   const offset = len * curvature;
