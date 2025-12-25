@@ -54,7 +54,7 @@ export function VersionHistoryModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 gap-0">
+        <DialogContent className="sm:max-w-6xl h-[80vh] flex flex-col p-0 gap-0">
           <DialogHeader className="px-6 py-4 border-b shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5 text-muted-foreground" />
@@ -67,15 +67,15 @@ export function VersionHistoryModal({
               {entityLabel}를 선택해주세요
             </div>
           ) : (
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden min-h-0">
               {/* Version List - 좌측 */}
-              <div className="w-64 border-r flex flex-col bg-muted/30">
+              <div className="w-64 border-r flex flex-col bg-muted/30 min-h-0 overflow-hidden">
                 <div className="px-4 py-3 border-b bg-background">
                   <span className="text-sm font-medium">
                     {versions.length}개 버전
                   </span>
                 </div>
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 min-h-0 overflow-hidden">
                   <div className="p-3 space-y-2">
                     {isLoading ? (
                       <div className="text-sm text-muted-foreground text-center py-8">
@@ -101,7 +101,7 @@ export function VersionHistoryModal({
               </div>
 
               {/* Diff View - 우측 */}
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                 {selectedVersion ? (
                   <>
                     <div className="flex items-center justify-between px-6 py-3 border-b bg-background shrink-0">
@@ -131,7 +131,7 @@ export function VersionHistoryModal({
                         </Button>
                       )}
                     </div>
-                    <ScrollArea className="flex-1">
+                    <ScrollArea className="flex-1 min-h-0 overflow-hidden">
                       <div className="p-6">
                         <DiffView version={selectedVersion} />
                       </div>

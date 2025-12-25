@@ -51,7 +51,7 @@ export function RightSidebarSynopsis({
 
       {/* Content */}
       {hasContent ? (
-        <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-[20]">
+        <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
           {synopsis.plainText}
         </div>
       ) : (
