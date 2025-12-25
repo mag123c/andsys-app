@@ -65,7 +65,7 @@ src/
 2. **오프라인 우선**: 모든 저장은 IndexedDB 먼저, syncStatus 추적
 3. **게스트 = 로컬 전용**: 게스트는 서버 동기화 없음 (IndexedDB만), 회원만 Supabase 동기화
 4. **Cascade Delete**: 프로젝트 삭제 시 관련 데이터(chapters, synopses, characters, relationships, versions) 함께 삭제
-5. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지
+5. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지, git -C 명령어 사용 금지
 
 ## Tech Stack
 
