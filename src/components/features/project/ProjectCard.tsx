@@ -56,26 +56,28 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
               <img
                 src={project.coverImageUrl}
                 alt={`${project.title} 표지`}
-                className="w-[50px] h-[75px] rounded object-cover"
+                className="w-[100px] h-[150px] rounded object-cover"
               />
             ) : (
-              <DefaultCoverImage size="sm" />
+              <DefaultCoverImage />
             )}
           </Link>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <CardHeader className="p-0">
-              <Link href={`/novels/${project.id}`} className="block">
-                <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
-                  {project.title}
-                </CardTitle>
-                {project.description && (
-                  <CardDescription className="line-clamp-2 mt-1">
-                    {project.description}
-                  </CardDescription>
+          {/* Content - 이미지 높이에 맞춤 */}
+          <div className="flex-1 min-w-0 h-[150px] flex flex-col">
+            <CardHeader className="p-0 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Link href={`/novels/${project.id}`} className="min-w-0">
+                  <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">
+                    {project.title}
+                  </CardTitle>
+                </Link>
+                {project.genre && (
+                  <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                    {project.genre}
+                  </span>
                 )}
-              </Link>
+              </div>
               <CardAction>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -96,15 +98,21 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
                 </DropdownMenu>
               </CardAction>
             </CardHeader>
-            <div className="mt-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {project.genre && (
-                  <span className="rounded-full bg-secondary px-2 py-0.5">
-                    {project.genre}
-                  </span>
-                )}
-                <span>수정: {formatDate(project.updatedAt)}</span>
-              </div>
+
+            {/* Description - 남은 공간 채우기, 3줄 제한 */}
+            {project.description && (
+              <Link href={`/novels/${project.id}`} className="flex-1 min-h-0 mt-1">
+                <CardDescription className="line-clamp-3">
+                  {project.description}
+                </CardDescription>
+              </Link>
+            )}
+
+            {/* Date - 하단 고정 */}
+            <div className="mt-auto pt-2">
+              <span className="text-xs text-muted-foreground">
+                수정: {formatDate(project.updatedAt)}
+              </span>
             </div>
           </div>
         </div>
