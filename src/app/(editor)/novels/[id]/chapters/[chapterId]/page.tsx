@@ -8,6 +8,7 @@ import { useChapters } from "@/hooks/useChapters";
 import { useEditor } from "@/hooks/useEditor";
 import { useSynopsis } from "@/hooks/useSynopsis";
 import { useCharacters } from "@/hooks/useCharacters";
+import { useRelationships } from "@/hooks/useRelationships";
 import { Button } from "@/components/ui/button";
 import { Editor, EditorLayout } from "@/components/features/editor";
 
@@ -30,6 +31,7 @@ export default function EditorPage({ params }: EditorPageProps) {
   } = useEditor(chapterId);
   const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
   const { characters } = useCharacters(projectId);
+  const { relationships } = useRelationships(projectId);
 
   const isLoading = isProjectLoading || isChaptersLoading || isChapterLoading;
 
@@ -104,6 +106,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       synopsis={synopsis}
       synopsisLoading={isSynopsisLoading}
       characters={characters}
+      relationships={relationships}
       onTitleChange={handleTitleChange}
     >
       <Editor initialContent={chapter.content} onUpdate={updateContent} />

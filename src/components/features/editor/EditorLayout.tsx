@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
 import { Menu, ArrowLeft, Download, Copy, MoreVertical } from "lucide-react";
-import type { Project, Chapter, Synopsis, Character } from "@/repositories/types";
+import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ interface EditorLayoutProps {
   synopsis: Synopsis | null;
   synopsisLoading: boolean;
   characters: Character[];
+  relationships: Relationship[];
   children: React.ReactNode;
   onTitleChange?: (title: string) => Promise<void>;
 }
@@ -51,6 +52,7 @@ export function EditorLayout({
   synopsis,
   synopsisLoading,
   characters,
+  relationships,
   children,
   onTitleChange,
 }: EditorLayoutProps) {
@@ -257,6 +259,7 @@ export function EditorLayout({
           synopsis={synopsis}
           synopsisLoading={synopsisLoading}
           characters={characters}
+          relationships={relationships}
           collapsed={rightSidebarCollapsed}
           onToggle={handleRightSidebarToggle}
           className="h-full"
