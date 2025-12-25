@@ -70,6 +70,7 @@ function RelationshipGraphInner({
 
   // 노드 삭제 중인지 추적 (노드 삭제로 인한 엣지 삭제는 IndexedDB에 반영하지 않음)
   const isDeletingNodesRef = useRef(false);
+  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // MiniMap 자동 숨김 (3초 비활동 후)
   const handleViewportChange = useCallback(() => {
@@ -322,12 +323,24 @@ function RelationshipGraphInner({
       deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
 
       // 다음 틱에서 플래그 해제 (React Flow의 엣지 삭제 이벤트 처리 후)
-      setTimeout(() => {
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+      }
+      deleteTimeoutRef.current = setTimeout(() => {
         isDeletingNodesRef.current = false;
       }, 0);
     },
     []
   );
+
+  // deleteTimeout cleanup
+  useEffect(() => {
+    return () => {
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)
   const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
