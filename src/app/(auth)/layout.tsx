@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -9,8 +10,15 @@ export default function AuthLayout({
     <div className="min-h-screen flex flex-col">
       <header className="border-b">
         <div className="container mx-auto px-4 h-14 flex items-center">
-          <Link href="/" className="text-xl font-bold">
-            Andsys
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Andsys"
+              width={100}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
         </div>
       </header>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PenLine, Cloud, Smartphone, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,16 @@ export default function LandingPage() {
       {/* Hero Section */}
       <header className="border-b">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <span className="text-xl font-bold">Andsys</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Andsys"
+              width={100}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
+          </Link>
           <nav className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="ghost" size="sm">
