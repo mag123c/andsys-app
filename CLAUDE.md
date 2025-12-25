@@ -17,6 +17,7 @@ pnpm test:run             # 테스트 1회 실행
 pnpm test:run <파일패턴>   # 특정 테스트 실행 (예: pnpm test:run project)
 pnpm supabase:start       # 로컬 Supabase (Docker 필요)
 pnpm supabase:stop        # Supabase 종료
+pnpm supabase:migrate     # DB 마이그레이션 적용
 pnpm supabase:reset       # DB 초기화 + 마이그레이션
 ```
 
@@ -47,7 +48,8 @@ src/
 ├── storage/
 │   ├── local/            # IndexedDB 구현 (Dexie) - db.ts가 스키마 정의
 │   └── remote/           # Supabase 클라이언트
-├── hooks/                # 커스텀 훅 (useProject, useChapters, useCharacters 등)
+├── hooks/                # 커스텀 훅 (useProject, useChapters, useCharacters, useSyncEngine 등)
+│                         # Dexie useLiveQuery로 IndexedDB 실시간 반응형 구독
 └── lib/                  # 유틸리티, 상수
 ```
 
