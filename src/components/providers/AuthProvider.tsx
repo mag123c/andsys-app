@@ -7,39 +7,23 @@ import {
   useState,
   useCallback,
 } from "react";
+import type { Provider } from "@supabase/supabase-js";
 import type { AuthState, User } from "@/repositories/types/user";
 import { createClient } from "@/storage/remote/client";
 import { getOrCreateGuestId, clearGuestId, getGuestId, migrateGuestDataToUser } from "@/lib/guest";
 import { syncEngine } from "@/sync";
 
-interface SignInResult {
-  success: boolean;
-  error?: string;
-}
+type OAuthProvider = Extract<Provider, "google" | "discord">;
 
-interface SignUpResult {
-  success: boolean;
-  error?: string;
-  needsEmailConfirmation?: boolean;
-}
-
-interface ResetPasswordResult {
-  success: boolean;
-  error?: string;
-}
-
-interface UpdatePasswordResult {
+interface OAuthResult {
   success: boolean;
   error?: string;
 }
 
 interface AuthContextValue {
   auth: AuthState;
-  signIn: (email: string, password: string) => Promise<SignInResult>;
-  signUp: (email: string, password: string, displayName?: string) => Promise<SignUpResult>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<OAuthResult>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<ResetPasswordResult>;
-  updatePassword: (newPassword: string) => Promise<UpdatePasswordResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,7 +47,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const user: User = {
           id: session.user.id,
           email: session.user.email ?? "",
-          displayName: session.user.user_metadata?.display_name ?? null,
+          displayName: session.user.user_metadata?.full_name
+            ?? session.user.user_metadata?.name
+            ?? session.user.user_metadata?.global_name
+            ?? session.user.user_metadata?.display_name
+            ?? null,
           createdAt: new Date(session.user.created_at),
           updatedAt: new Date(),
         };
@@ -83,7 +71,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const user: User = {
           id: session.user.id,
           email: session.user.email ?? "",
-          displayName: session.user.user_metadata?.display_name ?? null,
+          displayName: session.user.user_metadata?.full_name
+            ?? session.user.user_metadata?.name
+            ?? session.user.user_metadata?.global_name
+            ?? session.user.user_metadata?.display_name
+            ?? null,
           createdAt: new Date(session.user.created_at),
           updatedAt: new Date(),
         };
@@ -110,33 +102,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string): Promise<SignInResult> => {
+  const signInWithOAuth = useCallback(async (provider: OAuthProvider): Promise<OAuthResult> => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  }, []);
-
-  const signUp = useCallback(async (
-    email: string,
-    password: string,
-    displayName?: string
-  ): Promise<SignUpResult> => {
-    const supabase = createClient();
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
       options: {
-        data: {
-          display_name: displayName,
-        },
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -144,9 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return { success: false, error: error.message };
     }
 
-    // 이메일 확인이 필요한 경우
-    const needsEmailConfirmation = !data.session;
-    return { success: true, needsEmailConfirmation };
+    return { success: true };
   }, []);
 
   const signOut = useCallback(async () => {
@@ -157,32 +126,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAuth({ status: "guest", guestId });
   }, []);
 
-  const resetPassword = useCallback(async (email: string): Promise<ResetPasswordResult> => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  }, []);
-
-  const updatePassword = useCallback(async (newPassword: string): Promise<UpdatePasswordResult> => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ auth, signIn, signUp, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={{ auth, signInWithOAuth, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -21,13 +21,10 @@ import {
 } from "@/components/ui/card";
 
 export default function SettingsPage() {
-  const { auth, updatePassword } = useAuth();
+  const { auth } = useAuth();
   const { projects } = useProjects();
   const { theme, setTheme } = useTheme();
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const isAuthenticated = auth.status === "authenticated";
   const isGuest = auth.status === "guest";
@@ -71,44 +68,6 @@ export default function SettingsPage() {
       toast.error("백업 생성에 실패했습니다.");
     } finally {
       setIsExporting(false);
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newPassword || !confirmPassword) {
-      toast.error("새 비밀번호를 입력해주세요.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error("비밀번호는 6자 이상이어야 합니다.");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    setIsChangingPassword(true);
-
-    try {
-      const result = await updatePassword(newPassword);
-
-      if (!result.success) {
-        toast.error(result.error || "비밀번호 변경에 실패했습니다.");
-        return;
-      }
-
-      toast.success("비밀번호가 변경되었습니다.");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch {
-      toast.error("오류가 발생했습니다.");
-    } finally {
-      setIsChangingPassword(false);
     }
   };
 
@@ -209,47 +168,6 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* 비밀번호 변경 - 회원만 */}
-        {isAuthenticated && (
-          <Card>
-            <CardHeader>
-              <CardTitle>비밀번호 변경</CardTitle>
-              <CardDescription>
-                보안을 위해 정기적으로 비밀번호를 변경하세요.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">새 비밀번호</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isChangingPassword}
-                    autoComplete="new-password"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">새 비밀번호 확인</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isChangingPassword}
-                    autoComplete="new-password"
-                  />
-                </div>
-                <Button type="submit" disabled={isChangingPassword}>
-                  {isChangingPassword ? "변경 중..." : "비밀번호 변경"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
 
         {/* 게스트 안내 */}
         {isGuest && (
