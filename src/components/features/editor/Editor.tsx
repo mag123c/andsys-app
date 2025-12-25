@@ -26,6 +26,7 @@ export function Editor({
     extensions: editorExtensions,
     content: initialContent,
     editable,
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: cn(
