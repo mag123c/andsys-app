@@ -4,6 +4,7 @@ import { memo } from "react";
 import {
   BaseEdge,
   EdgeLabelRenderer,
+  getBezierPath,
   type Edge,
   type Position,
 } from "@xyflow/react";
@@ -37,16 +38,21 @@ function RelationshipEdgeComponent({
   sourceY,
   targetX,
   targetY,
+  sourcePosition,
+  targetPosition,
   data,
   markerStart,
   markerEnd,
-}: Omit<RelationshipEdgeProps, "sourcePosition" | "targetPosition">) {
-  // 직선 경로
-  const edgePath = `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`;
-
-  // 라벨 위치 (선 중앙)
-  const labelX = (sourceX + targetX) / 2;
-  const labelY = (sourceY + targetY) / 2;
+}: RelationshipEdgeProps) {
+  // 베지어 곡선 경로 (React Flow 기본 연결선과 동일)
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
 
   const color = data?.color || "#6B7280";
   const label = data?.label || "";

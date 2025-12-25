@@ -352,19 +352,29 @@ function RelationshipGraphInner({
     [onDelete]
   );
 
-  // 노드 삭제 시 그래프에서만 제거 (관계 데이터는 유지)
+  // 노드 삭제 시 노드 + 연결된 관계 모두 삭제
   const handleNodesDelete = useCallback(
     (deletedNodes: Node[]) => {
       const deletedIds = new Set(deletedNodes.map((n) => n.id));
+
+      // 그래프에서 노드 제거
       setGraphNodeIds((prev) => {
         const next = new Set(prev);
         deletedIds.forEach((id) => next.delete(id));
         return next;
       });
+
       // 수동 위치 정보도 제거
       deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
+
+      // 삭제된 노드와 연결된 관계도 IndexedDB에서 삭제
+      relationships.forEach((rel) => {
+        if (deletedIds.has(rel.fromCharacterId) || deletedIds.has(rel.toCharacterId)) {
+          onDelete?.(rel.id);
+        }
+      });
     },
-    []
+    [relationships, onDelete]
   );
 
   // 팝오버 외부 클릭 시 닫기
