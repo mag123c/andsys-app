@@ -18,13 +18,14 @@ interface EditorPageProps {
 export default function EditorPage({ params }: EditorPageProps) {
   const { id: projectId, chapterId } = use(params);
   const { project, isLoading: isProjectLoading } = useProject(projectId);
-  const { chapters, isLoading: isChaptersLoading, updateChapter } = useChapters(projectId);
+  const { chapters, isLoading: isChaptersLoading } = useChapters(projectId);
   const {
     chapter,
     isLoading: isChapterLoading,
     error,
     saveStatus,
     updateContent,
+    updateTitle,
     saveNow,
   } = useEditor(chapterId);
   const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
@@ -55,10 +56,11 @@ export default function EditorPage({ params }: EditorPageProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [saveNow]);
 
-  // 제목 변경 핸들러
+  // 제목 변경 핸들러 - useEditor의 updateTitle 사용으로 로컬 상태 + DB 동시 업데이트
+  // useChapters는 useLiveQuery로 IndexedDB 변경 자동 감지하여 사이드바 동기화
   const handleTitleChange = useCallback(async (title: string) => {
-    await updateChapter(chapterId, { title });
-  }, [chapterId, updateChapter]);
+    await updateTitle(title);
+  }, [updateTitle]);
 
   if (isLoading) {
     return (
