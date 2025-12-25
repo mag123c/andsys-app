@@ -18,7 +18,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -33,10 +32,8 @@ interface RelationshipFormData {
   fromCharacterId: string;
   toCharacterId: string;
   type: RelationshipType;
-  label: string;
   description: string;
   bidirectional: boolean;
-  reverseLabel: string;
 }
 
 function getInitialFormData(relationship?: Relationship): RelationshipFormData {
@@ -44,10 +41,8 @@ function getInitialFormData(relationship?: Relationship): RelationshipFormData {
     fromCharacterId: relationship?.fromCharacterId ?? "",
     toCharacterId: relationship?.toCharacterId ?? "",
     type: relationship?.type ?? "custom",
-    label: relationship?.label ?? "",
     description: relationship?.description ?? "",
     bidirectional: relationship?.bidirectional ?? true,
-    reverseLabel: relationship?.reverseLabel ?? "",
   };
 }
 
@@ -103,7 +98,7 @@ export function RelationshipDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fromCharacterId || !formData.toCharacterId || !formData.label) {
+    if (!formData.fromCharacterId || !formData.toCharacterId) {
       return;
     }
 
@@ -116,20 +111,16 @@ export function RelationshipDialog({
       if (isEditMode && onUpdate && relationship) {
         await onUpdate(relationship.id, {
           type: formData.type,
-          label: formData.label,
           description: formData.description || null,
           bidirectional: formData.bidirectional,
-          reverseLabel: formData.reverseLabel || null,
         });
       } else if (onCreate) {
         await onCreate({
           fromCharacterId: formData.fromCharacterId,
           toCharacterId: formData.toCharacterId,
           type: formData.type,
-          label: formData.label,
           description: formData.description || null,
           bidirectional: formData.bidirectional,
-          reverseLabel: formData.reverseLabel || null,
         });
       }
       onOpenChange(false);
@@ -137,9 +128,6 @@ export function RelationshipDialog({
       setIsSubmitting(false);
     }
   };
-
-  const fromCharacter = characters.find((c) => c.id === formData.fromCharacterId);
-  const toCharacter = characters.find((c) => c.id === formData.toCharacterId);
 
   const availableToCharacters = characters.filter(
     (c) => c.id !== formData.fromCharacterId
@@ -204,33 +192,16 @@ export function RelationshipDialog({
                   {RELATIONSHIP_TYPES.map((t) => (
                     <SelectItem key={t.type} value={t.type}>
                       <span className="flex items-center gap-2">
-                        <span>{t.icon}</span>
+                        <span
+                          className="h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: t.color }}
+                        />
                         <span>{t.label}</span>
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* 관계 라벨 */}
-            <div className="grid gap-2">
-              <Label htmlFor="label">
-                관계 라벨
-                {fromCharacter && toCharacter && (
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    ({fromCharacter.name} → {toCharacter.name})
-                  </span>
-                )}
-              </Label>
-              <Input
-                id="label"
-                value={formData.label}
-                onChange={(e) => handleChange("label", e.target.value)}
-                placeholder="예: 의형제, 첫사랑, 숙적"
-                required
-              />
             </div>
 
             {/* 캐릭터 2 */}
@@ -277,30 +248,9 @@ export function RelationshipDialog({
                 }
               />
               <Label htmlFor="bidirectional" className="font-normal cursor-pointer">
-                양방향 관계 (동일 라벨)
+                양방향 관계
               </Label>
             </div>
-
-            {/* 역방향 라벨 */}
-            {formData.bidirectional && (
-              <div className="grid gap-2">
-                <Label htmlFor="reverseLabel">
-                  역방향 라벨 (선택)
-                  {fromCharacter && toCharacter && (
-                    <span className="text-muted-foreground font-normal">
-                      {" "}
-                      ({toCharacter.name} → {fromCharacter.name})
-                    </span>
-                  )}
-                </Label>
-                <Input
-                  id="reverseLabel"
-                  value={formData.reverseLabel}
-                  onChange={(e) => handleChange("reverseLabel", e.target.value)}
-                  placeholder="비워두면 동일 라벨 사용"
-                />
-              </div>
-            )}
 
             {/* 설명 */}
             <div className="grid gap-2">
@@ -331,7 +281,6 @@ export function RelationshipDialog({
                 isSubmitting ||
                 !formData.fromCharacterId ||
                 !formData.toCharacterId ||
-                !formData.label ||
                 formData.fromCharacterId === formData.toCharacterId
               }
             >

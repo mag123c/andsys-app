@@ -120,12 +120,10 @@ export interface LocalRelationship {
 
   // 관계 정보
   type: LocalRelationshipType;
-  label: string;
   description: string | null;
 
   // 양방향 여부
   bidirectional: boolean;
-  reverseLabel: string | null;
 
   // 메타
   createdAt: Date;
@@ -245,6 +243,30 @@ export class AppDatabase extends Dexie {
       syncQueue: "++id, entityType, entityId, createdAt",
       settings: "key",
     });
+
+    // Version 7: Remove label and reverseLabel fields from relationships
+    this.version(7)
+      .stores({
+        projects: "id, userId, guestId, updatedAt, syncStatus",
+        chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+        synopses: "id, projectId, updatedAt, syncStatus",
+        characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+        relationships:
+          "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus",
+        versions: "id, projectId, [entityType+entityId], createdAt",
+        syncQueue: "++id, entityType, entityId, createdAt",
+        settings: "key",
+      })
+      .upgrade((tx) => {
+        // Remove label and reverseLabel fields from existing relationships
+        return tx
+          .table("relationships")
+          .toCollection()
+          .modify((relationship) => {
+            delete relationship.label;
+            delete relationship.reverseLabel;
+          });
+      });
   }
 }
 

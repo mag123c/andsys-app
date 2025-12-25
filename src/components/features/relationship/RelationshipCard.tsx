@@ -31,12 +31,12 @@ export function RelationshipCard({
   onEdit,
   onDelete,
 }: RelationshipCardProps) {
+  // isReverse는 양방향 표시용으로 유지하되 현재는 사용하지 않음
+  void isReverse;
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
-  const displayLabel = isReverse && relationship.reverseLabel
-    ? relationship.reverseLabel
-    : relationship.label;
 
   return (
     <>
@@ -59,12 +59,15 @@ export function RelationshipCard({
           <h4 className="font-medium truncate">{targetCharacter.name}</h4>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span
-              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs"
+              className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-xs"
               style={{ backgroundColor: `${typeConfig?.color}20`, color: typeConfig?.color }}
             >
-              {typeConfig?.icon} {displayLabel}
+              <span
+                className="h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: typeConfig?.color }}
+              />
+              {typeConfig?.label}
             </span>
-            <span className="text-xs">({typeConfig?.label})</span>
           </div>
         </div>
 
