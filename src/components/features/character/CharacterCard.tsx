@@ -53,7 +53,7 @@ export function CharacterCard({
 
         {/* 이미지 영역 (좌측) */}
         <div
-          className="relative w-20 h-24 shrink-0 bg-muted cursor-pointer"
+          className="relative w-[100px] h-[150px] shrink-0 bg-muted cursor-pointer"
           onClick={() => onEdit(character)}
         >
           {character.imageUrl ? (
@@ -64,7 +64,7 @@ export function CharacterCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <User className="h-8 w-8 text-muted-foreground" />
+              <User className="h-10 w-10 text-muted-foreground" />
             </div>
           )}
         </div>

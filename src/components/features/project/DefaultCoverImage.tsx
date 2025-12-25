@@ -3,32 +3,17 @@ import { cn } from "@/lib/utils";
 
 interface DefaultCoverImageProps {
   className?: string;
-  size?: "sm" | "md";
 }
 
-export function DefaultCoverImage({
-  className,
-  size = "md",
-}: DefaultCoverImageProps) {
-  const sizeClasses = {
-    sm: "w-[50px] h-[75px]",
-    md: "w-[100px] h-[150px]",
-  };
-
-  const iconSizes = {
-    sm: "h-4 w-4",
-    md: "h-8 w-8",
-  };
-
+export function DefaultCoverImage({ className }: DefaultCoverImageProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center rounded bg-muted",
-        sizeClasses[size],
+        "flex items-center justify-center rounded bg-muted w-[100px] h-[150px]",
         className
       )}
     >
-      <BookOpen className={cn("text-muted-foreground", iconSizes[size])} />
+      <BookOpen className="h-10 w-10 text-muted-foreground" />
     </div>
   );
 }

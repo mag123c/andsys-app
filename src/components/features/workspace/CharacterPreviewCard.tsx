@@ -36,7 +36,7 @@ export function CharacterPreviewCard({
       <div className="p-3 space-y-3">
         {/* Image + Basic Info */}
         <div className="flex gap-3">
-          <div className="w-12 h-18 rounded bg-muted overflow-hidden shrink-0">
+          <div className="w-16 h-24 rounded bg-muted overflow-hidden shrink-0">
             {character.imageUrl ? (
               <img
                 src={character.imageUrl}
