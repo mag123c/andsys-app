@@ -106,7 +106,6 @@ export function RelationshipList({
                 key={`${relationship.id}-${isReverse ? "r" : "f"}`}
                 relationship={relationship}
                 targetCharacter={targetCharacter}
-                isReverse={isReverse}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />

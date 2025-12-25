@@ -19,7 +19,6 @@ import {
 interface RelationshipCardProps {
   relationship: Relationship;
   targetCharacter: Character;
-  isReverse?: boolean;
   onEdit: (relationship: Relationship) => void;
   onDelete: (id: string) => void;
 }
@@ -27,13 +26,9 @@ interface RelationshipCardProps {
 export function RelationshipCard({
   relationship,
   targetCharacter,
-  isReverse = false,
   onEdit,
   onDelete,
 }: RelationshipCardProps) {
-  // isReverse는 양방향 표시용으로 유지하되 현재는 사용하지 않음
-  void isReverse;
-
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
