@@ -75,6 +75,9 @@ function RelationshipGraphInner({
   // 그래프에 있는 노드 ID들
   const [graphNodeIds, setGraphNodeIds] = useState<Set<string>>(new Set());
 
+  // 수동으로 배치된 노드 위치 (드래그 드롭으로 추가된 노드)
+  const manualPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
   // MiniMap 자동 숨김 (3초 비활동 후)
   const handleViewportChange = useCallback(() => {
     setShowMiniMap(true);
@@ -208,14 +211,33 @@ function RelationshipGraphInner({
       });
     });
 
-    // dagre 레이아웃 적용
+    // dagre 레이아웃 적용 (수동 배치된 노드는 제외)
     if (nodes.length > 0) {
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        nodes,
-        edges,
-        { direction: "TB", rankSep: 150, nodeSep: 100 }
-      );
-      return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
+      // 수동 위치가 없는 노드만 dagre 레이아웃 적용
+      const nodesForLayout = nodes.filter((n) => !manualPositionsRef.current.has(n.id));
+      const manualNodes = nodes.filter((n) => manualPositionsRef.current.has(n.id));
+
+      let layoutedNodes: Node<CharacterNodeData>[] = [];
+
+      if (nodesForLayout.length > 0) {
+        const { nodes: dagredNodes } = getLayoutedElements(
+          nodesForLayout,
+          edges,
+          { direction: "TB", rankSep: 150, nodeSep: 100 }
+        );
+        layoutedNodes = dagredNodes as Node<CharacterNodeData>[];
+      }
+
+      // 수동 위치가 있는 노드는 해당 위치 적용
+      const manualLayoutedNodes = manualNodes.map((node) => ({
+        ...node,
+        position: manualPositionsRef.current.get(node.id) || node.position,
+      }));
+
+      return {
+        initialNodes: [...layoutedNodes, ...manualLayoutedNodes],
+        initialEdges: edges,
+      };
     }
 
     return { initialNodes: nodes, initialEdges: edges };
@@ -258,13 +280,18 @@ function RelationshipGraphInner({
       });
 
       // 새 노드 추가 (노드 크기의 절반만큼 오프셋 적용하여 마우스 위치 중심에 배치)
+      const nodePosition = {
+        x: position.x - NODE_WIDTH / 2,
+        y: position.y - NODE_HEIGHT / 2,
+      };
+
+      // 수동 위치 저장 (dagre 레이아웃 덮어쓰기 방지)
+      manualPositionsRef.current.set(character.id, nodePosition);
+
       const newNode: Node<CharacterNodeData> = {
         id: character.id,
         type: "character",
-        position: {
-          x: position.x - NODE_WIDTH / 2,
-          y: position.y - NODE_HEIGHT / 2,
-        },
+        position: nodePosition,
         data: {
           name: character.name,
           imageUrl: character.imageUrl,
@@ -312,6 +339,30 @@ function RelationshipGraphInner({
     [relationships, onEdit, onCreate]
   );
 
+  // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
+  const handleEdgesDelete = useCallback(
+    (deletedEdges: Edge[]) => {
+      deletedEdges.forEach((edge) => {
+        onDelete?.(edge.id);
+      });
+    },
+    [onDelete]
+  );
+
+  // 노드 삭제 시 그래프에서만 제거 (관계 데이터는 유지)
+  const handleNodesDelete = useCallback(
+    (deletedNodes: Node[]) => {
+      const deletedIds = new Set(deletedNodes.map((n) => n.id));
+      setGraphNodeIds((prev) => {
+        const next = new Set(prev);
+        deletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      // 수동 위치 정보도 제거
+      deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
+    },
+    []
+  );
 
   // 팝오버 외부 클릭 시 닫기
   useEffect(() => {
@@ -347,6 +398,8 @@ function RelationshipGraphInner({
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodesDelete={handleNodesDelete}
+            onEdgesDelete={handleEdgesDelete}
             onConnect={handleConnect}
             onMove={handleViewportChange}
             onDrop={onDrop}
