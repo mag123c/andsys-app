@@ -10,10 +10,13 @@ import {
   Link2,
   ArrowLeft,
   ChevronRight,
+  User,
 } from "lucide-react";
 import type { Project, Chapter, Character } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { Button } from "@/components/ui/button";
 import { SidebarToggle } from "./SidebarToggle";
 
 const MAX_LIST_ITEMS = 20;
@@ -65,6 +68,11 @@ export function NovelSidebar({
 }: NovelSidebarProps) {
   const pathname = usePathname();
   const basePath = `/novels/${project.id}`;
+  const { auth } = useAuth();
+
+  const isLoading = auth.status === "loading";
+  const isGuest = auth.status === "guest";
+  const userName = auth.status === "authenticated" ? auth.user.displayName || auth.user.email : null;
 
   // 펼침 상태 (새로고침 시 초기화)
   const [expandedChapters, setExpandedChapters] = useState(false);
@@ -81,7 +89,6 @@ export function NovelSidebar({
 
   const isChaptersActive = pathname === basePath;
   const isCharactersActive = pathname === `${basePath}/characters`;
-  const totalWordCount = chapters.reduce((sum, ch) => sum + ch.wordCount, 0);
 
   // 해당 페이지 진입 시 자동 펼침
   useEffect(() => {
@@ -149,7 +156,19 @@ export function NovelSidebar({
             );
           })}
         </div>
-        <div className="p-2 border-t flex justify-center">
+        {/* 프로필 */}
+        <div className="p-2 border-t flex flex-col items-center gap-2">
+          {isLoading ? (
+            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+          ) : (
+            <Link
+              href={isGuest ? "/signup" : "/settings"}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-accent transition-colors"
+              title={isGuest ? "회원가입" : userName ?? "프로필"}
+            >
+              <User className="h-4 w-4 text-muted-foreground" />
+            </Link>
+          )}
           <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
         </div>
       </aside>
@@ -298,12 +317,30 @@ export function NovelSidebar({
         </ul>
       </nav>
 
-      {/* 푸터 */}
-      <div className="p-4 border-t flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
-          {chapters.length}개 회차 · {formatCharacterCount(totalWordCount)}
-        </span>
-        <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
+      {/* 프로필 */}
+      <div className="p-3 border-t">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted shrink-0">
+            {isLoading ? null : <User className="h-4 w-4 text-muted-foreground" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            {isLoading ? (
+              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+            ) : isGuest ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">게스트</span>
+                <Link href="/signup">
+                  <Button size="sm" variant="outline" className="h-7 text-xs">
+                    회원가입
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <span className="text-sm truncate block">{userName}</span>
+            )}
+          </div>
+          <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
+        </div>
       </div>
     </aside>
   );
