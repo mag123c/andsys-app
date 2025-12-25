@@ -244,7 +244,7 @@ export function NovelSidebar({
                                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                             )}
                           >
-                            <span className="shrink-0 w-8 text-center">
+                            <span className="shrink-0 w-11 text-center whitespace-nowrap">
                               {formatEpisodeNumber(chapter.order)}
                             </span>
                             <span className="truncate flex-1">{chapter.title}</span>
