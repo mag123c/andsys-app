@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { LogOut, Settings, User } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,8 +27,6 @@ export function DashboardHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
@@ -18,7 +18,7 @@ interface EditorPageProps {
 export default function EditorPage({ params }: EditorPageProps) {
   const { id: projectId, chapterId } = use(params);
   const { project, isLoading: isProjectLoading } = useProject(projectId);
-  const { chapters, isLoading: isChaptersLoading } = useChapters(projectId);
+  const { chapters, isLoading: isChaptersLoading, updateChapter } = useChapters(projectId);
   const {
     chapter,
     isLoading: isChapterLoading,
@@ -54,6 +54,11 @@ export default function EditorPage({ params }: EditorPageProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [saveNow]);
+
+  // 제목 변경 핸들러
+  const handleTitleChange = useCallback(async (title: string) => {
+    await updateChapter(chapterId, { title });
+  }, [chapterId, updateChapter]);
 
   if (isLoading) {
     return (
@@ -97,6 +102,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       synopsis={synopsis}
       synopsisLoading={isSynopsisLoading}
       characters={characters}
+      onTitleChange={handleTitleChange}
     >
       <Editor initialContent={chapter.content} onUpdate={updateContent} />
     </EditorLayout>

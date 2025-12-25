@@ -39,6 +39,7 @@ interface EditorLayoutProps {
   synopsisLoading: boolean;
   characters: Character[];
   children: React.ReactNode;
+  onTitleChange?: (title: string) => Promise<void>;
 }
 
 export function EditorLayout({
@@ -51,10 +52,19 @@ export function EditorLayout({
   synopsisLoading,
   characters,
   children,
+  onTitleChange,
 }: EditorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(currentChapter.title);
+
+  // 챕터 변경 시 draftTitle 동기화
+  useEffect(() => {
+    setDraftTitle(currentChapter.title);
+    setIsEditingTitle(false);
+  }, [currentChapter.id]); // eslint-disable-line react-hooks/exhaustive-deps -- currentChapter.id 변경 시에만 동기화
 
   // 클라이언트에서만 localStorage 읽기 (hydration 안전 패턴)
   useEffect(() => {
@@ -69,6 +79,39 @@ export function EditorLayout({
     const newValue = !rightSidebarCollapsed;
     setRightSidebarCollapsed(newValue);
     localStorage.setItem(RIGHT_SIDEBAR_COLLAPSED_KEY, String(newValue));
+  };
+
+  // 제목 편집 시작
+  const handleTitleClick = () => {
+    if (onTitleChange) {
+      setDraftTitle(currentChapter.title);
+      setIsEditingTitle(true);
+    }
+  };
+
+  // 제목 저장
+  const handleTitleSave = async () => {
+    const trimmed = draftTitle.trim();
+    if (trimmed && trimmed !== currentChapter.title && onTitleChange) {
+      await onTitleChange(trimmed);
+    }
+    setIsEditingTitle(false);
+  };
+
+  // 제목 편집 취소
+  const handleTitleCancel = () => {
+    setDraftTitle(currentChapter.title);
+    setIsEditingTitle(false);
+  };
+
+  // 제목 입력 키보드 이벤트
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === "Escape") {
+      handleTitleCancel();
+    }
   };
 
   // 콘텐츠에서 글자수 계산
@@ -147,8 +190,26 @@ export function EditorLayout({
                   <span>목록</span>
                 </Link>
 
-                {/* Chapter title */}
-                <h1 className="font-medium truncate">{currentChapter.title}</h1>
+                {/* Chapter title - inline editable */}
+                {isEditingTitle ? (
+                  <input
+                    type="text"
+                    value={draftTitle}
+                    onChange={(e) => setDraftTitle(e.target.value)}
+                    onBlur={handleTitleSave}
+                    onKeyDown={handleTitleKeyDown}
+                    className="font-medium bg-transparent border-b border-primary outline-none min-w-[100px] max-w-full"
+                    autoFocus
+                  />
+                ) : (
+                  <h1
+                    className={`font-medium truncate ${onTitleChange ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+                    onClick={handleTitleClick}
+                    title={onTitleChange ? "클릭하여 제목 수정" : undefined}
+                  >
+                    {currentChapter.title}
+                  </h1>
+                )}
               </div>
 
               <div className="flex items-center gap-3 shrink-0">

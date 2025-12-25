@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 
-/** novels/[id] 이후 페이지 매칭 (자체 사이드바 레이아웃 사용) */
-const NOVEL_DETAIL_PATTERN = /^\/novels\/[^/]+/;
+/** 헤더 숨김 페이지: /novels 및 /novels/[id] 이하 */
+const HEADER_HIDDEN_PATTERN = /^\/novels(\/|$)/;
 
 export default function DashboardLayout({
   children,
@@ -12,10 +12,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isNovelDetailPage = NOVEL_DETAIL_PATTERN.test(pathname);
+  const hideHeader = HEADER_HIDDEN_PATTERN.test(pathname);
 
-  if (isNovelDetailPage) {
-    return <>{children}</>;
+  if (hideHeader) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      </div>
+    );
   }
 
   return (
