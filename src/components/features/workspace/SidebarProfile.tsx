@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { User, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { SidebarToggle } from "./SidebarToggle";
 
 interface SidebarProfileProps {
@@ -55,23 +54,20 @@ export function SidebarProfile({
   return (
     <div className="p-3 border-t">
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted shrink-0">
+        <Link
+          href={isGuest ? "/signup" : "/settings"}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-accent transition-colors shrink-0"
+          title={isGuest ? "회원가입" : userName ?? "프로필"}
+        >
           {isLoading ? null : <User className="h-4 w-4 text-muted-foreground" />}
-        </div>
+        </Link>
         <div className="flex-1 min-w-0">
           {isLoading ? (
             <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-          ) : isGuest ? (
-            <div className="flex items-center gap-2 flex-nowrap">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">게스트</span>
-              <Link href="/signup">
-                <Button size="sm" variant="outline" className="h-7 text-xs whitespace-nowrap">
-                  회원가입
-                </Button>
-              </Link>
-            </div>
           ) : (
-            <span className="text-sm truncate block">{userName}</span>
+            <span className="text-sm text-muted-foreground truncate block">
+              {isGuest ? "게스트" : userName}
+            </span>
           )}
         </div>
         <Link
