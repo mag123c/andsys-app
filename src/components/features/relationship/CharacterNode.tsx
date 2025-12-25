@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type Node } from "@xyflow/react";
+import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,12 +10,14 @@ export interface CharacterNodeData extends Record<string, unknown> {
   imageUrl: string | null;
   nickname?: string | null;
   occupation?: string | null;
-  selected?: boolean;
 }
 
 export type CharacterNodeType = Node<CharacterNodeData, "character">;
 
-function CharacterNodeComponent({ data }: { data: CharacterNodeData }) {
+function CharacterNodeComponent({
+  data,
+  selected,
+}: NodeProps<CharacterNodeType>) {
   return (
     <>
       <Handle type="target" position={Position.Top} className="!bg-primary" />
@@ -23,8 +25,8 @@ function CharacterNodeComponent({ data }: { data: CharacterNodeData }) {
         className={cn(
           "px-3 py-2 rounded-lg border-2 bg-background shadow-sm transition-all",
           "min-w-[120px] max-w-[160px]",
-          data.selected
-            ? "border-primary ring-2 ring-primary/20"
+          selected
+            ? "border-primary ring-2 ring-primary/30 shadow-lg shadow-primary/20"
             : "border-border hover:border-primary/50"
         )}
       >

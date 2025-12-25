@@ -5,7 +5,7 @@ import {
   BaseEdge,
   getBezierPath,
   type Edge,
-  type Position,
+  type EdgeProps,
 } from "@xyflow/react";
 
 export interface RelationshipEdgeData extends Record<string, unknown> {
@@ -13,19 +13,6 @@ export interface RelationshipEdgeData extends Record<string, unknown> {
 }
 
 export type RelationshipEdgeType = Edge<RelationshipEdgeData, "relationship">;
-
-interface RelationshipEdgeProps {
-  id: string;
-  sourceX: number;
-  sourceY: number;
-  targetX: number;
-  targetY: number;
-  sourcePosition: Position;
-  targetPosition: Position;
-  data?: RelationshipEdgeData;
-  markerStart?: string;
-  markerEnd?: string;
-}
 
 function RelationshipEdgeComponent({
   id,
@@ -38,7 +25,8 @@ function RelationshipEdgeComponent({
   data,
   markerStart,
   markerEnd,
-}: RelationshipEdgeProps) {
+  selected,
+}: EdgeProps<RelationshipEdgeType>) {
   const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
@@ -61,6 +49,17 @@ function RelationshipEdgeComponent({
         style={{ cursor: "pointer", pointerEvents: "stroke" }}
         className="react-flow__edge-interaction"
       />
+      {/* 선택 시 글로우 효과 */}
+      {selected && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={8}
+          strokeOpacity={0.3}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
       <BaseEdge
         id={id}
         path={edgePath}
@@ -68,7 +67,7 @@ function RelationshipEdgeComponent({
         markerEnd={markerEnd}
         style={{
           stroke: color,
-          strokeWidth: 2,
+          strokeWidth: selected ? 3 : 2,
         }}
       />
     </>

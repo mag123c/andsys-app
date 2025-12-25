@@ -15,14 +15,14 @@ export interface RelationshipTypeConfig {
 }
 
 export const RELATIONSHIP_TYPES: RelationshipTypeConfig[] = [
-  { type: "family", label: "가족", color: "#8B5CF6" },
-  { type: "friend", label: "친구", color: "#10B981" },
-  { type: "lover", label: "연인", color: "#F43F5E" },
-  { type: "rival", label: "라이벌", color: "#F59E0B" },
-  { type: "enemy", label: "적", color: "#EF4444" },
-  { type: "colleague", label: "동료", color: "#3B82F6" },
-  { type: "master", label: "사제", color: "#8B5CF6" },
-  { type: "custom", label: "기타", color: "#6B7280" },
+  { type: "family", label: "가족", color: "#A855F7" },    // 밝은 보라
+  { type: "friend", label: "친구", color: "#22C55E" },    // 밝은 초록
+  { type: "lover", label: "연인", color: "#EC4899" },     // 핑크
+  { type: "rival", label: "라이벌", color: "#F97316" },   // 오렌지
+  { type: "enemy", label: "적", color: "#DC2626" },       // 진한 빨강
+  { type: "colleague", label: "동료", color: "#3B82F6" }, // 파랑
+  { type: "master", label: "사제", color: "#14B8A6" },    // 틸(청록)
+  { type: "custom", label: "기타", color: "#6B7280" },    // 회색
 ];
 
 export interface Relationship {
