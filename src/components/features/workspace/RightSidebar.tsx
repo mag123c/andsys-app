@@ -168,6 +168,7 @@ export function RightSidebar({
             <RelationshipGraph
               characters={characters}
               relationships={relationships}
+              readonly
             />
           </div>
         </DialogContent>

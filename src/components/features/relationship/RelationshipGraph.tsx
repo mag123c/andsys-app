@@ -33,6 +33,8 @@ interface RelationshipGraphProps {
   relationships: Relationship[];
   onDelete?: (id: string) => void;
   onCreate?: (fromCharacterId: string, toCharacterId: string) => void;
+  /** 읽기 전용 모드 (회차 상세에서 사용) */
+  readonly?: boolean;
 }
 
 const nodeTypes: NodeTypes = {
@@ -52,6 +54,7 @@ function RelationshipGraphInner({
   relationships,
   onDelete,
   onCreate,
+  readonly = false,
 }: RelationshipGraphProps) {
   const { screenToFlowPosition } = useReactFlow();
   const reactFlowRef = useRef<HTMLDivElement>(null);
@@ -376,12 +379,12 @@ function RelationshipGraphInner({
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onNodesDelete={handleNodesDelete}
-            onEdgesDelete={handleEdgesDelete}
-            onConnect={handleConnect}
+            onNodesDelete={readonly ? undefined : handleNodesDelete}
+            onEdgesDelete={readonly ? undefined : handleEdgesDelete}
+            onConnect={readonly ? undefined : handleConnect}
             onMove={handleViewportChange}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
+            onDrop={readonly ? undefined : onDrop}
+            onDragOver={readonly ? undefined : onDragOver}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             fitView
@@ -390,11 +393,15 @@ function RelationshipGraphInner({
             maxZoom={2}
             proOptions={{ hideAttribution: true }}
             connectionLineStyle={{ stroke: "#6B7280", strokeWidth: 2 }}
-            edgesFocusable
+            edgesFocusable={!readonly}
+            nodesDraggable={!readonly}
+            nodesConnectable={!readonly}
+            elementsSelectable={!readonly}
+            deleteKeyCode={readonly ? null : "Delete"}
             defaultEdgeOptions={{
               type: "relationship",
-              selectable: true,
-              focusable: true,
+              selectable: !readonly,
+              focusable: !readonly,
             }}
           >
             <Background gap={16} size={1} />
@@ -415,19 +422,23 @@ function RelationshipGraphInner({
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center text-muted-foreground">
                 <p className="text-lg mb-2">관계도가 비어있습니다</p>
-                <p className="text-sm">우측 패널에서 캐릭터를 드래그하여 추가하세요</p>
+                {!readonly && (
+                  <p className="text-sm">우측 패널에서 캐릭터를 드래그하여 추가하세요</p>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* 캐릭터 패널 */}
-      <CharacterPanel
-        characters={characters}
-        nodesOnGraph={nodesOnGraph}
-        onDragStart={handleDragStart}
-      />
+      {/* 캐릭터 패널 - 읽기 전용일 때 숨김 */}
+      {!readonly && (
+        <CharacterPanel
+          characters={characters}
+          nodesOnGraph={nodesOnGraph}
+          onDragStart={handleDragStart}
+        />
+      )}
     </div>
   );
 }
