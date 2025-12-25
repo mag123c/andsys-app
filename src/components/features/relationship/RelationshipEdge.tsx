@@ -58,6 +58,7 @@ function RelationshipEdgeComponent({
         fill="none"
         stroke="transparent"
         strokeWidth={20}
+        style={{ cursor: "pointer", pointerEvents: "stroke" }}
         className="react-flow__edge-interaction"
       />
       <BaseEdge

@@ -68,9 +68,13 @@ function RelationshipGraphInner({
   // 수동으로 배치된 노드 위치 (드래그 드롭으로 추가된 노드)
   const manualPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
-  // 노드 삭제 중인지 추적 (노드 삭제로 인한 엣지 삭제는 IndexedDB에 반영하지 않음)
-  const isDeletingNodesRef = useRef(false);
-  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // 노드 삭제로 인해 무시할 엣지 ID들 (노드 삭제 시 연결된 엣지도 삭제되지만 IndexedDB에는 반영 안 함)
+  const deletingEdgeIdsRef = useRef<Set<string>>(new Set());
+
+  // 초기화 여부 추적 (초기 로드 시에만 관계가 있는 캐릭터를 그래프에 추가)
+  const isInitializedRef = useRef(false);
+  // 이전 relationships 추적 (새로 추가된 관계만 감지)
+  const prevRelationshipsRef = useRef<Relationship[]>([]);
 
   // MiniMap 자동 숨김 (3초 비활동 후)
   const handleViewportChange = useCallback(() => {
@@ -107,15 +111,36 @@ function RelationshipGraphInner({
     [relationships, selectedTypes]
   );
 
-  // 초기화: 관계가 있는 캐릭터들을 그래프에 추가
+  // 관계가 있는 캐릭터들을 그래프에 추가 (초기화 또는 새 관계 추가 시)
   useEffect(() => {
-    const connectedIds = new Set<string>();
-    relationships.forEach((r) => {
-      connectedIds.add(r.fromCharacterId);
-      connectedIds.add(r.toCharacterId);
-    });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 관계가 있는 캐릭터를 그래프에 추가하기 위한 의도적 패턴
-    setGraphNodeIds(connectedIds);
+    if (!isInitializedRef.current) {
+      // 초기화: 모든 관계의 캐릭터를 추가
+      const connectedIds = new Set<string>();
+      relationships.forEach((r) => {
+        connectedIds.add(r.fromCharacterId);
+        connectedIds.add(r.toCharacterId);
+      });
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 관계가 있는 캐릭터를 그래프에 추가하기 위한 의도적 패턴
+      setGraphNodeIds(connectedIds);
+      isInitializedRef.current = true;
+    } else {
+      // 새로 추가된 관계만 처리 (삭제된 관계는 무시 - 노드 유지)
+      const prevIds = new Set(prevRelationshipsRef.current.map((r) => r.id));
+      const newRelationships = relationships.filter((r) => !prevIds.has(r.id));
+
+      if (newRelationships.length > 0) {
+        const newCharacterIds = new Set<string>();
+        newRelationships.forEach((r) => {
+          newCharacterIds.add(r.fromCharacterId);
+          newCharacterIds.add(r.toCharacterId);
+        });
+        // 새 캐릭터만 추가 (기존 노드는 유지)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- 새 관계 추가 시 관련 캐릭터를 그래프에 추가하기 위한 의도적 패턴
+        setGraphNodeIds((prev) => new Set([...prev, ...newCharacterIds]));
+      }
+    }
+
+    prevRelationshipsRef.current = relationships;
   }, [relationships]);
 
   const { initialNodes, initialEdges } = useMemo(() => {
@@ -290,27 +315,17 @@ function RelationshipGraphInner({
     [relationships, onCreate]
   );
 
-  // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
-  const handleEdgesDelete = useCallback(
-    (deletedEdges: Edge[]) => {
-      // 노드 삭제로 인한 엣지 삭제는 IndexedDB에 반영하지 않음 (관계 데이터 유지)
-      if (isDeletingNodesRef.current) return;
-
-      // 삭제 실패해도 UI에서는 이미 제거됨 (새로고침 시 복원)
-      deletedEdges.forEach((edge) => {
-        onDelete?.(edge.id);
-      });
-    },
-    [onDelete]
-  );
-
   // 노드 삭제 시 그래프에서만 제거 (관계 데이터는 IndexedDB에 유지)
   const handleNodesDelete = useCallback(
     (deletedNodes: Node[]) => {
-      // 노드 삭제 중임을 표시 (연결된 엣지 삭제 시 IndexedDB 반영 방지)
-      isDeletingNodesRef.current = true;
-
       const deletedIds = new Set(deletedNodes.map((n) => n.id));
+
+      // 삭제될 엣지 ID들을 미리 저장 (연결된 엣지)
+      deletingEdgeIdsRef.current = new Set(
+        edges
+          .filter((e) => deletedIds.has(e.source) || deletedIds.has(e.target))
+          .map((e) => e.id)
+      );
 
       // 그래프에서 노드 제거
       setGraphNodeIds((prev) => {
@@ -321,26 +336,28 @@ function RelationshipGraphInner({
 
       // 수동 위치 정보도 제거
       deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
-
-      // 다음 틱에서 플래그 해제 (React Flow의 엣지 삭제 이벤트 처리 후)
-      if (deleteTimeoutRef.current) {
-        clearTimeout(deleteTimeoutRef.current);
-      }
-      deleteTimeoutRef.current = setTimeout(() => {
-        isDeletingNodesRef.current = false;
-      }, 0);
     },
-    []
+    [edges]
   );
 
-  // deleteTimeout cleanup
-  useEffect(() => {
-    return () => {
-      if (deleteTimeoutRef.current) {
-        clearTimeout(deleteTimeoutRef.current);
-      }
-    };
-  }, []);
+  // 엣지(관계) 삭제 시 IndexedDB에서도 삭제
+  const handleEdgesDelete = useCallback(
+    (deletedEdges: Edge[]) => {
+      // 노드 삭제로 인한 엣지는 무시 (관계 데이터 유지)
+      const edgesToDelete = deletedEdges.filter(
+        (e) => !deletingEdgeIdsRef.current.has(e.id)
+      );
+
+      // 삭제 실패해도 UI에서는 이미 제거됨 (새로고침 시 복원)
+      edgesToDelete.forEach((edge) => {
+        onDelete?.(edge.id);
+      });
+
+      // 무시 목록 초기화
+      deletingEdgeIdsRef.current = new Set();
+    },
+    [onDelete]
+  );
 
   // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)
   const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
@@ -373,8 +390,11 @@ function RelationshipGraphInner({
             maxZoom={2}
             proOptions={{ hideAttribution: true }}
             connectionLineStyle={{ stroke: "#6B7280", strokeWidth: 2 }}
+            edgesFocusable
             defaultEdgeOptions={{
               type: "relationship",
+              selectable: true,
+              focusable: true,
             }}
           >
             <Background gap={16} size={1} />
