@@ -91,8 +91,8 @@ export function CharacterDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4">
             <div className="flex items-center justify-between">
               <DialogTitle>
                 {isEditMode ? "등장인물 편집" : "등장인물 추가"}
