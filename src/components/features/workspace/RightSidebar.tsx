@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Users, Network, PanelRightClose, PanelRight } from "lucide-react";
-import type { Synopsis, Character, Relationship } from "@/repositories/types";
+import { FileText, Users, Network, BookOpen, PanelRightClose, PanelRight } from "lucide-react";
+import type { Synopsis, Character, Relationship, Chapter } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,15 +13,18 @@ import {
 import { cn } from "@/lib/utils";
 import { RightSidebarSynopsis } from "./RightSidebarSynopsis";
 import { RightSidebarCharacters } from "./RightSidebarCharacters";
+import { RightSidebarChapters } from "./RightSidebarChapters";
 import { RelationshipGraph } from "@/components/features/relationship";
 
-type TabType = "synopsis" | "characters";
+type TabType = "synopsis" | "characters" | "chapters";
 
 interface RightSidebarProps {
   synopsis: Synopsis | null;
   synopsisLoading: boolean;
   characters: Character[];
   relationships: Relationship[];
+  chapters: Chapter[];
+  currentChapterId: string;
   collapsed: boolean;
   onToggle: () => void;
   className?: string;
@@ -32,6 +35,8 @@ export function RightSidebar({
   synopsisLoading,
   characters,
   relationships,
+  chapters,
+  currentChapterId,
   collapsed,
   onToggle,
   className,
@@ -91,6 +96,18 @@ export function RightSidebar({
             >
               <Network className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                setActiveTab("chapters");
+                onToggle();
+              }}
+              title="다른 회차"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
           </div>
         </aside>
       ) : (
@@ -130,6 +147,15 @@ export function RightSidebar({
                 <Network className="h-3 w-3 mr-1" />
                 관계도
               </Button>
+              <Button
+                variant={activeTab === "chapters" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => setActiveTab("chapters")}
+              >
+                <BookOpen className="h-3 w-3 mr-1" />
+                회차
+              </Button>
             </div>
             <Button
               variant="ghost"
@@ -144,15 +170,23 @@ export function RightSidebar({
 
           {/* Tab content */}
           <div className="flex-1 overflow-hidden">
-            {activeTab === "synopsis" ? (
+            {activeTab === "synopsis" && (
               <div className="h-full overflow-y-auto">
                 <RightSidebarSynopsis
                   synopsis={synopsis}
                   isLoading={synopsisLoading}
                 />
               </div>
-            ) : (
+            )}
+            {activeTab === "characters" && (
               <RightSidebarCharacters characters={characters} className="h-full" />
+            )}
+            {activeTab === "chapters" && (
+              <RightSidebarChapters
+                chapters={chapters}
+                currentChapterId={currentChapterId}
+                className="h-full"
+              />
             )}
           </div>
         </aside>

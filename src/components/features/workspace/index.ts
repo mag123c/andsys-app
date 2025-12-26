@@ -5,4 +5,5 @@ export { SidebarProfile } from "./SidebarProfile";
 export { RightSidebar } from "./RightSidebar";
 export { RightSidebarSynopsis } from "./RightSidebarSynopsis";
 export { RightSidebarCharacters } from "./RightSidebarCharacters";
+export { RightSidebarChapters } from "./RightSidebarChapters";
 export { CharacterPreviewCard } from "./CharacterPreviewCard";

@@ -260,6 +260,8 @@ export function EditorLayout({
           synopsisLoading={synopsisLoading}
           characters={characters}
           relationships={relationships}
+          chapters={chapters}
+          currentChapterId={currentChapter.id}
           collapsed={rightSidebarCollapsed}
           onToggle={handleRightSidebarToggle}
           className="h-full"
