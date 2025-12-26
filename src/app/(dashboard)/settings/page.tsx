@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Download, Loader2, Sun, Moon, Monitor } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Sun, Moon, Monitor, User } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useProjects } from "@/hooks/useProjects";
@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function SettingsPage() {
   const { auth } = useAuth();
@@ -106,6 +107,20 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             {isAuthenticated ? (
               <>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    {auth.user.avatarUrl && (
+                      <AvatarImage src={auth.user.avatarUrl} alt={auth.user.displayName || "프로필"} />
+                    )}
+                    <AvatarFallback className="text-lg">
+                      {auth.user.displayName?.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{auth.user.displayName || "이름 없음"}</p>
+                    <p className="text-sm text-muted-foreground">{auth.user.email}</p>
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <Label>이메일</Label>
                   <Input value={auth.user.email} disabled />

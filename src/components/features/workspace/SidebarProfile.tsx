@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { User, Settings } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarToggle } from "./SidebarToggle";
 
 interface SidebarProfileProps {
   isLoading: boolean;
   isGuest: boolean;
   userName: string | null;
+  avatarUrl: string | null;
   collapsed: boolean;
   onToggle?: () => void;
   showToggle?: boolean;
@@ -17,10 +19,13 @@ export function SidebarProfile({
   isLoading,
   isGuest,
   userName,
+  avatarUrl,
   collapsed,
   onToggle,
   showToggle = true,
 }: SidebarProfileProps) {
+  const initials = userName?.charAt(0).toUpperCase() ?? "?";
+
   if (collapsed) {
     return (
       <div className="p-2 border-t flex flex-col items-center gap-2">
@@ -30,10 +35,14 @@ export function SidebarProfile({
           <>
             <Link
               href={isGuest ? "/signup" : "/settings"}
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-accent transition-colors"
               title={isGuest ? "회원가입" : userName ?? "프로필"}
             >
-              <User className="h-4 w-4 text-muted-foreground" />
+              <Avatar className="h-8 w-8">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
+                <AvatarFallback className="text-xs">
+                  {isGuest ? <User className="h-4 w-4" /> : initials}
+                </AvatarFallback>
+              </Avatar>
             </Link>
             <Link
               href="/settings"
@@ -56,10 +65,15 @@ export function SidebarProfile({
       <div className="flex items-center gap-3">
         <Link
           href={isGuest ? "/signup" : "/settings"}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-accent transition-colors shrink-0"
+          className="shrink-0"
           title={isGuest ? "회원가입" : userName ?? "프로필"}
         >
-          {isLoading ? null : <User className="h-4 w-4 text-muted-foreground" />}
+          <Avatar className="h-8 w-8">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
+            <AvatarFallback className="text-xs">
+              {isGuest ? <User className="h-4 w-4" /> : initials}
+            </AvatarFallback>
+          </Avatar>
         </Link>
         <div className="flex-1 min-w-0">
           {isLoading ? (

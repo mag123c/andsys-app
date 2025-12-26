@@ -73,6 +73,7 @@ export function NovelSidebar({
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
   const userName = auth.status === "authenticated" ? auth.user.displayName || auth.user.email : null;
+  const avatarUrl = auth.status === "authenticated" ? auth.user.avatarUrl : null;
 
   // 펼침 상태 (새로고침 시 초기화)
   const [expandedChapters, setExpandedChapters] = useState(false);
@@ -160,6 +161,7 @@ export function NovelSidebar({
           isLoading={isLoading}
           isGuest={isGuest}
           userName={userName}
+          avatarUrl={avatarUrl}
           collapsed={collapsed}
           onToggle={onToggle}
         />
@@ -313,6 +315,7 @@ export function NovelSidebar({
         isLoading={isLoading}
         isGuest={isGuest}
         userName={userName}
+        avatarUrl={avatarUrl}
         collapsed={collapsed}
         onToggle={onToggle}
       />

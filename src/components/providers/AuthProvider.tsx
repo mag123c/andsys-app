@@ -52,6 +52,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             ?? session.user.user_metadata?.global_name
             ?? session.user.user_metadata?.display_name
             ?? null,
+          avatarUrl: session.user.user_metadata?.avatar_url
+            ?? session.user.user_metadata?.picture
+            ?? null,
           createdAt: new Date(session.user.created_at),
           updatedAt: new Date(),
         };
@@ -75,6 +78,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             ?? session.user.user_metadata?.name
             ?? session.user.user_metadata?.global_name
             ?? session.user.user_metadata?.display_name
+            ?? null,
+          avatarUrl: session.user.user_metadata?.avatar_url
+            ?? session.user.user_metadata?.picture
             ?? null,
           createdAt: new Date(session.user.created_at),
           updatedAt: new Date(),

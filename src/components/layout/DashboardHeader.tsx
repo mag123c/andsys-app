@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FilePenLine, LogOut, Settings, User } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,8 @@ export function DashboardHeader() {
 
   const isAuthenticated = auth.status === "authenticated";
   const displayName = isAuthenticated ? auth.user.displayName || auth.user.email : "게스트";
+  const avatarUrl = isAuthenticated ? auth.user.avatarUrl : null;
+  const initials = displayName?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,8 +34,11 @@ export function DashboardHeader() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Avatar className="h-8 w-8">
+                      {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+                      <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                    </Avatar>
                     <span className="sr-only">사용자 메뉴</span>
                   </Button>
                 </DropdownMenuTrigger>

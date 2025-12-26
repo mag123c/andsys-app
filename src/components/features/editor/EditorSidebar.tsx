@@ -26,6 +26,7 @@ export function EditorSidebar({
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
   const userName = auth.status === "authenticated" ? auth.user.displayName || auth.user.email : null;
+  const avatarUrl = auth.status === "authenticated" ? auth.user.avatarUrl : null;
 
   return (
     <aside className={cn("flex flex-col h-full", className)}>
@@ -72,6 +73,7 @@ export function EditorSidebar({
         isLoading={isLoading}
         isGuest={isGuest}
         userName={userName}
+        avatarUrl={avatarUrl}
         collapsed={false}
         showToggle={false}
       />
