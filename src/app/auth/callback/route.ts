@@ -10,11 +10,17 @@ export async function GET(request: Request) {
     const supabase = await createServerSupabaseClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+    if (error) {
+      console.error("Auth callback error:", error.message, error);
+      return NextResponse.redirect(
+        `${origin}/login?error=auth_callback_error&message=${encodeURIComponent(error.message)}`
+      );
     }
+
+    return NextResponse.redirect(`${origin}${next}`);
   }
 
-  // 에러 발생 시 로그인 페이지로 리다이렉트
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
+  // code가 없는 경우
+  console.error("Auth callback: No code provided");
+  return NextResponse.redirect(`${origin}/login?error=no_code`);
 }

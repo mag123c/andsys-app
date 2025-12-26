@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams;
+  const { error, message } = await searchParams;
 
   return (
     <div className="space-y-6">
@@ -24,8 +24,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-center text-sm text-destructive">
-          로그인 중 오류가 발생했습니다. 다시 시도해주세요.
+        <div className="rounded-md bg-destructive/10 p-3 text-center text-sm text-destructive space-y-1">
+          <p>로그인 중 오류가 발생했습니다. 다시 시도해주세요.</p>
+          {message && (
+            <p className="text-xs opacity-70">{message}</p>
+          )}
         </div>
       )}
 
