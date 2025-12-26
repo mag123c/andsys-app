@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Database, Loader2, CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Database,
+  Loader2,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -13,26 +20,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createChunhyangMockup } from "@/lib/mockup/create-mockup";
 
 export default function AdminPage() {
+  const router = useRouter();
   const { auth } = useAuth();
   const [isCreatingMockup, setIsCreatingMockup] = useState(false);
   const [mockupCreated, setMockupCreated] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
 
   const userEmail =
     auth.status === "authenticated" ? auth.user.email : "Unknown";
+  const userId = auth.status === "authenticated" ? auth.user.id : null;
 
   const handleCreateMockupData = async () => {
     setIsCreatingMockup(true);
     try {
-      // TODO: 목업 데이터 생성 로직 구현
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setMockupCreated(true);
-      toast.success("목업 데이터가 생성되었습니다.");
+      const result = await createChunhyangMockup(userId, null);
+
+      if (result.success && result.projectId) {
+        setMockupCreated(true);
+        setCreatedProjectId(result.projectId);
+        toast.success("춘향전 목업 데이터가 생성되었습니다.");
+      } else {
+        toast.error(result.error || "목업 데이터 생성에 실패했습니다.");
+      }
     } catch {
       toast.error("목업 데이터 생성에 실패했습니다.");
     } finally {
       setIsCreatingMockup(false);
+    }
+  };
+
+  const handleGoToProject = () => {
+    if (createdProjectId) {
+      router.push(`/novels/${createdProjectId}`);
     }
   };
 
@@ -79,24 +101,32 @@ export default function AdminPage() {
                   <li>회차 3~5개</li>
                 </ul>
               </div>
-              <Button
-                onClick={handleCreateMockupData}
-                disabled={isCreatingMockup || mockupCreated}
-              >
-                {isCreatingMockup ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    생성 중...
-                  </>
-                ) : mockupCreated ? (
-                  <>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    생성 완료
-                  </>
-                ) : (
-                  "목업 데이터 생성"
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleCreateMockupData}
+                  disabled={isCreatingMockup || mockupCreated}
+                >
+                  {isCreatingMockup ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      생성 중...
+                    </>
+                  ) : mockupCreated ? (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      생성 완료
+                    </>
+                  ) : (
+                    "목업 데이터 생성"
+                  )}
+                </Button>
+                {mockupCreated && createdProjectId && (
+                  <Button variant="outline" onClick={handleGoToProject}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    프로젝트 보기
+                  </Button>
                 )}
-              </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
