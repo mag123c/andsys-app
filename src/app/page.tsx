@@ -3,8 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FilePenLine, PenLine, Cloud, Smartphone, Zap } from "lucide-react";
+import { FilePenLine, BookOpen, Users, Network, PanelRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,24 +25,57 @@ const GUEST_NOTICE_KEY = "andsys:guest-notice-shown";
 
 const features = [
   {
-    icon: PenLine,
-    title: "집중 모드 에디터",
-    description: "방해 없이 글쓰기에만 집중할 수 있는 깔끔한 에디터",
+    icon: BookOpen,
+    title: "회차 관리",
+    description: "웹소설 연재 구조에 맞춘 회차별 원고 관리",
   },
   {
-    icon: Cloud,
-    title: "오프라인 우선",
-    description: "인터넷 없이도 작업하고, 온라인 시 자동 동기화",
+    icon: Users,
+    title: "등장인물 관리",
+    description: "캐릭터 설정과 커스텀 필드로 인물 정보 정리",
   },
   {
-    icon: Smartphone,
-    title: "어디서나 접근",
-    description: "PC, 태블릿, 모바일 어디서든 이어서 작성",
+    icon: Network,
+    title: "관계도 시각화",
+    description: "복잡한 인물 관계를 한눈에 파악할 수 있는 그래프",
   },
   {
-    icon: Zap,
-    title: "자동 저장",
-    description: "작성 중 자동 저장으로 데이터 손실 걱정 없음",
+    icon: PanelRight,
+    title: "워크스페이스",
+    description: "시놉시스와 등장인물을 참조하며 집필",
+  },
+];
+
+const faqs = [
+  {
+    question: "내 소설은 어디에 저장되나요?",
+    answer:
+      "게스트로 사용하시면 현재 브라우저에만 저장됩니다. 회원가입을 하시면 클라우드에 안전하게 백업되어 다른 기기에서도 이어서 작업할 수 있습니다.",
+  },
+  {
+    question: "다른 사람이 내 소설을 볼 수 있나요?",
+    answer:
+      "아니요, 본인만 접근할 수 있습니다. 다른 사용자의 소설에 접근하는 기능은 제공하지 않으며, 모든 데이터는 개인별로 안전하게 관리됩니다.",
+  },
+  {
+    question: "무료인가요?",
+    answer:
+      "네, 모든 기능을 무료로 사용할 수 있습니다. 회차 관리, 등장인물, 관계도, 시놉시스 등 모든 기능이 무료입니다.",
+  },
+  {
+    question: "나중에 유료로 바뀌나요?",
+    answer:
+      "아니요, 유료 전환 계획이 없습니다. 4ndSYS는 무료 서비스로 계속 운영될 예정입니다.",
+  },
+  {
+    question: "브라우저 데이터를 삭제하면 어떻게 되나요?",
+    answer:
+      "게스트 사용자는 브라우저 데이터(쿠키, 캐시 등)를 삭제하면 저장된 소설도 함께 삭제됩니다. 회원가입을 하시면 클라우드에 백업되어 다시 로그인하면 복구됩니다.",
+  },
+  {
+    question: "게스트로 쓰다가 회원가입하면 기존 데이터는 어떻게 되나요?",
+    answer:
+      "걱정 마세요! 게스트로 작성한 소설은 회원가입 후 자동으로 계정에 연동됩니다. 기존 데이터가 사라지지 않고 그대로 유지됩니다.",
   },
 ];
 
@@ -98,7 +137,7 @@ export default function LandingPage() {
             <p className="mt-6 text-lg text-muted-foreground md:text-xl">
               웹소설 작가를 위한 무료 글쓰기 플랫폼.
               <br />
-              오프라인에서도 작업하고, 어디서든 이어서 쓰세요.
+              회차, 등장인물, 관계도까지 한 곳에서 관리하세요.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" className="w-full sm:w-auto" onClick={handleStartClick}>
@@ -135,6 +174,27 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="border-t py-20">
+          <div className="mx-auto max-w-3xl px-4">
+            <h2 className="text-center text-2xl font-bold md:text-3xl">
+              자주 묻는 질문
+            </h2>
+            <Accordion type="single" collapsible className="mt-8">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger className="text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </section>
 
