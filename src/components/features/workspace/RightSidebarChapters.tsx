@@ -22,9 +22,11 @@ export function RightSidebarChapters({
 }: RightSidebarChaptersProps) {
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
 
-  // 현재 편집 중인 회차를 제외한 목록
+  // 현재 편집 중인 회차를 제외한 목록 (order 기준 정렬)
   const otherChapters = useMemo(() => {
-    return chapters.filter((ch) => ch.id !== currentChapterId);
+    return chapters
+      .filter((ch) => ch.id !== currentChapterId)
+      .sort((a, b) => a.order - b.order);
   }, [chapters, currentChapterId]);
 
   // 선택된 회차 내용 텍스트 추출

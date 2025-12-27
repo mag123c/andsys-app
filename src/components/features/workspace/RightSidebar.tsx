@@ -10,6 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { RightSidebarSynopsis } from "./RightSidebarSynopsis";
 import { RightSidebarCharacters } from "./RightSidebarCharacters";
@@ -117,55 +122,82 @@ export function RightSidebar({
             className
           )}
         >
-          {/* Header with tabs */}
+          {/* Header with tabs - icon only with tooltips */}
           <div className="flex items-center justify-between p-2 border-b">
-            <div className="flex gap-1">
-              <Button
-                variant={activeTab === "synopsis" ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setActiveTab("synopsis")}
-              >
-                <FileText className="h-3 w-3 mr-1" />
-                시놉시스
-              </Button>
-              <Button
-                variant={activeTab === "characters" ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setActiveTab("characters")}
-              >
-                <Users className="h-3 w-3 mr-1" />
-                등장인물
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setRelationshipDialogOpen(true)}
-              >
-                <Network className="h-3 w-3 mr-1" />
-                관계도
-              </Button>
-              <Button
-                variant={activeTab === "chapters" ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setActiveTab("chapters")}
-              >
-                <BookOpen className="h-3 w-3 mr-1" />
-                회차
-              </Button>
+            <div className="flex items-center gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={activeTab === "synopsis" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setActiveTab("synopsis")}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">시놉시스</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={activeTab === "characters" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setActiveTab("characters")}
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">등장인물</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setRelationshipDialogOpen(true)}
+                  >
+                    <Network className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">관계도</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={activeTab === "chapters" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setActiveTab("chapters")}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">다른 회차</TooltipContent>
+              </Tooltip>
+              {/* 선택된 탭 라벨 표시 */}
+              <span className="text-xs text-muted-foreground ml-1">
+                {activeTab === "synopsis" && "시놉시스"}
+                {activeTab === "characters" && "등장인물"}
+                {activeTab === "chapters" && "다른 회차"}
+              </span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onToggle}
-              aria-label="사이드바 접기"
-            >
-              <PanelRightClose className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={onToggle}
+                  aria-label="사이드바 접기"
+                >
+                  <PanelRightClose className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">접기</TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Tab content */}

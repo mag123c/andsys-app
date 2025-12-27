@@ -14,6 +14,7 @@ import {
   type EdgeTypes,
   type Connection,
   type OnConnect,
+  type OnNodeDrag,
   MarkerType,
   useReactFlow,
   ReactFlowProvider,
@@ -101,8 +102,9 @@ function RelationshipGraphInner({
   // 그래프에 있는 노드 ID들
   const [graphNodeIds, setGraphNodeIds] = useState<Set<string>>(new Set());
 
-  // 수동으로 배치된 노드 위치 (드래그 드롭으로 추가된 노드)
-  const manualPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  // 노드 위치 저장 (모든 노드 - dagre 계산된 위치 + 사용자가 드래그한 위치)
+  // 이 위치는 데이터 변경 시에도 유지됨
+  const nodePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
   // 노드 삭제로 인해 무시할 엣지 ID들 (노드 삭제 시 연결된 엣지도 삭제되지만 IndexedDB에는 반영 안 함)
   const deletingEdgeIdsRef = useRef<Set<string>>(new Set());
@@ -195,40 +197,45 @@ function RelationshipGraphInner({
         },
       }));
 
-    // dagre 레이아웃 적용 (수동 배치된 노드는 제외)
+    // 노드 위치 계산: 저장된 위치 사용 + 새 노드만 dagre 레이아웃 적용
     let finalNodes: Node<CharacterNodeData>[] = nodes;
 
     if (nodes.length > 0) {
-      // 임시 엣지 (레이아웃 계산용, 핸들 없이)
-      const tempEdges: Edge[] = filteredRelationships.map((r) => ({
-        id: r.id,
-        source: r.fromCharacterId,
-        target: r.toCharacterId,
+      // 저장된 위치가 있는 노드와 없는 노드 분리
+      const existingNodes = nodes.filter((n) => nodePositionsRef.current.has(n.id));
+      const newNodes = nodes.filter((n) => !nodePositionsRef.current.has(n.id));
+
+      // 저장된 위치가 있는 노드는 그 위치 사용
+      const existingLayoutedNodes = existingNodes.map((node) => ({
+        ...node,
+        position: nodePositionsRef.current.get(node.id)!,
       }));
 
-      // 수동 위치가 없는 노드만 dagre 레이아웃 적용
-      const nodesForLayout = nodes.filter((n) => !manualPositionsRef.current.has(n.id));
-      const manualNodes = nodes.filter((n) => manualPositionsRef.current.has(n.id));
+      let newLayoutedNodes: Node<CharacterNodeData>[] = [];
 
-      let layoutedNodes: Node<CharacterNodeData>[] = [];
+      // 새 노드가 있을 때만 dagre 레이아웃 적용
+      if (newNodes.length > 0) {
+        // 임시 엣지 (레이아웃 계산용)
+        const tempEdges: Edge[] = filteredRelationships.map((r) => ({
+          id: r.id,
+          source: r.fromCharacterId,
+          target: r.toCharacterId,
+        }));
 
-      // 자동 레이아웃이 필요한 노드가 있을 때만 dagre 적용
-      if (nodesForLayout.length > 0) {
         const { nodes: dagredNodes } = getLayoutedElements(
-          nodesForLayout,
+          newNodes,
           tempEdges,
           { direction: "TB", rankSep: 150, nodeSep: 100 }
         );
-        layoutedNodes = dagredNodes as Node<CharacterNodeData>[];
+        newLayoutedNodes = dagredNodes as Node<CharacterNodeData>[];
+
+        // 새로 계산된 위치를 저장
+        newLayoutedNodes.forEach((node) => {
+          nodePositionsRef.current.set(node.id, node.position);
+        });
       }
 
-      // 수동 위치가 있는 노드는 저장된 위치 적용
-      const manualLayoutedNodes = manualNodes.map((node) => ({
-        ...node,
-        position: manualPositionsRef.current.get(node.id) || node.position,
-      }));
-
-      finalNodes = [...layoutedNodes, ...manualLayoutedNodes];
+      finalNodes = [...existingLayoutedNodes, ...newLayoutedNodes];
     }
 
     // 노드 위치 맵 생성
@@ -288,6 +295,11 @@ function RelationshipGraphInner({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
+  // 노드 드래그 종료 시 위치 저장
+  const handleNodeDragStop: OnNodeDrag = useCallback((_, node) => {
+    nodePositionsRef.current.set(node.id, node.position);
+  }, []);
+
   // 드래그 앤 드롭으로 노드 추가
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -321,8 +333,8 @@ function RelationshipGraphInner({
         y: position.y - NODE_HEIGHT / 2,
       };
 
-      // 수동 위치 저장 (dagre 레이아웃 덮어쓰기 방지)
-      manualPositionsRef.current.set(character.id, nodePosition);
+      // 위치 저장 (dagre 레이아웃 덮어쓰기 방지)
+      nodePositionsRef.current.set(character.id, nodePosition);
 
       const newNode: Node<CharacterNodeData> = {
         id: character.id,
@@ -391,8 +403,8 @@ function RelationshipGraphInner({
         return next;
       });
 
-      // 수동 위치 정보도 제거
-      deletedIds.forEach((id) => manualPositionsRef.current.delete(id));
+      // 위치 정보도 제거
+      deletedIds.forEach((id) => nodePositionsRef.current.delete(id));
     },
     [edges]
   );
@@ -433,6 +445,7 @@ function RelationshipGraphInner({
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodeDragStop={readonly ? undefined : handleNodeDragStop}
             onNodesDelete={readonly ? undefined : handleNodesDelete}
             onEdgesDelete={readonly ? undefined : handleEdgesDelete}
             onConnect={readonly ? undefined : handleConnect}
