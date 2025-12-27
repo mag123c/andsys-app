@@ -16,10 +16,13 @@ import {
   BookOpen,
   FileText,
   LetterText,
+  Type,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useProjects } from "@/hooks/useProjects";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { EDITOR_FONTS } from "@/components/features/editor/extensions";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { exportBackup, type BackupData } from "@/lib/export";
 import { Button } from "@/components/ui/button";
@@ -37,6 +40,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { auth } = useAuth();
   const { projects } = useProjects();
+  const { settings, updateSettings } = useUserSettings();
   const { theme, setTheme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -127,6 +131,15 @@ export default function SettingsPage() {
       toast.error("로그아웃에 실패했습니다.");
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleFontChange = async (fontValue: string) => {
+    try {
+      await updateSettings({ defaultFont: fontValue });
+      toast.success("기본 글꼴이 변경되었습니다.");
+    } catch {
+      toast.error("글꼴 변경에 실패했습니다.");
     }
   };
 
@@ -277,6 +290,35 @@ export default function SettingsPage() {
                 <Monitor className="mr-1.5 h-4 w-4" />
                 시스템
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 기본 글꼴 */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Type className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-base">기본 글꼴</CardTitle>
+            </div>
+            <CardDescription>
+              에디터에서 사용할 기본 글꼴을 선택합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              {EDITOR_FONTS.map((font) => (
+                <Button
+                  key={font.value}
+                  variant={settings.defaultFont === font.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleFontChange(font.value)}
+                  className="justify-start"
+                  style={{ fontFamily: font.value }}
+                >
+                  {font.name}
+                </Button>
+              ))}
             </div>
           </CardContent>
         </Card>

@@ -9,6 +9,7 @@ import { useEditor } from "@/hooks/useEditor";
 import { useSynopsis } from "@/hooks/useSynopsis";
 import { useCharacters } from "@/hooks/useCharacters";
 import { useRelationships } from "@/hooks/useRelationships";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { Button } from "@/components/ui/button";
 import { Editor, EditorLayout } from "@/components/features/editor";
 
@@ -32,6 +33,7 @@ export default function EditorPage({ params }: EditorPageProps) {
   const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
   const { characters } = useCharacters(projectId);
   const { relationships } = useRelationships(projectId);
+  const { settings } = useUserSettings();
 
   const isLoading = isProjectLoading || isChaptersLoading || isChapterLoading;
 
@@ -109,7 +111,11 @@ export default function EditorPage({ params }: EditorPageProps) {
       relationships={relationships}
       onTitleChange={handleTitleChange}
     >
-      <Editor initialContent={chapter.content} onUpdate={updateContent} />
+      <Editor
+        initialContent={chapter.content}
+        onUpdate={updateContent}
+        defaultFont={settings.defaultFont}
+      />
     </EditorLayout>
   );
 }

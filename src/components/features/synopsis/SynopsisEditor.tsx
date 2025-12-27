@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { History } from "lucide-react";
 import type { JSONContent } from "@tiptap/core";
 import { useSynopsis } from "@/hooks/useSynopsis";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { Editor } from "@/components/features/editor/Editor";
 import { VersionHistoryModal } from "@/components/features/history";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface SynopsisEditorProps {
 export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
   const { synopsis, isLoading, error, saveStatus, updateContent } =
     useSynopsis(projectId);
+  const { settings } = useUserSettings();
   const [showHistory, setShowHistory] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
 
@@ -74,6 +76,7 @@ export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
             initialContent={synopsis?.content}
             onUpdate={updateContent}
             className="h-full"
+            defaultFont={settings.defaultFont}
           />
         </div>
       </div>

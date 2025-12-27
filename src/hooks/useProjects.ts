@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Project, CreateProjectInput } from "@/repositories/types";
+import type { Project, CreateProjectInput, UpdateProjectInput } from "@/repositories/types";
 import { projectLocalRepository } from "@/storage/local/project.local";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
@@ -15,6 +15,7 @@ interface UseProjectsReturn {
   isLoading: boolean;
   error: Error | null;
   createProject: (data: CreateProjectInput) => Promise<Project>;
+  updateProject: (id: string, data: UpdateProjectInput) => Promise<Project>;
   deleteProject: (id: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -70,6 +71,17 @@ export function useProjects(): UseProjectsReturn {
     [auth]
   );
 
+  const updateProject = useCallback(
+    async (id: string, data: UpdateProjectInput): Promise<Project> => {
+      const updated = await projectLocalRepository.update(id, data);
+      setProjects((prev) =>
+        prev.map((p) => (p.id === id ? updated : p))
+      );
+      return updated;
+    },
+    []
+  );
+
   const deleteProject = useCallback(async (id: string): Promise<void> => {
     // 관련 데이터 cascade delete
     await chapterLocalRepository.deleteByProjectId(id);
@@ -86,6 +98,7 @@ export function useProjects(): UseProjectsReturn {
     isLoading,
     error,
     createProject,
+    updateProject,
     deleteProject,
     refetch: fetchProjects,
   };

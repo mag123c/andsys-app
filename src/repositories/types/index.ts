@@ -5,3 +5,4 @@ export * from "./character";
 export * from "./relationship";
 export * from "./user";
 export * from "./version";
+export * from "./settings";

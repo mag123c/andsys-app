@@ -10,7 +10,7 @@ import {
 } from "@/components/features/project";
 
 export default function ProjectsPage() {
-  const { projects, isLoading, error, createProject, deleteProject } =
+  const { projects, isLoading, error, createProject, updateProject, deleteProject } =
     useProjects();
 
   const handleCreate = async (data: Parameters<typeof createProject>[0]) => {
@@ -19,6 +19,15 @@ export default function ProjectsPage() {
       toast.success("소설이 생성되었습니다.");
     } catch {
       toast.error("소설 생성에 실패했습니다.");
+    }
+  };
+
+  const handleUpdate = async (id: string, data: Parameters<typeof updateProject>[1]) => {
+    try {
+      await updateProject(id, data);
+      toast.success("소설이 수정되었습니다.");
+    } catch {
+      toast.error("소설 수정에 실패했습니다.");
     }
   };
 
@@ -69,6 +78,7 @@ export default function ProjectsPage() {
             <ProjectCard
               key={project.id}
               project={project}
+              onUpdate={handleUpdate}
               onDelete={handleDelete}
             />
           ))}

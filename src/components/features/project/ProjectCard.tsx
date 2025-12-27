@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Trash2 } from "lucide-react";
-import type { Project } from "@/repositories/types";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import type { Project, UpdateProjectInput } from "@/repositories/types";
+import { EditProjectDialog } from "./EditProjectDialog";
 import {
   Card,
   CardHeader,
@@ -32,6 +33,7 @@ import { DefaultCoverImage } from "./DefaultCoverImage";
 
 interface ProjectCardProps {
   project: Project;
+  onUpdate: (id: string, data: UpdateProjectInput) => Promise<void>;
   onDelete: (id: string) => void;
 }
 
@@ -43,7 +45,8 @@ function formatDate(date: Date): string {
   }).format(date);
 }
 
-export function ProjectCard({ project, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   return (
@@ -87,6 +90,12 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => setShowEditDialog(true)}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      수정
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onClick={() => setShowDeleteDialog(true)}
@@ -139,6 +148,13 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditProjectDialog
+        project={project}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onUpdate={(data) => onUpdate(project.id, data)}
+      />
     </>
   );
 }

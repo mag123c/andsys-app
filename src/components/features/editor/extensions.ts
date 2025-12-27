@@ -52,18 +52,20 @@ export const editorExtensions = [
  * 에디터에서 사용 가능한 폰트 목록
  * (웹폰트로 로드된 폰트만 포함)
  *
+ * 명조체: 리디바탕 (기본), Noto Serif KR, 마루 부리
  * 고딕체: Pretendard, Noto Sans KR, 나눔스퀘어 네오, Gmarket Sans
- * 명조체: 리디바탕, Noto Serif KR, 마루 부리
  */
 export const EDITOR_FONTS = [
-  { name: "기본", value: "" },
+  // 명조체 (기본: 리디바탕)
+  { name: "리디바탕", value: "RIDIBatang" },
+  { name: "본명조", value: "Noto Serif KR" },
+  { name: "마루 부리", value: "MaruBuri" },
   // 고딕체
   { name: "Pretendard", value: "Pretendard" },
   { name: "본고딕", value: "Noto Sans KR" },
   { name: "나눔스퀘어 네오", value: "NanumSquareNeo" },
   { name: "Gmarket Sans", value: "GmarketSansMedium" },
-  // 명조체
-  { name: "리디바탕", value: "RIDIBatang" },
-  { name: "본명조", value: "Noto Serif KR" },
-  { name: "마루 부리", value: "MaruBuri" },
 ] as const;
+
+/** 기본 폰트 (리디바탕) */
+export const DEFAULT_EDITOR_FONT = "RIDIBatang";

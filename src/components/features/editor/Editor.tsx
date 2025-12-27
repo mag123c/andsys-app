@@ -13,6 +13,8 @@ interface EditorProps {
   className?: string;
   editable?: boolean;
   showToolbar?: boolean;
+  /** 기본 글꼴 (사용자 설정에서 가져옴) */
+  defaultFont?: string;
 }
 
 export function Editor({
@@ -21,6 +23,7 @@ export function Editor({
   className,
   editable = true,
   showToolbar = true,
+  defaultFont,
 }: EditorProps) {
   const editor = useEditor({
     extensions: editorExtensions,
@@ -32,7 +35,7 @@ export function Editor({
         class: cn(
           "prose prose-lg dark:prose-invert max-w-none",
           "focus:outline-none",
-          "min-h-[500px] px-4 py-2"
+          "min-h-[500px] px-4 pt-8 pb-4"
         ),
       },
     },
@@ -57,6 +60,7 @@ export function Editor({
       <EditorContent
         editor={editor}
         className="flex-1 overflow-auto"
+        style={defaultFont ? { fontFamily: defaultFont } : undefined}
       />
     </div>
   );
