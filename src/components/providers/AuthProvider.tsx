@@ -7,6 +7,7 @@ import {
   useState,
   useCallback,
 } from "react";
+import * as Sentry from "@sentry/nextjs";
 import type { Provider } from "@supabase/supabase-js";
 import type { AuthState, User } from "@/repositories/types/user";
 import { createClient } from "@/storage/remote/client";
@@ -107,6 +108,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Sentry 사용자 식별 연동
+  useEffect(() => {
+    if (auth.status === "authenticated") {
+      Sentry.setUser({
+        id: auth.user.id,
+        email: auth.user.email,
+      });
+    } else if (auth.status === "guest") {
+      Sentry.setUser({
+        id: `guest:${auth.guestId}`,
+      });
+    } else {
+      Sentry.setUser(null);
+    }
+  }, [auth]);
 
   const signInWithOAuth = useCallback(async (provider: OAuthProvider): Promise<OAuthResult> => {
     const supabase = createClient();
