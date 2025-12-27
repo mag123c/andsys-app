@@ -14,13 +14,65 @@ export interface CharacterNodeData extends Record<string, unknown> {
 
 export type CharacterNodeType = Node<CharacterNodeData, "character">;
 
+// 핸들 공통 스타일
+const handleClassName = "!w-2 !h-2 !bg-primary/50 hover:!bg-primary !border-0";
+
 function CharacterNodeComponent({
   data,
   selected,
 }: NodeProps<CharacterNodeType>) {
   return (
     <>
-      <Handle type="target" position={Position.Top} className="!bg-primary" />
+      {/* 4방위 핸들 - source와 target 모두 가능 */}
+      <Handle
+        type="source"
+        position={Position.Top}
+        id="top"
+        className={handleClassName}
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top-target"
+        className={handleClassName}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom"
+        className={handleClassName}
+      />
+      <Handle
+        type="target"
+        position={Position.Bottom}
+        id="bottom-target"
+        className={handleClassName}
+      />
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        className={handleClassName}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left-target"
+        className={handleClassName}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className={handleClassName}
+      />
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="right-target"
+        className={handleClassName}
+      />
+
       <div
         className={cn(
           "px-3 py-2 rounded-lg border-2 bg-background shadow-sm transition-all",
@@ -54,7 +106,6 @@ function CharacterNodeComponent({
           </div>
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-primary" />
     </>
   );
 }

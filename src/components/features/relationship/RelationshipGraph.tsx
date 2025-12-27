@@ -49,6 +49,39 @@ const edgeTypes: EdgeTypes = {
 const NODE_WIDTH = 120;
 const NODE_HEIGHT = 60;
 
+/**
+ * 두 노드의 위치를 기반으로 최적의 핸들 방향 계산
+ * 엣지가 꼬이지 않도록 상대 위치에 따라 적절한 방향 선택
+ */
+function getBestHandles(
+  sourcePos: { x: number; y: number },
+  targetPos: { x: number; y: number }
+): { sourceHandle: string; targetHandle: string } {
+  const dx = targetPos.x - sourcePos.x;
+  const dy = targetPos.y - sourcePos.y;
+
+  // 수평/수직 거리 비교하여 주요 방향 결정
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // 수평 방향이 더 큼
+    if (dx > 0) {
+      // target이 오른쪽
+      return { sourceHandle: "right", targetHandle: "left-target" };
+    } else {
+      // target이 왼쪽
+      return { sourceHandle: "left", targetHandle: "right-target" };
+    }
+  } else {
+    // 수직 방향이 더 큼
+    if (dy > 0) {
+      // target이 아래
+      return { sourceHandle: "bottom", targetHandle: "top-target" };
+    } else {
+      // target이 위
+      return { sourceHandle: "top", targetHandle: "bottom-target" };
+    }
+  }
+}
+
 function RelationshipGraphInner({
   characters,
   relationships,
@@ -162,17 +195,69 @@ function RelationshipGraphInner({
         },
       }));
 
-    // 관계를 단일 엣지로 생성 (양방향은 양쪽 화살표)
+    // dagre 레이아웃 적용 (수동 배치된 노드는 제외)
+    let finalNodes: Node<CharacterNodeData>[] = nodes;
+
+    if (nodes.length > 0) {
+      // 임시 엣지 (레이아웃 계산용, 핸들 없이)
+      const tempEdges: Edge[] = filteredRelationships.map((r) => ({
+        id: r.id,
+        source: r.fromCharacterId,
+        target: r.toCharacterId,
+      }));
+
+      // 수동 위치가 없는 노드만 dagre 레이아웃 적용
+      const nodesForLayout = nodes.filter((n) => !manualPositionsRef.current.has(n.id));
+      const manualNodes = nodes.filter((n) => manualPositionsRef.current.has(n.id));
+
+      let layoutedNodes: Node<CharacterNodeData>[] = [];
+
+      // 자동 레이아웃이 필요한 노드가 있을 때만 dagre 적용
+      if (nodesForLayout.length > 0) {
+        const { nodes: dagredNodes } = getLayoutedElements(
+          nodesForLayout,
+          tempEdges,
+          { direction: "TB", rankSep: 150, nodeSep: 100 }
+        );
+        layoutedNodes = dagredNodes as Node<CharacterNodeData>[];
+      }
+
+      // 수동 위치가 있는 노드는 저장된 위치 적용
+      const manualLayoutedNodes = manualNodes.map((node) => ({
+        ...node,
+        position: manualPositionsRef.current.get(node.id) || node.position,
+      }));
+
+      finalNodes = [...layoutedNodes, ...manualLayoutedNodes];
+    }
+
+    // 노드 위치 맵 생성
+    const nodePositionMap = new Map(
+      finalNodes.map((n) => [n.id, n.position])
+    );
+
+    // 관계를 엣지로 생성 (노드 위치 기반 최적 핸들 선택)
     const edges: Edge<RelationshipEdgeData>[] = [];
 
     filteredRelationships.forEach((relationship) => {
+      const sourcePos = nodePositionMap.get(relationship.fromCharacterId);
+      const targetPos = nodePositionMap.get(relationship.toCharacterId);
+
+      // 노드가 그래프에 없으면 스킵
+      if (!sourcePos || !targetPos) return;
+
       const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
       const color = typeConfig?.color || "#6B7280";
+
+      // 노드 위치 기반 최적 핸들 계산
+      const { sourceHandle, targetHandle } = getBestHandles(sourcePos, targetPos);
 
       edges.push({
         id: relationship.id,
         source: relationship.fromCharacterId,
         target: relationship.toCharacterId,
+        sourceHandle,
+        targetHandle,
         type: "relationship",
         // 양방향이면 양쪽 화살표
         ...(relationship.bidirectional && {
@@ -191,38 +276,7 @@ function RelationshipGraphInner({
       });
     });
 
-    // dagre 레이아웃 적용 (수동 배치된 노드는 제외)
-    if (nodes.length > 0) {
-      // 수동 위치가 없는 노드만 dagre 레이아웃 적용
-      // 모든 노드가 수동 배치인 경우 nodesForLayout은 빈 배열이 되어 dagre 스킵
-      const nodesForLayout = nodes.filter((n) => !manualPositionsRef.current.has(n.id));
-      const manualNodes = nodes.filter((n) => manualPositionsRef.current.has(n.id));
-
-      let layoutedNodes: Node<CharacterNodeData>[] = [];
-
-      // 자동 레이아웃이 필요한 노드가 있을 때만 dagre 적용
-      if (nodesForLayout.length > 0) {
-        const { nodes: dagredNodes } = getLayoutedElements(
-          nodesForLayout,
-          edges,
-          { direction: "TB", rankSep: 150, nodeSep: 100 }
-        );
-        layoutedNodes = dagredNodes as Node<CharacterNodeData>[];
-      }
-
-      // 수동 위치가 있는 노드는 저장된 위치 적용
-      const manualLayoutedNodes = manualNodes.map((node) => ({
-        ...node,
-        position: manualPositionsRef.current.get(node.id) || node.position,
-      }));
-
-      return {
-        initialNodes: [...layoutedNodes, ...manualLayoutedNodes],
-        initialEdges: edges,
-      };
-    }
-
-    return { initialNodes: nodes, initialEdges: edges };
+    return { initialNodes: finalNodes, initialEdges: edges };
   }, [characters, filteredRelationships, graphNodeIds]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
