@@ -37,7 +37,7 @@ export interface LocalChapter {
 
 export interface SyncQueueItem {
   id?: number;
-  entityType: "project" | "chapter";
+  entityType: "project" | "chapter" | "synopsis" | "character" | "relationship";
   entityId: string;
   operation: "create" | "update" | "delete";
   payload: unknown;

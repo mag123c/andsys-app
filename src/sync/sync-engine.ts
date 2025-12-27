@@ -2,8 +2,11 @@ import { db } from "@/storage/local/db";
 import { createClient } from "@/storage/remote/client";
 import { projectRemoteRepository } from "@/storage/remote/project.remote";
 import { chapterRemoteRepository } from "@/storage/remote/chapter.remote";
+import { synopsisRemoteRepository } from "@/storage/remote/synopsis.remote";
+import { characterRemoteRepository } from "@/storage/remote/character.remote";
+import { relationshipRemoteRepository } from "@/storage/remote/relationship.remote";
 import { syncQueue, type EntityType, type SyncOperation } from "./sync-queue";
-import type { Project, Chapter } from "@/repositories/types";
+import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 
 export type SyncStatus = "idle" | "syncing" | "error";
 
@@ -17,7 +20,7 @@ interface SyncResult {
 /**
  * 동기화 엔진
  * - 로컬 pending 항목을 서버로 동기화
- * - 충돌 해결 (latest-wins)
+ * - 충돌 해결 (latest-wins, pending 상태 보존)
  * - 온라인 복귀 시 자동 동기화
  */
 export class SyncEngine {
@@ -71,6 +74,9 @@ export class SyncEngine {
       // 2. pending 상태인 로컬 항목들 동기화
       await this.syncPendingProjects(result);
       await this.syncPendingChapters(result);
+      await this.syncPendingSynopses(result);
+      await this.syncPendingCharacters(result);
+      await this.syncPendingRelationships(result);
 
       this.setStatus(result.failed > 0 ? "error" : "idle");
     } catch (error) {
@@ -119,10 +125,22 @@ export class SyncEngine {
     operation: SyncOperation,
     payload: unknown
   ): Promise<void> {
-    if (entityType === "project") {
-      await this.syncProjectItem(entityId, operation, payload);
-    } else if (entityType === "chapter") {
-      await this.syncChapterItem(entityId, operation, payload);
+    switch (entityType) {
+      case "project":
+        await this.syncProjectItem(entityId, operation, payload);
+        break;
+      case "chapter":
+        await this.syncChapterItem(entityId, operation, payload);
+        break;
+      case "synopsis":
+        await this.syncSynopsisItem(entityId, operation, payload);
+        break;
+      case "character":
+        await this.syncCharacterItem(entityId, operation, payload);
+        break;
+      case "relationship":
+        await this.syncRelationshipItem(entityId, operation, payload);
+        break;
     }
   }
 
@@ -209,6 +227,154 @@ export class SyncEngine {
     // 로컬 syncStatus 업데이트
     if (operation !== "delete") {
       await db.chapters.update(id, {
+        syncStatus: "synced",
+        lastSyncedAt: new Date(),
+      });
+    }
+  }
+
+  /**
+   * 시놉시스 항목 동기화
+   */
+  private async syncSynopsisItem(
+    id: string,
+    operation: SyncOperation,
+    payload: unknown
+  ): Promise<void> {
+    const data = payload as {
+      projectId?: string;
+      content?: unknown;
+    };
+
+    switch (operation) {
+      case "create":
+        await synopsisRemoteRepository.create({
+          projectId: data.projectId!,
+          content: data.content as Synopsis["content"],
+        });
+        break;
+      case "update":
+        await synopsisRemoteRepository.update(id, {
+          content: data.content as Synopsis["content"],
+        });
+        break;
+      case "delete":
+        await synopsisRemoteRepository.delete(id);
+        break;
+    }
+
+    if (operation !== "delete") {
+      await db.synopses.update(id, {
+        syncStatus: "synced",
+        lastSyncedAt: new Date(),
+      });
+    }
+  }
+
+  /**
+   * 캐릭터 항목 동기화
+   */
+  private async syncCharacterItem(
+    id: string,
+    operation: SyncOperation,
+    payload: unknown
+  ): Promise<void> {
+    const data = payload as Partial<Character> & { projectId?: string };
+
+    switch (operation) {
+      case "create":
+        await characterRemoteRepository.create({
+          projectId: data.projectId!,
+          name: data.name!,
+          nickname: data.nickname,
+          age: data.age,
+          gender: data.gender,
+          race: data.race,
+          imageUrl: data.imageUrl,
+          height: data.height,
+          weight: data.weight,
+          appearance: data.appearance,
+          mbti: data.mbti,
+          personality: data.personality,
+          education: data.education,
+          occupation: data.occupation,
+          affiliation: data.affiliation,
+          background: data.background,
+          customFields: data.customFields,
+        });
+        break;
+      case "update":
+        await characterRemoteRepository.update(id, {
+          name: data.name,
+          nickname: data.nickname,
+          age: data.age,
+          gender: data.gender,
+          race: data.race,
+          imageUrl: data.imageUrl,
+          height: data.height,
+          weight: data.weight,
+          appearance: data.appearance,
+          mbti: data.mbti,
+          personality: data.personality,
+          education: data.education,
+          occupation: data.occupation,
+          affiliation: data.affiliation,
+          background: data.background,
+          customFields: data.customFields,
+        });
+        break;
+      case "delete":
+        await characterRemoteRepository.delete(id);
+        break;
+    }
+
+    if (operation !== "delete") {
+      await db.characters.update(id, {
+        syncStatus: "synced",
+        lastSyncedAt: new Date(),
+      });
+    }
+  }
+
+  /**
+   * 관계 항목 동기화
+   */
+  private async syncRelationshipItem(
+    id: string,
+    operation: SyncOperation,
+    payload: unknown
+  ): Promise<void> {
+    const data = payload as Partial<Relationship> & {
+      projectId?: string;
+      fromCharacterId?: string;
+      toCharacterId?: string;
+    };
+
+    switch (operation) {
+      case "create":
+        await relationshipRemoteRepository.create({
+          projectId: data.projectId!,
+          fromCharacterId: data.fromCharacterId!,
+          toCharacterId: data.toCharacterId!,
+          type: data.type!,
+          bidirectional: data.bidirectional!,
+          description: data.description,
+        });
+        break;
+      case "update":
+        await relationshipRemoteRepository.update(id, {
+          type: data.type,
+          description: data.description,
+          bidirectional: data.bidirectional,
+        });
+        break;
+      case "delete":
+        await relationshipRemoteRepository.delete(id);
+        break;
+    }
+
+    if (operation !== "delete") {
+      await db.relationships.update(id, {
         syncStatus: "synced",
         lastSyncedAt: new Date(),
       });
@@ -334,8 +500,192 @@ export class SyncEngine {
   }
 
   /**
+   * pending 상태의 시놉시스 동기화
+   */
+  private async syncPendingSynopses(result: SyncResult): Promise<void> {
+    const supabase = createClient();
+    const pendingSynopses = await db.synopses
+      .where("syncStatus")
+      .equals("pending")
+      .toArray();
+
+    for (const local of pendingSynopses) {
+      const project = await db.projects.get(local.projectId);
+      if (!project?.userId) continue;
+
+      try {
+        const remote = await synopsisRemoteRepository.getById(local.id);
+
+        if (!remote) {
+          const { error } = await supabase.from("synopses").upsert({
+            id: local.id,
+            project_id: local.projectId,
+            content: local.content,
+            plain_text: local.plainText,
+            word_count: local.wordCount,
+            created_at: local.createdAt.toISOString(),
+            updated_at: local.updatedAt.toISOString(),
+          });
+          if (error) throw new Error(error.message);
+        } else {
+          if (local.updatedAt > remote.updatedAt) {
+            await synopsisRemoteRepository.update(local.id, {
+              content: local.content,
+            });
+          }
+        }
+
+        await db.synopses.update(local.id, {
+          syncStatus: "synced",
+          lastSyncedAt: new Date(),
+        });
+        result.synced++;
+      } catch (error) {
+        result.failed++;
+        result.errors.push(
+          `synopsis/${local.id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
+  /**
+   * pending 상태의 캐릭터 동기화
+   */
+  private async syncPendingCharacters(result: SyncResult): Promise<void> {
+    const supabase = createClient();
+    const pendingCharacters = await db.characters
+      .where("syncStatus")
+      .equals("pending")
+      .toArray();
+
+    for (const local of pendingCharacters) {
+      const project = await db.projects.get(local.projectId);
+      if (!project?.userId) continue;
+
+      try {
+        const remote = await characterRemoteRepository.getById(local.id);
+
+        if (!remote) {
+          const { error } = await supabase.from("characters").upsert({
+            id: local.id,
+            project_id: local.projectId,
+            name: local.name,
+            nickname: local.nickname,
+            age: local.age,
+            gender: local.gender,
+            race: local.race,
+            image_url: local.imageUrl,
+            order: local.order,
+            height: local.height,
+            weight: local.weight,
+            appearance: local.appearance,
+            mbti: local.mbti,
+            personality: local.personality,
+            education: local.education,
+            occupation: local.occupation,
+            affiliation: local.affiliation,
+            background: local.background,
+            custom_fields: local.customFields,
+            created_at: local.createdAt.toISOString(),
+            updated_at: local.updatedAt.toISOString(),
+          });
+          if (error) throw new Error(error.message);
+        } else {
+          if (local.updatedAt > remote.updatedAt) {
+            await characterRemoteRepository.update(local.id, {
+              name: local.name,
+              nickname: local.nickname,
+              age: local.age,
+              gender: local.gender,
+              race: local.race,
+              imageUrl: local.imageUrl,
+              height: local.height,
+              weight: local.weight,
+              appearance: local.appearance,
+              mbti: local.mbti,
+              personality: local.personality,
+              education: local.education,
+              occupation: local.occupation,
+              affiliation: local.affiliation,
+              background: local.background,
+              customFields: local.customFields,
+            });
+          }
+        }
+
+        await db.characters.update(local.id, {
+          syncStatus: "synced",
+          lastSyncedAt: new Date(),
+        });
+        result.synced++;
+      } catch (error) {
+        result.failed++;
+        result.errors.push(
+          `character/${local.id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
+  /**
+   * pending 상태의 관계 동기화
+   */
+  private async syncPendingRelationships(result: SyncResult): Promise<void> {
+    const supabase = createClient();
+    const pendingRelationships = await db.relationships
+      .where("syncStatus")
+      .equals("pending")
+      .toArray();
+
+    for (const local of pendingRelationships) {
+      const project = await db.projects.get(local.projectId);
+      if (!project?.userId) continue;
+
+      try {
+        const remote = await relationshipRemoteRepository.getById(local.id);
+
+        if (!remote) {
+          const { error } = await supabase.from("relationships").upsert({
+            id: local.id,
+            project_id: local.projectId,
+            from_character_id: local.fromCharacterId,
+            to_character_id: local.toCharacterId,
+            type: local.type,
+            description: local.description,
+            bidirectional: local.bidirectional,
+            created_at: local.createdAt.toISOString(),
+            updated_at: local.updatedAt.toISOString(),
+          });
+          if (error) throw new Error(error.message);
+        } else {
+          if (local.updatedAt > remote.updatedAt) {
+            await relationshipRemoteRepository.update(local.id, {
+              type: local.type,
+              description: local.description,
+              bidirectional: local.bidirectional,
+            });
+          }
+        }
+
+        await db.relationships.update(local.id, {
+          syncStatus: "synced",
+          lastSyncedAt: new Date(),
+        });
+        result.synced++;
+      } catch (error) {
+        result.failed++;
+        result.errors.push(
+          `relationship/${local.id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
+  /**
    * 서버 → 로컬 동기화 (pull)
    * 회원 로그인 시 서버 데이터를 로컬로 가져오기
+   * pending 상태인 로컬 데이터는 보존 (충돌 방지)
    */
   async pullFromServer(userId: string): Promise<void> {
     this.setStatus("syncing");
@@ -355,8 +705,8 @@ export class SyncEngine {
             syncStatus: "synced",
             lastSyncedAt: new Date(),
           });
-        } else if (remote.updatedAt > local.updatedAt) {
-          // 서버가 더 최신이면 업데이트
+        } else if (local.syncStatus !== "pending" && remote.updatedAt > local.updatedAt) {
+          // pending이 아니고 서버가 더 최신이면 업데이트
           await db.projects.update(remote.id, {
             ...remote,
             coverImageBase64: local.coverImageBase64,
@@ -364,10 +714,10 @@ export class SyncEngine {
             lastSyncedAt: new Date(),
           });
         }
+        // pending 상태면 로컬 변경 보존 (덮어쓰지 않음)
 
         // 해당 프로젝트의 챕터도 가져오기
         const remoteChapters = await chapterRemoteRepository.getByProjectId(remote.id);
-
         for (const remoteChapter of remoteChapters) {
           const localChapter = await db.chapters.get(remoteChapter.id);
 
@@ -377,9 +727,71 @@ export class SyncEngine {
               syncStatus: "synced",
               lastSyncedAt: new Date(),
             });
-          } else if (remoteChapter.updatedAt > localChapter.updatedAt) {
+          } else if (localChapter.syncStatus !== "pending" && remoteChapter.updatedAt > localChapter.updatedAt) {
             await db.chapters.update(remoteChapter.id, {
               ...remoteChapter,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          }
+        }
+
+        // 시놉시스 가져오기
+        const remoteSynopsis = await synopsisRemoteRepository.getByProjectId(remote.id);
+        if (remoteSynopsis) {
+          const localSynopsis = await db.synopses.get(remoteSynopsis.id);
+
+          if (!localSynopsis) {
+            await db.synopses.add({
+              ...remoteSynopsis,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          } else if (localSynopsis.syncStatus !== "pending" && remoteSynopsis.updatedAt > localSynopsis.updatedAt) {
+            await db.synopses.update(remoteSynopsis.id, {
+              ...remoteSynopsis,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          }
+        }
+
+        // 캐릭터 가져오기
+        const remoteCharacters = await characterRemoteRepository.getByProjectId(remote.id);
+        for (const remoteCharacter of remoteCharacters) {
+          const localCharacter = await db.characters.get(remoteCharacter.id);
+
+          if (!localCharacter) {
+            await db.characters.add({
+              ...remoteCharacter,
+              imageBase64: null,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          } else if (localCharacter.syncStatus !== "pending" && remoteCharacter.updatedAt > localCharacter.updatedAt) {
+            await db.characters.update(remoteCharacter.id, {
+              ...remoteCharacter,
+              imageBase64: localCharacter.imageBase64,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          }
+        }
+
+        // 관계 가져오기
+        const remoteRelationships = await relationshipRemoteRepository.getByProjectId(remote.id);
+        for (const remoteRelationship of remoteRelationships) {
+          const localRelationship = await db.relationships.get(remoteRelationship.id);
+
+          if (!localRelationship) {
+            await db.relationships.add({
+              ...remoteRelationship,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          } else if (localRelationship.syncStatus !== "pending" && remoteRelationship.updatedAt > localRelationship.updatedAt) {
+            await db.relationships.update(remoteRelationship.id, {
+              ...remoteRelationship,
               syncStatus: "synced",
               lastSyncedAt: new Date(),
             });

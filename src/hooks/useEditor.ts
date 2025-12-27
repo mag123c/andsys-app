@@ -27,6 +27,13 @@ export function useEditor(chapterId: string): UseEditorReturn {
 
   const pendingContentRef = useRef<JSONContent | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSavingRef = useRef(false);
+  const chapterIdRef = useRef(chapterId);
+
+  // chapterId가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    chapterIdRef.current = chapterId;
+  }, [chapterId]);
 
   const fetchChapter = useCallback(async () => {
     setIsLoading(true);
@@ -48,24 +55,67 @@ export function useEditor(chapterId: string): UseEditorReturn {
     fetchChapter();
   }, [fetchChapter]);
 
+  // 동기적 저장 (페이지 이탈 시 사용)
+  const saveSync = useCallback(() => {
+    if (pendingContentRef.current && !isSavingRef.current) {
+      isSavingRef.current = true;
+      // fire-and-forget이지만, IndexedDB는 동기적으로 작업을 시작함
+      chapterLocalRepository
+        .update(chapterIdRef.current, {
+          content: pendingContentRef.current,
+        })
+        .catch(console.error)
+        .finally(() => {
+          isSavingRef.current = false;
+        });
+      pendingContentRef.current = null;
+    }
+  }, []);
+
+  // beforeunload 및 visibilitychange 이벤트 핸들러
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (pendingContentRef.current) {
+        saveSync();
+        // 브라우저에 저장 중임을 알림
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      // 탭이 백그라운드로 갈 때 저장
+      if (document.visibilityState === "hidden" && pendingContentRef.current) {
+        saveSync();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [saveSync]);
+
+  // 컴포넌트 언마운트 시 저장
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      if (pendingContentRef.current) {
-        chapterLocalRepository.update(chapterId, {
-          content: pendingContentRef.current,
-        });
-      }
+      // 언마운트 시 동기적 저장 시도
+      saveSync();
     };
-  }, [chapterId]);
+  }, [saveSync]);
 
   const save = useCallback(
     async (data: UpdateChapterInput) => {
       if (!chapter) return;
 
       setSaveStatus("saving");
+      isSavingRef.current = true;
       try {
         const updated = await chapterLocalRepository.update(chapterId, data);
         setChapter(updated);
@@ -75,6 +125,8 @@ export function useEditor(chapterId: string): UseEditorReturn {
           err instanceof Error ? err : new Error("Failed to save chapter")
         );
         setSaveStatus("error");
+      } finally {
+        isSavingRef.current = false;
       }
     },
     [chapter, chapterId]

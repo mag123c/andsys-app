@@ -2,12 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Project, CreateProjectInput, UpdateProjectInput } from "@/repositories/types";
+import { db } from "@/storage/local/db";
 import { projectLocalRepository } from "@/storage/local/project.local";
-import { chapterLocalRepository } from "@/storage/local/chapter.local";
-import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
-import { characterLocalRepository } from "@/storage/local/character.local";
-import { relationshipLocalRepository } from "@/storage/local/relationship.local";
-import { versionLocalRepository } from "@/storage/local/version.local";
 import { useAuth } from "@/hooks/useAuth";
 
 interface UseProjectsReturn {
@@ -83,13 +79,26 @@ export function useProjects(): UseProjectsReturn {
   );
 
   const deleteProject = useCallback(async (id: string): Promise<void> => {
-    // 관련 데이터 cascade delete
-    await chapterLocalRepository.deleteByProjectId(id);
-    await synopsisLocalRepository.deleteByProjectId(id);
-    await versionLocalRepository.deleteByProjectId(id);
-    await relationshipLocalRepository.deleteByProjectId(id);
-    await characterLocalRepository.deleteByProjectId(id);
-    await projectLocalRepository.delete(id);
+    // 트랜잭션으로 관련 데이터 cascade delete (원자성 보장)
+    await db.transaction(
+      "rw",
+      [db.projects, db.chapters, db.synopses, db.characters, db.relationships, db.versions],
+      async () => {
+        await db.chapters.where("projectId").equals(id).delete();
+        await db.synopses.where("projectId").equals(id).delete();
+        await db.versions.where("projectId").equals(id).delete();
+        await db.relationships.where("projectId").equals(id).delete();
+        await db.characters.where("projectId").equals(id).delete();
+
+        // soft delete
+        await db.projects.update(id, {
+          status: "deleted",
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+          syncStatus: "pending",
+        });
+      }
+    );
     setProjects((prev) => prev.filter((p) => p.id !== id));
   }, []);
 

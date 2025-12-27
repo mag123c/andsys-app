@@ -3,7 +3,7 @@ import { db, type SyncQueueItem } from "@/storage/local/db";
 const MAX_ATTEMPTS = 5;
 
 export type SyncOperation = "create" | "update" | "delete";
-export type EntityType = "project" | "chapter";
+export type EntityType = "project" | "chapter" | "synopsis" | "character" | "relationship";
 
 interface EnqueueParams {
   entityType: EntityType;
