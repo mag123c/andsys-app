@@ -4,6 +4,7 @@
  */
 
 import type { JSONContent } from "@tiptap/core";
+import type { RelationshipType } from "@/repositories/types";
 
 // ID 생성 (클라이언트에서 실행되므로 crypto.randomUUID 사용)
 const generateId = () => crypto.randomUUID();
@@ -66,7 +67,7 @@ export interface MockupData {
     id: string;
     fromCharacterId: string;
     toCharacterId: string;
-    type: "family" | "friend" | "lover" | "rival" | "enemy" | "colleague" | "master" | "custom";
+    type: RelationshipType;
     description: string;
     bidirectional: boolean;
   }>;
