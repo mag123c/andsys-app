@@ -27,7 +27,7 @@ import { formatCharacterCount } from "@/lib/format";
 import { extractText, countCharacters } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 
-const RIGHT_SIDEBAR_COLLAPSED_KEY = "andsys:editor-right-sidebar-collapsed";
+const RIGHT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-right-sidebar-collapsed";
 
 interface EditorLayoutProps {
   project: Project;

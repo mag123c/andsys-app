@@ -58,7 +58,7 @@
 ## 프로젝트 구조
 
 ```
-andsys-project/
+4ndsys-project/
 ├── .claude/               # Claude 스킬
 │   └── skills/
 │       ├── developer/
@@ -319,7 +319,7 @@ export class AppDatabase extends Dexie {
   syncQueue!: Table<SyncQueueItem>;
 
   constructor() {
-    super("andsys");
+    super("4ndsys");
     this.version(1).stores({
       projects: "id, updatedAt, pendingSync",
       chapters: "id, projectId, order, updatedAt, pendingSync",

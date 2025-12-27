@@ -87,7 +87,7 @@ const sections: LeftSidebarSection[] = [
 
 ```typescript
 // localStorage에 상태 저장
-const SIDEBAR_STATE_KEY = "andsys:left-sidebar-collapsed";
+const SIDEBAR_STATE_KEY = "4ndsys:left-sidebar-collapsed";
 
 function useLeftSidebar() {
   const [collapsed, setCollapsed] = useState(() => {

@@ -142,5 +142,5 @@ export function downloadAsJson(data: unknown, filename: string): void {
  */
 export function exportBackup(backup: BackupData): void {
   const date = new Date().toISOString().split("T")[0];
-  downloadAsJson(backup, `andsys-backup-${date}`);
+  downloadAsJson(backup, `4ndsys-backup-${date}`);
 }

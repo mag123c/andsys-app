@@ -35,7 +35,7 @@ npx @sentry/wizard@latest -i nextjs
 # .env.local
 SENTRY_DSN=https://xxx@sentry.io/xxx
 SENTRY_ORG=your-org
-SENTRY_PROJECT=andsys
+SENTRY_PROJECT=4ndsys
 
 # 소스맵 업로드용 (CI/CD)
 SENTRY_AUTH_TOKEN=your-auth-token
@@ -319,7 +319,7 @@ src/lib/analytics/
 # Sentry
 SENTRY_DSN=https://xxx@sentry.io/xxx
 SENTRY_ORG=your-org
-SENTRY_PROJECT=andsys
+SENTRY_PROJECT=4ndsys
 SENTRY_AUTH_TOKEN=your-auth-token
 
 # GA4

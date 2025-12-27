@@ -173,7 +173,7 @@ export class AppDatabase extends Dexie {
   settings!: Table<LocalSettings>;
 
   constructor() {
-    super("andsys");
+    super("4ndsys");
 
     this.version(1).stores({
       projects: "id, userId, guestId, updatedAt, syncStatus",

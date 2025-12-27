@@ -123,10 +123,10 @@
 
 ### 배포
 - [x] Vercel 프로젝트 생성 (vercel.json 설정 완료)
-- [x] GitHub 저장소 연결 (mag123c/andsys-app)
+- [x] GitHub 저장소 연결 (mag123c/4ndsys-app)
 - [x] 환경 변수 설정 (Supabase Cloud 연결)
 - [x] 배포 완료
-  - Production: https://andsys-project.vercel.app
+  - Production: 4ndsys.net
 - [ ] 커스텀 도메인 연결 (선택)
 
 ---
@@ -169,6 +169,6 @@
 
 | 항목 | 값 |
 |------|-----|
-| GitHub | https://github.com/mag123c/andsys-app |
-| Vercel | https://andsys-project.vercel.app |
+| GitHub | https://github.com/mag123c/4ndsys-app |
+| Vercel | 4ndsys.net |
 | Supabase | rwuukrncmkrhubbqughn.supabase.co |

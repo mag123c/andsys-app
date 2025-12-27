@@ -165,7 +165,7 @@ export class AppDatabase extends Dexie {
   settings!: Table<LocalSettings>;
 
   constructor() {
-    super("andsys");
+    super("4ndsys");
 
     this.version(1).stores({
       // 인덱스 정의 (id는 PK로 자동)

@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
 
-const GUEST_NOTICE_KEY = "andsys:guest-notice-shown";
+const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
 
 // 애니메이션 설정
 const animations = {

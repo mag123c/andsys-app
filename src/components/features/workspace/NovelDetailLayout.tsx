@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { NovelSidebar } from "./NovelSidebar";
 
-const SIDEBAR_COLLAPSED_KEY = "andsys:novel-sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "4ndsys:novel-sidebar-collapsed";
 
 interface NovelDetailLayoutProps {
   children: React.ReactNode;
