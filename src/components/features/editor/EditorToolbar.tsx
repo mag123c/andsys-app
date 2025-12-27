@@ -24,35 +24,38 @@ import { EDITOR_FONTS } from "./extensions";
 
 interface EditorToolbarProps {
   editor: Editor | null;
+  /** 기본 글꼴 (사용자 설정에서 가져옴) */
+  defaultFont?: string;
 }
 
-export function EditorToolbar({ editor }: EditorToolbarProps) {
+export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
   if (!editor) return null;
 
-  const currentFont = editor.getAttributes("textStyle").fontFamily || "";
+  // Tiptap에서 설정된 폰트가 없으면 defaultFont 사용
+  const tiptapFont = editor.getAttributes("textStyle").fontFamily || "";
+  const currentFont = tiptapFont || defaultFont || "";
+
+  // 현재 폰트의 표시 이름 찾기
+  const currentFontName = EDITOR_FONTS.find((f) => f.value === currentFont)?.name || currentFont;
 
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
       {/* 폰트 선택 */}
       <Select
-        value={currentFont || "default"}
+        value={currentFont}
         onValueChange={(value) => {
-          if (value === "default") {
-            editor.chain().focus().unsetFontFamily().run();
-          } else {
-            editor.chain().focus().setFontFamily(value).run();
-          }
+          editor.chain().focus().setFontFamily(value).run();
         }}
       >
         <SelectTrigger className="h-8 w-[120px] text-xs">
-          <SelectValue placeholder="폰트" />
+          <span className="truncate">{currentFontName || "폰트"}</span>
         </SelectTrigger>
         <SelectContent>
           {EDITOR_FONTS.map((font) => (
             <SelectItem
-              key={font.value || "default"}
-              value={font.value || "default"}
-              style={{ fontFamily: font.value || "inherit" }}
+              key={font.value}
+              value={font.value}
+              style={{ fontFamily: font.value }}
             >
               {font.name}
             </SelectItem>

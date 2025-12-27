@@ -56,7 +56,9 @@ export function Editor({
 
   return (
     <div className={cn("flex flex-col", className)}>
-      {showToolbar && editable && <EditorToolbar editor={editor} />}
+      {showToolbar && editable && (
+        <EditorToolbar editor={editor} defaultFont={defaultFont} />
+      )}
       <EditorContent
         editor={editor}
         className="flex-1 overflow-auto"
