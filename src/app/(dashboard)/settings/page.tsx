@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { ArrowLeft, Download, Loader2, Sun, Moon, Monitor, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Loader2,
+  Sun,
+  Moon,
+  Monitor,
+  User,
+  LogOut,
+  BookOpen,
+  FileText,
+  LetterText,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useProjects } from "@/hooks/useProjects";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { exportBackup, type BackupData } from "@/lib/export";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,15 +31,46 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/storage/remote/client";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { auth } = useAuth();
   const { projects } = useProjects();
   const { theme, setTheme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isAuthenticated = auth.status === "authenticated";
-  const isGuest = auth.status === "guest";
+
+  // 통계 계산
+  const [stats, setStats] = useState({ totalProjects: 0, totalChapters: 0, totalWords: 0 });
+
+  useEffect(() => {
+    async function calculateStats() {
+      let totalChapters = 0;
+      let totalWords = 0;
+
+      for (const project of projects) {
+        const chapters = await chapterLocalRepository.getByProjectId(project.id);
+        totalChapters += chapters.length;
+        totalWords += chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
+      }
+
+      setStats({
+        totalProjects: projects.length,
+        totalChapters,
+        totalWords,
+      });
+    }
+
+    if (projects.length > 0) {
+      calculateStats();
+    } else {
+      setStats({ totalProjects: 0, totalChapters: 0, totalWords: 0 });
+    }
+  }, [projects]);
 
   const handleExportBackup = async () => {
     setIsExporting(true);
@@ -72,6 +114,20 @@ export default function SettingsPage() {
     }
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/");
+      toast.success("로그아웃되었습니다.");
+    } catch {
+      toast.error("로그아웃에 실패했습니다.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (auth.status === "loading") {
     return (
       <div className="flex items-center justify-center py-16">
@@ -82,7 +138,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <nav className="mb-6">
+      <nav className="mb-4">
         <Link
           href="/novels"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -92,64 +148,98 @@ export default function SettingsPage() {
         </Link>
       </nav>
 
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold">설정</h1>
-        <p className="text-muted-foreground mt-1">계정 및 앱 설정을 관리합니다.</p>
+      <header className="mb-6">
+        <h1 className="text-xl font-bold">설정</h1>
       </header>
 
-      <div className="space-y-6">
-        {/* 프로필 정보 */}
+      <div className="max-w-2xl space-y-4">
+        {/* 프로필 + 통계 */}
         <Card>
-          <CardHeader>
-            <CardTitle>프로필</CardTitle>
-            <CardDescription>계정 정보를 확인합니다.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-6">
             {isAuthenticated ? (
-              <>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    {auth.user.avatarUrl && (
-                      <AvatarImage src={auth.user.avatarUrl} alt={auth.user.displayName || "프로필"} />
-                    )}
-                    <AvatarFallback className="text-lg">
-                      {auth.user.displayName?.charAt(0).toUpperCase() || <User className="h-6 w-6" />}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{auth.user.displayName || "이름 없음"}</p>
-                    <p className="text-sm text-muted-foreground">{auth.user.email}</p>
-                  </div>
+              <div className="flex items-start gap-4">
+                <Avatar className="h-12 w-12">
+                  {auth.user.avatarUrl && (
+                    <AvatarImage src={auth.user.avatarUrl} alt={auth.user.displayName || "프로필"} />
+                  )}
+                  <AvatarFallback>
+                    {auth.user.displayName?.charAt(0).toUpperCase() || <User className="h-5 w-5" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{auth.user.displayName || "이름 없음"}</p>
+                  <p className="text-sm text-muted-foreground truncate">{auth.user.email}</p>
                 </div>
-                <div className="space-y-2">
-                  <Label>이메일</Label>
-                  <Input value={auth.user.email} disabled />
-                </div>
-                <div className="space-y-2">
-                  <Label>표시 이름</Label>
-                  <Input
-                    value={auth.user.displayName || "설정되지 않음"}
-                    disabled
-                  />
-                </div>
-              </>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="shrink-0"
+                >
+                  {isLoggingOut ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <LogOut className="h-4 w-4 mr-1" />
+                      로그아웃
+                    </>
+                  )}
+                </Button>
+              </div>
             ) : (
-              <p className="text-muted-foreground">
-                게스트로 사용 중입니다.{" "}
-                <Link href="/signup" className="text-primary hover:underline">
-                  회원가입
-                </Link>
-                하면 데이터를 클라우드에 저장할 수 있습니다.
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">게스트</p>
+                  <p className="text-sm text-muted-foreground">로그인하면 클라우드 백업을 사용할 수 있습니다</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" asChild>
+                    <Link href="/signup">회원가입</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/login">로그인</Link>
+                  </Button>
+                </div>
+              </div>
             )}
+
+            {/* 통계 */}
+            <Separator className="my-4" />
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span className="text-xs">소설</span>
+                </div>
+                <p className="text-lg font-semibold">{stats.totalProjects}</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                  <FileText className="h-3.5 w-3.5" />
+                  <span className="text-xs">회차</span>
+                </div>
+                <p className="text-lg font-semibold">{stats.totalChapters}</p>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                  <LetterText className="h-3.5 w-3.5" />
+                  <span className="text-xs">글자</span>
+                </div>
+                <p className="text-lg font-semibold">
+                  {stats.totalWords >= 10000
+                    ? `${(stats.totalWords / 10000).toFixed(1)}만`
+                    : stats.totalWords.toLocaleString()}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* 테마 설정 */}
+        {/* 테마 */}
         <Card>
-          <CardHeader>
-            <CardTitle>테마</CardTitle>
-            <CardDescription>앱의 외관을 설정합니다.</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">테마</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
@@ -159,7 +249,7 @@ export default function SettingsPage() {
                 onClick={() => setTheme("light")}
                 className="flex-1"
               >
-                <Sun className="mr-2 h-4 w-4" />
+                <Sun className="mr-1.5 h-4 w-4" />
                 라이트
               </Button>
               <Button
@@ -168,7 +258,7 @@ export default function SettingsPage() {
                 onClick={() => setTheme("dark")}
                 className="flex-1"
               >
-                <Moon className="mr-2 h-4 w-4" />
+                <Moon className="mr-1.5 h-4 w-4" />
                 다크
               </Button>
               <Button
@@ -177,69 +267,36 @@ export default function SettingsPage() {
                 onClick={() => setTheme("system")}
                 className="flex-1"
               >
-                <Monitor className="mr-2 h-4 w-4" />
+                <Monitor className="mr-1.5 h-4 w-4" />
                 시스템
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* 게스트 안내 */}
-        {isGuest && (
-          <Card>
-            <CardHeader>
-              <CardTitle>회원가입 안내</CardTitle>
-              <CardDescription>
-                현재 게스트로 사용 중입니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                게스트 모드에서는 데이터가 이 브라우저에만 저장됩니다. 회원가입을 하면:
-              </p>
-              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                <li>데이터가 클라우드에 안전하게 백업됩니다</li>
-                <li>다른 기기에서도 작업을 이어갈 수 있습니다</li>
-                <li>기존 게스트 데이터가 자동으로 마이그레이션됩니다</li>
-              </ul>
-              <div className="flex gap-2">
-                <Button asChild>
-                  <Link href="/signup">회원가입</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/login">로그인</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* 데이터 관리 */}
         <Card>
-          <CardHeader>
-            <CardTitle>데이터 관리</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">데이터 백업</CardTitle>
             <CardDescription>
-              소설과 회차 데이터를 백업합니다.
+              모든 소설과 회차를 JSON 파일로 내보냅니다.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              모든 소설과 회차를 JSON 파일로 내보냅니다.
-              {projects.length > 0 && ` (${projects.length}개 소설)`}
-            </p>
+          <CardContent>
             <Button
               onClick={handleExportBackup}
               disabled={isExporting || projects.length === 0}
               variant="outline"
+              size="sm"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                   백업 중...
                 </>
               ) : (
                 <>
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="mr-1.5 h-4 w-4" />
                   전체 백업 다운로드
                 </>
               )}
