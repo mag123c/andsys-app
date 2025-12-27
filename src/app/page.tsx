@@ -1,12 +1,6 @@
 "use client";
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
@@ -16,6 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
 import Link from "next/link";
@@ -195,22 +190,26 @@ export default function LandingPage() {
 
         {/* FAQ */}
         <section className="border-t py-20">
-          <div className="mx-auto max-w-3xl px-4">
+          <div className="mx-auto max-w-5xl px-4">
             <h2 className="text-center text-2xl font-bold md:text-3xl">
               자주 묻는 질문
             </h2>
-            <Accordion type="single" collapsible className="mt-8">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
+                <Card key={index} className="h-full">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium">
+                      {faq.question}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {faq.answer}
+                    </p>
+                  </CardContent>
+                </Card>
               ))}
-            </Accordion>
+            </div>
           </div>
         </section>
 
