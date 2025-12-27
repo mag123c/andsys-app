@@ -58,61 +58,82 @@ export function RightSidebar({
             className
           )}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={onToggle}
-            aria-label="사이드바 펼치기"
-          >
-            <PanelRight className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onToggle}
+                aria-label="사이드바 펼치기"
+              >
+                <PanelRight className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">펼치기</TooltipContent>
+          </Tooltip>
           <div className="flex flex-col gap-2 mt-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => {
-                setActiveTab("synopsis");
-                onToggle();
-              }}
-              title="시놉시스"
-            >
-              <FileText className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => {
-                setActiveTab("characters");
-                onToggle();
-              }}
-              title="등장인물"
-            >
-              <Users className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setRelationshipDialogOpen(true)}
-              title="관계도"
-            >
-              <Network className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => {
-                setActiveTab("chapters");
-                onToggle();
-              }}
-              title="다른 회차"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setActiveTab("synopsis");
+                    onToggle();
+                  }}
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">시놉시스</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setActiveTab("characters");
+                    onToggle();
+                  }}
+                >
+                  <Users className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">등장인물</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setRelationshipDialogOpen(true)}
+                >
+                  <Network className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">관계도</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setActiveTab("chapters");
+                    onToggle();
+                  }}
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">다른 회차</TooltipContent>
+            </Tooltip>
           </div>
         </aside>
       ) : (

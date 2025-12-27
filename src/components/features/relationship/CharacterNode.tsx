@@ -14,16 +14,19 @@ export interface CharacterNodeData extends Record<string, unknown> {
 
 export type CharacterNodeType = Node<CharacterNodeData, "character">;
 
-// 핸들 공통 스타일
-const handleClassName = "!w-2 !h-2 !bg-primary/50 hover:!bg-primary !border-0";
-
 function CharacterNodeComponent({
   data,
   selected,
 }: NodeProps<CharacterNodeType>) {
+  // 핸들 스타일: 선택 시에만 표시
+  const handleClassName = cn(
+    "!w-2 !h-2 !bg-primary/50 hover:!bg-primary !border-0 transition-opacity",
+    selected ? "!opacity-100" : "!opacity-0"
+  );
+
   return (
     <>
-      {/* 4방위 핸들 - source와 target 모두 가능 */}
+      {/* 4방위 핸들 - source와 target 모두 가능, 선택 시에만 표시 */}
       <Handle
         type="source"
         position={Position.Top}
