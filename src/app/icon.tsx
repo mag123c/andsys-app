@@ -19,7 +19,7 @@ export default function Icon() {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ color: "#171717" }}
+        style={{ color: "#0ea5e9" }}
       >
         {/* FilePenLine icon */}
         <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
