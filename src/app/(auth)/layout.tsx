@@ -1,11 +1,37 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FilePenLine } from "lucide-react";
+import { FilePenLine, Loader2 } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { auth } = useAuth();
+
+  const isLoading = auth.status === "loading";
+  const isAuthenticated = auth.status === "authenticated";
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/novels");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // 로딩 중이거나 로그인 상태면 로딩 표시
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b">

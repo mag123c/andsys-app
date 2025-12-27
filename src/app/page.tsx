@@ -1,10 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FilePenLine, BookOpen, Users, Network, PanelRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -13,13 +8,19 @@ import {
 } from "@/components/ui/accordion";
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const GUEST_NOTICE_KEY = "andsys:guest-notice-shown";
 
@@ -60,12 +61,7 @@ const faqs = [
   {
     question: "무료인가요?",
     answer:
-      "네, 모든 기능을 무료로 사용할 수 있습니다. 회차 관리, 등장인물, 관계도, 시놉시스 등 모든 기능이 무료입니다.",
-  },
-  {
-    question: "나중에 유료로 바뀌나요?",
-    answer:
-      "아니요, 유료 전환 계획이 없습니다. 4ndSYS는 무료 서비스로 계속 운영될 예정입니다.",
+      "네, 모든 기능을 무료로 사용할 수 있습니다. 4ndSYS는 무료 서비스로 계속 운영될 예정입니다.",
   },
   {
     question: "브라우저 데이터를 삭제하면 어떻게 되나요?",
@@ -81,13 +77,33 @@ const faqs = [
 
 export default function LandingPage() {
   const router = useRouter();
+  const { auth } = useAuth();
   const [showGuestNotice, setShowGuestNotice] = useState(false);
   const [hasSeenNotice, setHasSeenNotice] = useState(true); // 초기값 true로 hydration 문제 방지
+
+  const isLoading = auth.status === "loading";
+  const isAuthenticated = auth.status === "authenticated";
 
   useEffect(() => {
     const seen = localStorage.getItem(GUEST_NOTICE_KEY);
     setHasSeenNotice(!!seen);
   }, []);
+
+  // 로그인 상태면 /novels로 리다이렉트
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/novels");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // 로딩 중이거나 로그인 상태면 로딩 표시
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const handleStartClick = () => {
     if (hasSeenNotice) {
