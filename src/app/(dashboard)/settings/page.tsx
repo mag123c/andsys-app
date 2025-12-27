@@ -139,7 +139,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
+    <div className="max-w-lg mx-auto">
       <nav className="mb-4">
         <Link
           href="/novels"
@@ -154,7 +154,7 @@ export default function SettingsPage() {
         <h1 className="text-xl font-bold">설정</h1>
       </header>
 
-      <div className="max-w-lg space-y-4">
+      <div className="space-y-4">
         {/* 프로필 */}
         <Card>
           <CardContent className="pt-4 pb-4">
@@ -311,6 +311,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 }
