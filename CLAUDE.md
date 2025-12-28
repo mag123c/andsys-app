@@ -34,7 +34,7 @@ IndexedDB (로컬) ←→ SyncEngine ←→ Supabase (서버)
 
 - **Repository 패턴**: Supabase 직접 호출 금지, `src/repositories/` 인터페이스 통해 접근
 - **오프라인 우선**: 저장 시 IndexedDB 먼저 → 온라인이면 debounce 후 Supabase 동기화
-- **Dexie 스키마 버전**: 현재 v6 (projects, chapters, synopses, characters, relationships, versions 테이블)
+- **Dexie 스키마 버전**: 현재 v7 (projects, chapters, synopses, characters, relationships, versions 테이블)
 
 ### 주요 폴더 구조
 ```

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, Settings } from "lucide-react";
+import { User, Settings, HelpCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarToggle } from "./SidebarToggle";
 
@@ -51,6 +51,15 @@ export function SidebarProfile({
             >
               <Settings className="h-4 w-4 text-muted-foreground" />
             </Link>
+            <a
+              href="https://guide.4ndsys.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
+              title="도움말"
+            >
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            </a>
           </>
         )}
         {showToggle && onToggle && (
@@ -91,6 +100,15 @@ export function SidebarProfile({
         >
           <Settings className="h-4 w-4 text-muted-foreground" />
         </Link>
+        <a
+          href="https://guide.4ndsys.net"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors shrink-0"
+          title="도움말"
+        >
+          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+        </a>
         {showToggle && onToggle && (
           <SidebarToggle collapsed={collapsed} onToggle={onToggle} side="left" />
         )}
