@@ -6,8 +6,20 @@ export default defineConfig({
   lang: 'ko-KR',
 
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
-    ['meta', { name: 'theme-color', content: '#3b82f6' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['meta', { name: 'theme-color', content: '#0ea5e9' }],
+    ['meta', { name: 'author', content: '4ndSYS' }],
+    ['meta', { name: 'keywords', content: '웹소설, 글쓰기, 소설 쓰기, 작가, 집필, 4ndSYS, 가이드' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: '4ndSYS 가이드' }],
+    ['meta', { property: 'og:title', content: '4ndSYS 사용 가이드' }],
+    ['meta', { property: 'og:description', content: '웹소설 작가를 위한 글쓰기 플랫폼 사용 가이드' }],
+    ['meta', { property: 'og:url', content: 'https://guide.4ndsys.net' }],
+    ['meta', { property: 'og:locale', content: 'ko_KR' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { name: 'twitter:title', content: '4ndSYS 사용 가이드' }],
+    ['meta', { name: 'twitter:description', content: '웹소설 작가를 위한 글쓰기 플랫폼 사용 가이드' }],
+    ['link', { rel: 'canonical', href: 'https://guide.4ndsys.net' }],
   ],
 
   themeConfig: {
