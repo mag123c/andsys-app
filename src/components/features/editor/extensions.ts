@@ -4,6 +4,61 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import FontFamily from "@tiptap/extension-font-family";
 import { TextStyle } from "@tiptap/extension-text-style";
+import { Extension } from "@tiptap/core";
+
+/**
+ * 폰트 크기 확장 (TextStyle 기반)
+ */
+const FontSize = Extension.create({
+  name: "fontSize",
+
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    };
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element) =>
+              element.style.fontSize?.replace(/['"]+/g, "") || null,
+            renderHTML: (attributes) => {
+              if (!attributes.fontSize) {
+                return {};
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      setFontSize:
+        (fontSize: string) =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize }).run();
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }) => {
+          return chain()
+            .setMark("textStyle", { fontSize: null })
+            .removeEmptyTextStyle()
+            .run();
+        },
+    };
+  },
+});
 
 /**
  * 소설 에디터용 Tiptap 확장 설정
@@ -46,6 +101,7 @@ export const editorExtensions = [
     types: ["paragraph"],
     alignments: ["left", "center"],
   }),
+  FontSize,
 ];
 
 /**
@@ -69,3 +125,21 @@ export const EDITOR_FONTS = [
 
 /** 기본 폰트 (리디바탕) */
 export const DEFAULT_EDITOR_FONT = "RIDIBatang";
+
+/**
+ * 에디터에서 사용 가능한 폰트 크기 목록
+ */
+export const EDITOR_FONT_SIZES = [
+  { name: "9", value: "9pt" },
+  { name: "10", value: "10pt" },
+  { name: "11", value: "11pt" },
+  { name: "12", value: "12pt" },
+  { name: "14", value: "14pt" },
+  { name: "16", value: "16pt" },
+  { name: "18", value: "18pt" },
+  { name: "20", value: "20pt" },
+  { name: "24", value: "24pt" },
+] as const;
+
+/** 기본 폰트 크기 */
+export const DEFAULT_FONT_SIZE = "12pt";

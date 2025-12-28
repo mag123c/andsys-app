@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { EDITOR_FONTS } from "./extensions";
+import { EDITOR_FONTS, EDITOR_FONT_SIZES, DEFAULT_FONT_SIZE } from "./extensions";
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -36,6 +36,10 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
 
   // 현재 폰트의 표시 이름 찾기
   const currentFontName = EDITOR_FONTS.find((f) => f.value === currentFont)?.name || currentFont;
+
+  // 현재 폰트 크기 (설정된 값이 없으면 기본값 12pt)
+  const currentFontSize = editor.getAttributes("textStyle").fontSize || DEFAULT_FONT_SIZE;
+  const currentFontSizeName = EDITOR_FONT_SIZES.find((s) => s.value === currentFontSize)?.name || currentFontSize.replace("pt", "");
 
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
@@ -57,6 +61,25 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
               style={{ fontFamily: font.value }}
             >
               {font.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* 폰트 크기 선택 */}
+      <Select
+        value={currentFontSize}
+        onValueChange={(value) => {
+          editor.chain().focus().setFontSize(value).run();
+        }}
+      >
+        <SelectTrigger className="h-8 w-[70px] text-xs">
+          <span className="truncate">{currentFontSizeName}</span>
+        </SelectTrigger>
+        <SelectContent>
+          {EDITOR_FONT_SIZES.map((size) => (
+            <SelectItem key={size.value} value={size.value}>
+              {size.name}
             </SelectItem>
           ))}
         </SelectContent>
