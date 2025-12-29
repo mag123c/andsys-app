@@ -25,6 +25,7 @@ import { useUserSettings } from "@/hooks/useUserSettings";
 import { EDITOR_FONTS } from "@/components/features/editor/extensions";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { exportBackup, type BackupData } from "@/lib/export";
+import { DeleteAccountDialog } from "@/components/features/settings/DeleteAccountDialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -352,6 +353,21 @@ export default function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* 계정 관리 (로그인 사용자만) */}
+        {isAuthenticated && (
+          <Card className="border-destructive/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-destructive">계정 관리</CardTitle>
+              <CardDescription>
+                계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DeleteAccountDialog />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
