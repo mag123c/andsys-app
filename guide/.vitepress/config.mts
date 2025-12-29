@@ -67,7 +67,6 @@ export default defineConfig({
           { text: '에디터 기본 사용법', link: '/editor/basics' },
           { text: '서식 적용하기', link: '/editor/formatting' },
           { text: '폰트 변경', link: '/editor/font' },
-          { text: '맞춤법 검사', link: '/editor/spellcheck' },
           { text: '자동 저장', link: '/editor/auto-save' },
           { text: '키보드 단축키', link: '/editor/shortcuts' },
           { text: '우측 패널 활용', link: '/editor/right-panel' },

@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
-import { editorExtensions } from "./extensions";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Placeholder from "@tiptap/extension-placeholder";
+import TextAlign from "@tiptap/extension-text-align";
+import FontFamily from "@tiptap/extension-font-family";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { FontSize } from "./extensions";
 import { EditorToolbar } from "./EditorToolbar";
 import { cn } from "@/lib/utils";
 
@@ -25,8 +31,44 @@ export function Editor({
   showToolbar = true,
   defaultFont,
 }: EditorProps) {
+  // 확장 기능을 useMemo로 안정화하여 중복 등록 방지
+  const extensions = useMemo(
+    () => [
+      StarterKit.configure({
+        heading: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        blockquote: false,
+        codeBlock: false,
+        code: false,
+        strike: false,
+        horizontalRule: false,
+        gapcursor: false,
+        dropcursor: {
+          color: "#DBEAFE",
+          width: 4,
+        },
+      }),
+      Placeholder.configure({
+        placeholder: "글을 작성하세요...",
+      }),
+      Underline,
+      TextStyle,
+      FontFamily.configure({
+        types: ["textStyle"],
+      }),
+      TextAlign.configure({
+        types: ["paragraph"],
+        alignments: ["left", "center"],
+      }),
+      FontSize,
+    ],
+    []
+  );
+
   const editor = useEditor({
-    extensions: editorExtensions,
+    extensions,
     content: initialContent,
     editable,
     immediatelyRender: false,
