@@ -51,8 +51,8 @@ function spellCheckAsync(
       reject(err);
     };
 
-    // PNU(부산대) 서비스 사용: 더 정밀한 맞춤법 검사 제공
-    hanspell.spellCheckByPNU(text, timeout, onResult, onEnd, onError);
+    // DAUM 서비스 사용 (PNU 서버 불안정으로 변경)
+    hanspell.spellCheckByDAUM(text, timeout, onResult, onEnd, onError);
   });
 }
 
