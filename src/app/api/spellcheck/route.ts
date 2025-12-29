@@ -5,6 +5,14 @@ import type { SpellCheckError, SpellCheckResult } from "@/lib/spellcheck";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const hanspell = require("hanspell");
 
+/** 맞춤법 검사 설정 */
+const SPELLCHECK_CONFIG = {
+  /** 최대 검사 길이 (API 부하 방지) */
+  maxLength: 2000,
+  /** API 타임아웃 (ms) */
+  timeout: 10000,
+} as const;
+
 interface HanspellResult {
   token: string;
   suggestions: string[];
@@ -18,7 +26,7 @@ interface HanspellResult {
  */
 function spellCheckAsync(
   text: string,
-  timeout = 10000
+  timeout = SPELLCHECK_CONFIG.timeout
 ): Promise<SpellCheckError[]> {
   return new Promise((resolve, reject) => {
     const results: SpellCheckError[] = [];
@@ -43,7 +51,7 @@ function spellCheckAsync(
       reject(err);
     };
 
-    // DAUM 서비스 사용 (더 정확한 결과)
+    // DAUM 서비스 사용: PNU보다 띄어쓰기/맞춤법 정확도가 높고 응답 속도가 빠름
     hanspell.spellCheckByDAUM(text, timeout, onResult, onEnd, onError);
   });
 }
@@ -60,21 +68,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 최대 2000자 제한 (API 부하 방지)
-    const MAX_LENGTH = 2000;
-    const isTruncated = text.length > MAX_LENGTH;
-    const truncatedText = text.slice(0, MAX_LENGTH);
+    const isTruncated = text.length > SPELLCHECK_CONFIG.maxLength;
+    const truncatedText = text.slice(0, SPELLCHECK_CONFIG.maxLength);
 
     const errors = await spellCheckAsync(truncatedText);
 
     // 중복 제거 (같은 token이 여러 번 나올 수 있음)
-    const uniqueErrors = errors.reduce<SpellCheckError[]>((acc, error) => {
-      const exists = acc.some((e) => e.token === error.token);
-      if (!exists) {
-        acc.push(error);
-      }
-      return acc;
-    }, []);
+    const seen = new Set<string>();
+    const uniqueErrors = errors.filter((error) => {
+      if (seen.has(error.token)) return false;
+      seen.add(error.token);
+      return true;
+    });
 
     const result: SpellCheckResult = {
       success: true,
