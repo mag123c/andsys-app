@@ -72,6 +72,9 @@ export function EditorLayout({
   const [spellCheckLoading, setSpellCheckLoading] = useState(false);
   const [spellCheckErrors, setSpellCheckErrors] = useState<SpellCheckError[]>([]);
   const [spellCheckMessage, setSpellCheckMessage] = useState<string>();
+  const [spellCheckTruncated, setSpellCheckTruncated] = useState(false);
+  const [spellCheckCheckedLength, setSpellCheckCheckedLength] = useState<number>();
+  const [spellCheckTotalLength, setSpellCheckTotalLength] = useState<number>();
 
   // 챕터 변경 시 draftTitle 동기화
   useEffect(() => {
@@ -158,6 +161,9 @@ export function EditorLayout({
     setSpellCheckLoading(true);
     setSpellCheckErrors([]);
     setSpellCheckMessage(undefined);
+    setSpellCheckTruncated(false);
+    setSpellCheckCheckedLength(undefined);
+    setSpellCheckTotalLength(undefined);
 
     const text = extractText(content);
     if (!text.trim()) {
@@ -170,6 +176,9 @@ export function EditorLayout({
 
     if (result.success) {
       setSpellCheckErrors(result.errors);
+      setSpellCheckTruncated(result.truncated ?? false);
+      setSpellCheckCheckedLength(result.checkedLength);
+      setSpellCheckTotalLength(result.totalLength);
     } else {
       setSpellCheckMessage(result.message);
     }
@@ -350,6 +359,9 @@ export function EditorLayout({
         errors={spellCheckErrors}
         isLoading={spellCheckLoading}
         errorMessage={spellCheckMessage}
+        truncated={spellCheckTruncated}
+        checkedLength={spellCheckCheckedLength}
+        totalLength={spellCheckTotalLength}
         onApply={handleApplyCorrection}
         onApplyAll={handleApplyAllCorrections}
       />

@@ -24,6 +24,12 @@ export interface SpellCheckResult {
   errors: SpellCheckError[];
   /** 에러 메시지 (실패 시) */
   message?: string;
+  /** 텍스트가 잘렸는지 여부 */
+  truncated?: boolean;
+  /** 검사된 텍스트 길이 */
+  checkedLength?: number;
+  /** 전체 텍스트 길이 */
+  totalLength?: number;
 }
 
 /**

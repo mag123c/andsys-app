@@ -60,8 +60,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 최대 5000자 제한 (API 부하 방지)
-    const truncatedText = text.slice(0, 5000);
+    // 최대 2000자 제한 (API 부하 방지)
+    const MAX_LENGTH = 2000;
+    const isTruncated = text.length > MAX_LENGTH;
+    const truncatedText = text.slice(0, MAX_LENGTH);
 
     const errors = await spellCheckAsync(truncatedText);
 
@@ -77,6 +79,9 @@ export async function POST(request: NextRequest) {
     const result: SpellCheckResult = {
       success: true,
       errors: uniqueErrors,
+      truncated: isTruncated,
+      checkedLength: truncatedText.length,
+      totalLength: text.length,
     };
 
     return NextResponse.json(result);

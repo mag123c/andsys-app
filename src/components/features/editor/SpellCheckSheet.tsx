@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Check, AlertCircle, SpellCheck } from "lucide-react";
+import { Loader2, Check, AlertCircle, SpellCheck, AlertTriangle } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { SpellCheckError } from "@/lib/spellcheck";
 
 interface SpellCheckSheetProps {
@@ -20,6 +21,12 @@ interface SpellCheckSheetProps {
   errors: SpellCheckError[];
   isLoading: boolean;
   errorMessage?: string;
+  /** 텍스트가 잘렸는지 여부 */
+  truncated?: boolean;
+  /** 검사된 텍스트 길이 */
+  checkedLength?: number;
+  /** 전체 텍스트 길이 */
+  totalLength?: number;
   onApply: (error: SpellCheckError) => void;
   onApplyAll: () => void;
 }
@@ -30,6 +37,9 @@ export function SpellCheckSheet({
   errors,
   isLoading,
   errorMessage,
+  truncated,
+  checkedLength,
+  totalLength,
   onApply,
   onApplyAll,
 }: SpellCheckSheetProps) {
@@ -71,6 +81,15 @@ export function SpellCheckSheet({
                 : "맞춤법 오류가 없습니다."}
           </SheetDescription>
         </SheetHeader>
+
+        {truncated && !isLoading && (
+          <Alert variant="default" className="mt-4 border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-700 dark:text-yellow-500 text-sm">
+              전체 {totalLength?.toLocaleString()}자 중 앞 {checkedLength?.toLocaleString()}자만 검사되었습니다.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex-1 min-h-0 mt-4">
           {isLoading ? (
