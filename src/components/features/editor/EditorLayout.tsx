@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
-import { Menu, ArrowLeft, Download, Copy, MoreVertical } from "lucide-react";
+import { Menu, ArrowLeft, Download, Copy, MoreVertical, SpellCheck } from "lucide-react";
 import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -22,10 +23,12 @@ import {
 } from "@/components/ui/sheet";
 import { EditorSidebar } from "./EditorSidebar";
 import { SaveStatus } from "./SaveStatus";
+import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
 import { formatCharacterCount } from "@/lib/format";
-import { extractText, countCharacters } from "@/lib/content-utils";
+import { extractText, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
+import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 
 const RIGHT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-right-sidebar-collapsed";
 
@@ -41,6 +44,7 @@ interface EditorLayoutProps {
   relationships: Relationship[];
   children: React.ReactNode;
   onTitleChange?: (title: string) => Promise<void>;
+  onContentChange?: (content: JSONContent) => void;
 }
 
 export function EditorLayout({
@@ -55,12 +59,19 @@ export function EditorLayout({
   relationships,
   children,
   onTitleChange,
+  onContentChange,
 }: EditorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(currentChapter.title);
+
+  // 맞춤법 검사 상태
+  const [spellCheckOpen, setSpellCheckOpen] = useState(false);
+  const [spellCheckLoading, setSpellCheckLoading] = useState(false);
+  const [spellCheckErrors, setSpellCheckErrors] = useState<SpellCheckError[]>([]);
+  const [spellCheckMessage, setSpellCheckMessage] = useState<string>();
 
   // 챕터 변경 시 draftTitle 동기화
   useEffect(() => {
@@ -135,6 +146,65 @@ export function EditorLayout({
       toast.error("클립보드 복사에 실패했습니다");
     }
   };
+
+  // 맞춤법 검사 실행
+  const handleSpellCheck = useCallback(async () => {
+    if (!content) {
+      toast.error("검사할 내용이 없습니다");
+      return;
+    }
+
+    setSpellCheckOpen(true);
+    setSpellCheckLoading(true);
+    setSpellCheckErrors([]);
+    setSpellCheckMessage(undefined);
+
+    const text = extractText(content);
+    if (!text.trim()) {
+      setSpellCheckLoading(false);
+      return;
+    }
+
+    const result = await checkSpelling(text);
+    setSpellCheckLoading(false);
+
+    if (result.success) {
+      setSpellCheckErrors(result.errors);
+    } else {
+      setSpellCheckMessage(result.message);
+    }
+  }, [content]);
+
+  // 맞춤법 오류 하나 적용
+  const handleApplyCorrection = useCallback(
+    (error: SpellCheckError) => {
+      if (!content || !onContentChange || !error.suggestions[0]) return;
+
+      const newContent = replaceTextInContent(
+        content,
+        error.token,
+        error.suggestions[0]
+      ) as JSONContent;
+
+      onContentChange(newContent);
+      toast.success(`"${error.token}" → "${error.suggestions[0]}" 적용됨`);
+    },
+    [content, onContentChange]
+  );
+
+  // 모든 맞춤법 오류 적용
+  const handleApplyAllCorrections = useCallback(() => {
+    if (!content || !onContentChange || spellCheckErrors.length === 0) return;
+
+    const replacements = spellCheckErrors
+      .filter((e) => e.suggestions[0])
+      .map((e) => ({ from: e.token, to: e.suggestions[0] }));
+
+    const newContent = replaceMultipleInContent(content, replacements) as JSONContent;
+
+    onContentChange(newContent);
+    toast.success(`${replacements.length}개의 오류가 수정되었습니다`);
+  }, [content, onContentChange, spellCheckErrors]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -234,6 +304,11 @@ export function EditorLayout({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleSpellCheck}>
+                      <SpellCheck className="mr-2 h-4 w-4" />
+                      맞춤법 검사
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleExportTxt}>
                       <Download className="mr-2 h-4 w-4" />
                       TXT로 내보내기
@@ -267,6 +342,17 @@ export function EditorLayout({
           className="h-full"
         />
       </div>
+
+      {/* 맞춤법 검사 Sheet */}
+      <SpellCheckSheet
+        open={spellCheckOpen}
+        onOpenChange={setSpellCheckOpen}
+        errors={spellCheckErrors}
+        isLoading={spellCheckLoading}
+        errorMessage={spellCheckMessage}
+        onApply={handleApplyCorrection}
+        onApplyAll={handleApplyAllCorrections}
+      />
     </div>
   );
 }

@@ -110,6 +110,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       characters={characters}
       relationships={relationships}
       onTitleChange={handleTitleChange}
+      onContentChange={updateContent}
     >
       <Editor
         initialContent={chapter.content}
