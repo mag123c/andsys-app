@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-4ndSYS - 웹소설 작가를 위한 오프라인 우선(Local-First) 글쓰기 플랫폼.
+4ndSYS - 웹소설 작가를 위한 로컬 우선(Local-First) 글쓰기 플랫폼.
 
 ## Commands
 
@@ -33,7 +33,7 @@ IndexedDB (로컬) ←→ SyncEngine ←→ Supabase (서버)
 ```
 
 - **Repository 패턴**: Supabase 직접 호출 금지, `src/repositories/` 인터페이스 통해 접근
-- **오프라인 우선**: 저장 시 IndexedDB 먼저 → 온라인이면 debounce 후 Supabase 동기화
+- **로컬 우선 저장**: 저장 시 IndexedDB 먼저 → 온라인이면 debounce 후 Supabase 동기화
 - **Dexie 스키마 버전**: 현재 v7 (projects, chapters, synopses, characters, relationships, versions 테이블)
 
 ### 주요 폴더 구조
@@ -64,7 +64,7 @@ src/
 ## 핵심 규칙
 
 1. **RSC 보안**: Server Action에서 민감 데이터 반환 금지, 필요한 필드만 명시적 반환
-2. **오프라인 우선**: 모든 저장은 IndexedDB 먼저, syncStatus 추적
+2. **로컬 우선 저장**: 모든 저장은 IndexedDB 먼저, syncStatus 추적
 3. **게스트 = 로컬 전용**: 게스트는 서버 동기화 없음 (IndexedDB만), 회원만 Supabase 동기화
 4. **Cascade Delete**: 프로젝트 삭제 시 관련 데이터(chapters, synopses, characters, relationships, versions) 함께 삭제
 5. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지, git -C 명령어 사용 금지

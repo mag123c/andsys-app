@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 4ndSYS
   text: 사용 가이드
-  tagline: 웹소설 작가를 위한 오프라인 우선 글쓰기 플랫폼
+  tagline: 웹소설 작가를 위한 무료 글쓰기 플랫폼
   actions:
     - theme: brand
       text: 시작하기
@@ -29,7 +29,7 @@ features:
   - title: 자동 저장
     details: 저장 버튼 없이 자동으로 저장되는 안심 시스템
     link: /editor/auto-save
-  - title: 오프라인 지원
-    details: 인터넷 없이도 글쓰기 가능, 온라인 복귀 시 자동 동기화
+  - title: 클라우드 동기화
+    details: 회원가입하면 여러 기기에서 이어쓰기 가능
     link: /getting-started/guest-vs-member
 ---

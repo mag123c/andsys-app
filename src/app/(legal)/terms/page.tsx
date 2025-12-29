@@ -92,7 +92,7 @@ export default function TermsPage() {
         <CardContent className="space-y-3">
           <p className="text-muted-foreground">서비스는 다음과 같은 기능을 제공합니다.</p>
           <div className="grid grid-cols-2 gap-2">
-            {["웹소설 작성 및 편집", "캐릭터/시놉시스/관계도 관리", "오프라인 저장", "클라우드 동기화"].map((item) => (
+            {["웹소설 작성 및 편집", "캐릭터/시놉시스/관계도 관리", "로컬 저장", "클라우드 동기화"].map((item) => (
               <div key={item} className="rounded-lg border p-3 text-sm text-center">
                 {item}
               </div>
