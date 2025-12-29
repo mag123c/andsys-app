@@ -151,14 +151,13 @@ export function SpellCheckSheet({
                             </div>
                           )}
 
-                          {(error.info || error.type) && (
+                          {error.type && (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              {error.info ||
-                                (error.type === "space"
-                                  ? "띄어쓰기 오류"
-                                  : error.type === "spell"
-                                    ? "맞춤법 오류"
-                                    : error.type)}
+                              {error.type === "space"
+                                ? "띄어쓰기 오류"
+                                : error.type === "spell"
+                                  ? "맞춤법 오류"
+                                  : error.type}
                             </p>
                           )}
                         </div>

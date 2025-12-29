@@ -199,6 +199,15 @@ export default function PrivacyPage() {
             위 권리 행사는 서비스 내 설정 메뉴 또는 개인정보 보호책임자에게
             서면, 전화, 이메일로 연락하시면 처리해 드립니다.
           </p>
+
+          <div className="rounded-lg border p-4 mt-4">
+            <h4 className="font-medium mb-2">회원 탈퇴 방법</h4>
+            <p className="text-sm text-muted-foreground">
+              회원 탈퇴를 원하시는 경우, <strong>설정 → 계정 관리 → 회원 탈퇴</strong> 메뉴에서
+              직접 탈퇴하실 수 있습니다. 탈퇴 시 계정 정보 및 모든 콘텐츠(소설, 캐릭터, 시놉시스 등)가
+              즉시 삭제되며, 삭제된 데이터는 복구할 수 없습니다.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
