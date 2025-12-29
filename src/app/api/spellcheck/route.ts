@@ -51,8 +51,8 @@ function spellCheckAsync(
       reject(err);
     };
 
-    // DAUM 서비스 사용: PNU보다 띄어쓰기/맞춤법 정확도가 높고 응답 속도가 빠름
-    hanspell.spellCheckByDAUM(text, timeout, onResult, onEnd, onError);
+    // PNU(부산대) 서비스 사용: 더 정밀한 맞춤법 검사 제공
+    hanspell.spellCheckByPNU(text, timeout, onResult, onEnd, onError);
   });
 }
 

@@ -110,8 +110,8 @@ export function SpellCheckSheet({
               <p className="text-sm">맞춤법 오류가 없습니다!</p>
             </div>
           ) : (
-            <ScrollArea className="h-[calc(100vh-280px)]">
-              <div className="space-y-3 pr-4">
+            <ScrollArea className="h-[calc(100vh-280px)] -mx-6 px-6">
+              <div className="space-y-3">
                 {errors.map((error, index) => {
                   const isApplied = appliedTokens.has(error.token);
 
@@ -185,7 +185,7 @@ export function SpellCheckSheet({
         </div>
 
         {errors.length > 0 && !isLoading && (
-          <div className="flex gap-2 pt-4 border-t mt-4">
+          <div className="flex gap-2 pt-4 border-t mt-4 -mx-6 px-6 pb-2">
             <Button
               variant="outline"
               className="flex-1"

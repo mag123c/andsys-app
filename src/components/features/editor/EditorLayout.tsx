@@ -317,6 +317,7 @@ export function EditorLayout({
         onExportTxt={handleExportTxt}
         onCopyToClipboard={handleCopyToClipboard}
         onSpellCheck={handleSpellCheck}
+        rightSidebarCollapsed={rightSidebarCollapsed}
       />
 
       {/* 맞춤법 검사 Sheet */}

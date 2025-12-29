@@ -26,6 +26,8 @@ interface EditorStatusBarProps {
   onCopyToClipboard: () => void;
   /** 맞춤법 검사 핸들러 */
   onSpellCheck: () => void;
+  /** 우측 사이드바 접힘 상태 */
+  rightSidebarCollapsed: boolean;
 }
 
 export function EditorStatusBar({
@@ -36,9 +38,16 @@ export function EditorStatusBar({
   onExportTxt,
   onCopyToClipboard,
   onSpellCheck,
+  rightSidebarCollapsed,
 }: EditorStatusBarProps) {
+  const isSaving = saveStatus === "saving";
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      className={`fixed bottom-0 left-0 right-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-[padding] duration-200 lg:left-64 ${
+        rightSidebarCollapsed ? "lg:right-12" : "lg:right-72"
+      }`}
+    >
       <div className="mx-auto max-w-4xl px-4">
         <div className="flex h-10 items-center justify-between gap-4">
           {/* 좌측: 글자수 */}
@@ -67,6 +76,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onSpellCheck}
+                  disabled={isSaving}
                 >
                   <SpellCheck className="h-4 w-4" />
                   <span className="sr-only">맞춤법 검사</span>
@@ -82,6 +92,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onCopyToClipboard}
+                  disabled={isSaving}
                 >
                   <Copy className="h-4 w-4" />
                   <span className="sr-only">클립보드에 복사</span>
@@ -97,6 +108,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onExportTxt}
+                  disabled={isSaving}
                 >
                   <Download className="h-4 w-4" />
                   <span className="sr-only">TXT로 내보내기</span>
