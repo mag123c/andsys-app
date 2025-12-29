@@ -17,7 +17,7 @@ interface SynopsisEditorProps {
 }
 
 export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
-  const { synopsis, isLoading, error, saveStatus, updateContent } =
+  const { synopsis, isLoading, error, saveStatus, updateContent, restoreContent } =
     useSynopsis(projectId);
   const { settings } = useUserSettings();
   const [showHistory, setShowHistory] = useState(false);
@@ -27,12 +27,12 @@ export function SynopsisEditor({ projectId, className }: SynopsisEditorProps) {
     async (snapshot: Record<string, unknown>) => {
       const content = snapshot.content as JSONContent;
       if (content) {
-        updateContent(content);
-        // Force editor re-render with restored content
+        await restoreContent(content);
+        // 에디터 리렌더링으로 복원된 콘텐츠 표시
         setEditorKey((prev) => prev + 1);
       }
     },
-    [updateContent]
+    [restoreContent]
   );
 
   if (isLoading) {

@@ -24,6 +24,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
     error,
     createCharacter,
     updateCharacter,
+    restoreCharacter,
     deleteCharacter,
     reorderCharacters,
   } = useCharacters(projectId);
@@ -59,6 +60,20 @@ export default function CharactersPage({ params }: CharactersPageProps) {
       }
     },
     [updateCharacter]
+  );
+
+  const handleRestore = useCallback(
+    async (id: string, data: UpdateCharacterInput) => {
+      try {
+        const restored = await restoreCharacter(id, data);
+        toast.success("등장인물이 복원되었습니다.");
+        return restored;
+      } catch {
+        toast.error("등장인물 복원에 실패했습니다.");
+        throw new Error("Failed to restore character");
+      }
+    },
+    [restoreCharacter]
   );
 
   const handleDelete = useCallback(
@@ -136,6 +151,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
         onOpenChange={(open) => !open && setEditingCharacter(null)}
         character={editingCharacter ?? undefined}
         onUpdate={handleUpdate}
+        onRestore={handleRestore}
       />
     </>
   );

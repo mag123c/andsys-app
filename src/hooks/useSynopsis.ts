@@ -15,6 +15,8 @@ interface UseSynopsisReturn {
   saveStatus: SaveStatus;
   updateContent: (content: JSONContent) => void;
   saveNow: () => Promise<void>;
+  /** 히스토리에서 복원 시 사용. 즉시 저장 + 버전 생성 완료 후 반환 */
+  restoreContent: (content: JSONContent) => Promise<void>;
 }
 
 const DEBOUNCE_MS = 2000;
@@ -128,6 +130,54 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
     }
   }, [save]);
 
+  /**
+   * 히스토리 복원 전용. 즉시 저장 + 버전 생성 완료 대기.
+   */
+  const restoreContent = useCallback(
+    async (content: JSONContent) => {
+      if (!synopsis) return;
+
+      // debounce 타이머 취소
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      pendingContentRef.current = null;
+
+      setSaveStatus("saving");
+      try {
+        const updated = await synopsisLocalRepository.update(synopsis.id, {
+          content,
+        });
+        setSynopsis(updated);
+
+        // 버전 생성 완료 대기 (복원 기록)
+        const currentSnapshot = {
+          content: updated.content,
+          plainText: updated.plainText,
+          wordCount: updated.wordCount,
+        };
+        await createVersion(
+          projectId,
+          "synopsis",
+          synopsis.id,
+          currentSnapshot,
+          previousSnapshotRef.current || undefined
+        );
+        previousSnapshotRef.current = currentSnapshot;
+
+        setSaveStatus("saved");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to restore synopsis")
+        );
+        setSaveStatus("error");
+        throw err;
+      }
+    },
+    [synopsis, projectId]
+  );
+
   const updateContent = useCallback(
     (content: JSONContent) => {
       pendingContentRef.current = content;
@@ -154,5 +204,6 @@ export function useSynopsis(projectId: string): UseSynopsisReturn {
     saveStatus,
     updateContent,
     saveNow,
+    restoreContent,
   };
 }

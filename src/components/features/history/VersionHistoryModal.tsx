@@ -33,7 +33,7 @@ export function VersionHistoryModal({
   entityName,
   onRestore,
 }: VersionHistoryModalProps) {
-  const { versions, isLoading, selectedVersion, selectVersion, refresh } =
+  const { versions, isLoading, selectedVersion, selectVersion } =
     useVersionHistory(entityType, entityId);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [versionToRestore, setVersionToRestore] = useState<Version | null>(null);
@@ -45,7 +45,6 @@ export function VersionHistoryModal({
 
   const handleRestore = async (version: Version) => {
     await onRestore(version.snapshot);
-    await refresh();
     onOpenChange(false);
   };
 

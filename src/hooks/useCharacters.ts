@@ -42,6 +42,11 @@ interface UseCharactersReturn {
     id: string,
     data: UpdateCharacterInput
   ) => Promise<Character>;
+  /** 히스토리에서 복원 시 사용. 버전 생성 완료 후 반환 */
+  restoreCharacter: (
+    id: string,
+    data: UpdateCharacterInput
+  ) => Promise<Character>;
   deleteCharacter: (id: string) => Promise<void>;
   reorderCharacters: (characterIds: string[]) => Promise<void>;
   refetch: () => Promise<void>;
@@ -115,6 +120,35 @@ export function useCharacters(projectId: string): UseCharactersReturn {
     [characters, projectId]
   );
 
+  /**
+   * 히스토리 복원 전용. 버전 생성 완료 대기.
+   */
+  const restoreCharacter = useCallback(
+    async (id: string, data: UpdateCharacterInput): Promise<Character> => {
+      const existing = characters.find((ch) => ch.id === id);
+      const previousSnapshot = existing
+        ? characterToSnapshot(existing)
+        : undefined;
+
+      const updated = await characterLocalRepository.update(id, data);
+      setCharacters((prev) =>
+        prev.map((ch) => (ch.id === id ? updated : ch))
+      );
+
+      // 버전 생성 완료 대기 (복원 기록)
+      await createVersion(
+        projectId,
+        "character",
+        id,
+        characterToSnapshot(updated),
+        previousSnapshot
+      );
+
+      return updated;
+    },
+    [characters, projectId]
+  );
+
   const deleteCharacter = useCallback(async (id: string): Promise<void> => {
     // 해당 캐릭터와 연결된 관계들 및 버전들도 함께 삭제
     await relationshipLocalRepository.deleteByCharacterId(id);
@@ -145,6 +179,7 @@ export function useCharacters(projectId: string): UseCharactersReturn {
     error,
     createCharacter,
     updateCharacter,
+    restoreCharacter,
     deleteCharacter,
     reorderCharacters,
     refetch: fetchCharacters,

@@ -25,6 +25,8 @@ interface CharacterDialogProps {
     data: Omit<CreateCharacterInput, "projectId">
   ) => Promise<Character>;
   onUpdate?: (id: string, data: UpdateCharacterInput) => Promise<Character>;
+  /** 히스토리 복원 전용 (버전 생성 완료 대기) */
+  onRestore?: (id: string, data: UpdateCharacterInput) => Promise<Character>;
 }
 
 export function CharacterDialog({
@@ -33,6 +35,7 @@ export function CharacterDialog({
   character,
   onCreate,
   onUpdate,
+  onRestore,
 }: CharacterDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -55,7 +58,8 @@ export function CharacterDialog({
   };
 
   const handleRestore = async (snapshot: Record<string, unknown>) => {
-    if (!character || !onUpdate) return;
+    const restoreHandler = onRestore || onUpdate;
+    if (!character || !restoreHandler) return;
 
     const restoreData: UpdateCharacterInput = {
       name: snapshot.name as string,
@@ -76,7 +80,7 @@ export function CharacterDialog({
       customFields: snapshot.customFields as Array<{ key: string; value: string }>,
     };
 
-    await onUpdate(character.id, restoreData);
+    await restoreHandler(character.id, restoreData);
     onOpenChange(false);
   };
 
