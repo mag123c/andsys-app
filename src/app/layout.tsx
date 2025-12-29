@@ -20,8 +20,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "4ndSYS - 소설 쓰기 플랫폼",
-  description: "웹소설 작가를 위한 무료 글쓰기 플랫폼",
+  title: "4ndSYS | 웹소설 작가를 위한 글쓰기 플랫폼",
+  description:
+    "회차·시놉시스·캐릭터·관계도를 한 곳에서. 자동 저장과 클라우드 동기화로 어디서든 이어 쓰세요.",
+  keywords: ["웹소설", "글쓰기", "소설 쓰기", "작가", "집필", "4ndSYS"],
+  authors: [{ name: "4ndSYS" }],
+  openGraph: {
+    title: "4ndSYS | 웹소설 작가를 위한 글쓰기 플랫폼",
+    description:
+      "회차·시놉시스·캐릭터·관계도를 한 곳에서. 자동 저장과 클라우드 동기화로 어디서든 이어 쓰세요.",
+    url: "https://4ndsys.net",
+    siteName: "4ndSYS",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "4ndSYS | 웹소설 작가를 위한 글쓰기 플랫폼",
+    description:
+      "회차·시놉시스·캐릭터·관계도를 한 곳에서. 자동 저장과 클라우드 동기화로 어디서든 이어 쓰세요.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
