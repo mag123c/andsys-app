@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import type { Version } from "@/repositories/types";
 import {
   AlertDialog,
@@ -80,6 +80,7 @@ export function RestoreVersionDialog({
             취소
           </Button>
           <Button onClick={handleRestore} disabled={isRestoring}>
+            {isRestoring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isRestoring ? "복원 중..." : "복원"}
           </Button>
         </AlertDialogFooter>
