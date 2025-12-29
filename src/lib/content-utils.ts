@@ -1,7 +1,9 @@
 /**
  * Tiptap JSONContent에서 평문 텍스트 추출
+ * @param content Tiptap JSONContent
+ * @param separator 블록 사이 구분자 (기본: "")
  */
-export function extractText(content: unknown): string {
+export function extractText(content: unknown, separator = ""): string {
   if (!content || typeof content !== "object") return "";
 
   const node = content as { type?: string; text?: string; content?: unknown[] };
@@ -11,10 +13,22 @@ export function extractText(content: unknown): string {
   }
 
   if (Array.isArray(node.content)) {
-    return node.content.map(extractText).join("");
+    // paragraph, heading 등 블록 요소는 separator로 구분
+    const isBlockParent = node.type === "doc";
+    const joiner = isBlockParent ? separator : "";
+    return node.content.map((child) => extractText(child, separator)).join(joiner);
   }
 
   return "";
+}
+
+/**
+ * 맞춤법 검사용 텍스트 추출 (개행을 공백으로 변환)
+ * @param content Tiptap JSONContent
+ */
+export function extractTextForSpellCheck(content: unknown): string {
+  // 블록 사이에 공백 추가하여 추출
+  return extractText(content, " ").replace(/\s+/g, " ").trim();
 }
 
 /**

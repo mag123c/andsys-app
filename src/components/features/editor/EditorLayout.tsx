@@ -4,17 +4,11 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
-import { Menu, ArrowLeft, Download, Copy, MoreVertical, SpellCheck } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
+import { EditorStatusBar } from "./EditorStatusBar";
 import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -22,11 +16,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { EditorSidebar } from "./EditorSidebar";
-import { SaveStatus } from "./SaveStatus";
 import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
-import { formatCharacterCount } from "@/lib/format";
-import { extractText, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
+import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 
@@ -165,8 +157,8 @@ export function EditorLayout({
     setSpellCheckCheckedLength(undefined);
     setSpellCheckTotalLength(undefined);
 
-    const text = extractText(content);
-    if (!text.trim()) {
+    const text = extractTextForSpellCheck(content);
+    if (!text) {
       setSpellCheckLoading(false);
       return;
     }
@@ -293,48 +285,12 @@ export function EditorLayout({
                 )}
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <button
-                  onClick={() => setIncludeSpaces(!includeSpaces)}
-                  className="text-sm text-muted-foreground hover:text-foreground hidden sm:inline transition-colors"
-                  title={includeSpaces ? "공백 포함 (클릭: 공백 제외)" : "공백 제외 (클릭: 공백 포함)"}
-                >
-                  {formatCharacterCount(characterCount)}
-                  <span className="ml-1 text-xs">
-                    ({includeSpaces ? "공백 포함" : "공백 제외"})
-                  </span>
-                </button>
-                <SaveStatus status={saveStatus} />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                      <span className="sr-only">메뉴</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleSpellCheck}>
-                      <SpellCheck className="mr-2 h-4 w-4" />
-                      맞춤법 검사
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleExportTxt}>
-                      <Download className="mr-2 h-4 w-4" />
-                      TXT로 내보내기
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCopyToClipboard}>
-                      <Copy className="mr-2 h-4 w-4" />
-                      클립보드에 복사
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </div>
           </div>
         </header>
 
         {/* Editor content */}
-        <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-4xl px-4 py-8 pb-16">{children}</main>
       </div>
 
       {/* Desktop right sidebar - fixed */}
@@ -351,6 +307,17 @@ export function EditorLayout({
           className="h-full"
         />
       </div>
+
+      {/* 하단 상태바 */}
+      <EditorStatusBar
+        characterCount={characterCount}
+        includeSpaces={includeSpaces}
+        onToggleSpaces={() => setIncludeSpaces(!includeSpaces)}
+        saveStatus={saveStatus}
+        onExportTxt={handleExportTxt}
+        onCopyToClipboard={handleCopyToClipboard}
+        onSpellCheck={handleSpellCheck}
+      />
 
       {/* 맞춤법 검사 Sheet */}
       <SpellCheckSheet
