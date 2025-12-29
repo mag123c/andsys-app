@@ -33,12 +33,21 @@ export const metadata: Metadata = {
     siteName: "4ndSYS",
     locale: "ko_KR",
     type: "website",
+    images: [
+      {
+        url: "https://4ndsys.net/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "4ndSYS - 웹소설 작가를 위한 글쓰기 플랫폼",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "4ndSYS | 웹소설 작가를 위한 글쓰기 플랫폼",
     description:
       "회차·시놉시스·캐릭터·관계도를 한 곳에서. 자동 저장과 클라우드 동기화로 어디서든 이어 쓰세요.",
+    images: ["https://4ndsys.net/og-image.png"],
   },
   robots: {
     index: true,
