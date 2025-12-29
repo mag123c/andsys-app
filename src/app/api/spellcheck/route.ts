@@ -3,6 +3,8 @@ import type { SpellCheckError, SpellCheckResult } from "@/lib/spellcheck";
 
 /** 맞춤법 검사 설정 */
 const SPELLCHECK_CONFIG = {
+  /** API URL (환경변수로 변경 가능) */
+  apiUrl: process.env.SPELLER_API_URL ?? "https://www.nara-speller.co.kr/api/check",
   /** 최대 검사 길이 (API 부하 방지) */
   maxLength: 2000,
   /** API 타임아웃 (ms) */
@@ -31,10 +33,13 @@ interface NaraSpellerResponse {
  * 바른한글 API 호출
  */
 async function checkWithNaraSpeller(text: string): Promise<SpellCheckError[]> {
-  const response = await fetch("https://www.nara-speller.co.kr/api/check", {
+  const response = await fetch(SPELLCHECK_CONFIG.apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Referer": "https://www.nara-speller.co.kr/speller/",
+      "Origin": "https://www.nara-speller.co.kr",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     },
     body: JSON.stringify({
       text,

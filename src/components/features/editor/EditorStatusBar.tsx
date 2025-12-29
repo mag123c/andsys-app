@@ -40,9 +40,8 @@ export function EditorStatusBar({
   onSpellCheck,
   rightSidebarCollapsed,
 }: EditorStatusBarProps) {
-  // 저장되지 않은 상태(unsaved, saving)에서는 유틸리티 비활성화
-  // 현재 UI 콘텐츠와 저장된 콘텐츠가 다를 수 있음
-  const isNotSaved = saveStatus === "saving" || saveStatus === "unsaved";
+  // 저장되지 않은 상태에서는 유틸리티 비활성화 (저장 전 데이터로 동작 방지)
+  const shouldDisableUtilities = saveStatus !== "saved";
 
   return (
     <div
@@ -78,7 +77,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onSpellCheck}
-                  disabled={isNotSaved}
+                  disabled={shouldDisableUtilities}
                 >
                   <SpellCheck className="h-4 w-4" />
                   <span className="sr-only">맞춤법 검사</span>
@@ -94,7 +93,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onCopyToClipboard}
-                  disabled={isNotSaved}
+                  disabled={shouldDisableUtilities}
                 >
                   <Copy className="h-4 w-4" />
                   <span className="sr-only">클립보드에 복사</span>
@@ -110,7 +109,7 @@ export function EditorStatusBar({
                   size="icon"
                   className="h-8 w-8"
                   onClick={onExportTxt}
-                  disabled={isNotSaved}
+                  disabled={shouldDisableUtilities}
                 >
                   <Download className="h-4 w-4" />
                   <span className="sr-only">TXT로 내보내기</span>
