@@ -16,6 +16,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -45,13 +46,13 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
       {/* 폰트 선택 */}
       <Select
-        value={currentFont}
+        value={currentFont || undefined}
         onValueChange={(value) => {
           editor.chain().focus().setFontFamily(value).run();
         }}
       >
         <SelectTrigger className="h-8 w-[120px] text-xs">
-          <span className="truncate">{currentFontName || "폰트"}</span>
+          <SelectValue placeholder="폰트">{currentFontName}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {EDITOR_FONTS.map((font) => (
@@ -68,13 +69,13 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
 
       {/* 폰트 크기 선택 */}
       <Select
-        value={currentFontSize}
+        value={currentFontSize || undefined}
         onValueChange={(value) => {
           editor.chain().focus().setFontSize(value).run();
         }}
       >
         <SelectTrigger className="h-8 w-[70px] text-xs">
-          <span className="truncate">{currentFontSizeName}</span>
+          <SelectValue placeholder="크기">{currentFontSizeName}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {EDITOR_FONT_SIZES.map((size) => (

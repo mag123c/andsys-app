@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import type {
   Character,
   CreateCharacterInput,
@@ -8,6 +9,7 @@ import type {
 } from "@/repositories/types";
 import { characterLocalRepository } from "@/storage/local/character.local";
 import { relationshipLocalRepository } from "@/storage/local/relationship.local";
+import { db } from "@/storage/local/db";
 import { createVersion, deleteVersionsByEntity } from "./useVersionHistory";
 
 function characterToSnapshot(character: Character): Record<string, unknown> {
@@ -53,29 +55,51 @@ interface UseCharactersReturn {
 }
 
 export function useCharacters(projectId: string): UseCharactersReturn {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchCharacters = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // useLiveQuery: IndexedDB 변경 시 자동으로 re-render
+  const characters = useLiveQuery(
+    async () => {
+      try {
+        setError(null);
+        const localCharacters = await db.characters
+          .where("projectId")
+          .equals(projectId)
+          .sortBy("order");
 
-    try {
-      const result = await characterLocalRepository.getByProjectId(projectId);
-      setCharacters(result);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch characters")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projectId]);
+        // LocalCharacter를 Character 타입으로 변환
+        return localCharacters.map((ch) => ({
+          id: ch.id,
+          projectId: ch.projectId,
+          name: ch.name,
+          nickname: ch.nickname,
+          age: ch.age,
+          gender: ch.gender,
+          race: ch.race,
+          imageUrl: ch.imageUrl,
+          height: ch.height,
+          weight: ch.weight,
+          appearance: ch.appearance,
+          mbti: ch.mbti,
+          personality: ch.personality,
+          education: ch.education,
+          occupation: ch.occupation,
+          affiliation: ch.affiliation,
+          background: ch.background,
+          customFields: ch.customFields,
+          order: ch.order,
+          createdAt: ch.createdAt,
+          updatedAt: ch.updatedAt,
+        }));
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to fetch characters"));
+        return [];
+      }
+    },
+    [projectId]
+  );
 
-  useEffect(() => {
-    fetchCharacters();
-  }, [fetchCharacters]);
+  const isLoading = characters === undefined;
 
   const createCharacter = useCallback(
     async (
@@ -85,7 +109,7 @@ export function useCharacters(projectId: string): UseCharactersReturn {
         ...data,
         projectId,
       });
-      setCharacters((prev) => [...prev, character]);
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
       return character;
     },
     [projectId]
@@ -93,16 +117,14 @@ export function useCharacters(projectId: string): UseCharactersReturn {
 
   const updateCharacter = useCallback(
     async (id: string, data: UpdateCharacterInput): Promise<Character> => {
-      // 이전 스냅샷 저장
-      const existing = characters.find((ch) => ch.id === id);
+      // 이전 스냅샷 저장 (IndexedDB에서 직접 조회)
+      const existing = await characterLocalRepository.getById(id);
       const previousSnapshot = existing
         ? characterToSnapshot(existing)
         : undefined;
 
       const updated = await characterLocalRepository.update(id, data);
-      setCharacters((prev) =>
-        prev.map((ch) => (ch.id === id ? updated : ch))
-      );
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
 
       // 버전 생성 (백그라운드에서 실행, 에러 무시)
       createVersion(
@@ -117,7 +139,7 @@ export function useCharacters(projectId: string): UseCharactersReturn {
 
       return updated;
     },
-    [characters, projectId]
+    [projectId]
   );
 
   /**
@@ -125,15 +147,14 @@ export function useCharacters(projectId: string): UseCharactersReturn {
    */
   const restoreCharacter = useCallback(
     async (id: string, data: UpdateCharacterInput): Promise<Character> => {
-      const existing = characters.find((ch) => ch.id === id);
+      // 이전 스냅샷 저장 (IndexedDB에서 직접 조회)
+      const existing = await characterLocalRepository.getById(id);
       const previousSnapshot = existing
         ? characterToSnapshot(existing)
         : undefined;
 
       const updated = await characterLocalRepository.update(id, data);
-      setCharacters((prev) =>
-        prev.map((ch) => (ch.id === id ? updated : ch))
-      );
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
 
       // 버전 생성 완료 대기 (복원 기록)
       await createVersion(
@@ -146,7 +167,7 @@ export function useCharacters(projectId: string): UseCharactersReturn {
 
       return updated;
     },
-    [characters, projectId]
+    [projectId]
   );
 
   const deleteCharacter = useCallback(async (id: string): Promise<void> => {
@@ -154,27 +175,24 @@ export function useCharacters(projectId: string): UseCharactersReturn {
     await relationshipLocalRepository.deleteByCharacterId(id);
     await deleteVersionsByEntity("character", id);
     await characterLocalRepository.delete(id);
-    setCharacters((prev) => prev.filter((ch) => ch.id !== id));
+    // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
   }, []);
 
   const reorderCharacters = useCallback(
     async (characterIds: string[]): Promise<void> => {
       await characterLocalRepository.reorder(projectId, characterIds);
-      setCharacters((prev) => {
-        const characterMap = new Map(prev.map((ch) => [ch.id, ch]));
-        return characterIds
-          .map((id, index) => {
-            const character = characterMap.get(id);
-            return character ? { ...character, order: index + 1 } : null;
-          })
-          .filter((ch): ch is Character => ch !== null);
-      });
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
     },
     [projectId]
   );
 
+  // refetch는 useLiveQuery에서는 불필요하지만 인터페이스 호환성 유지
+  const refetch = useCallback(async () => {
+    // useLiveQuery가 자동으로 데이터를 동기화하므로 no-op
+  }, []);
+
   return {
-    characters,
+    characters: characters ?? [],
     isLoading,
     error,
     createCharacter,
@@ -182,6 +200,6 @@ export function useCharacters(projectId: string): UseCharactersReturn {
     restoreCharacter,
     deleteCharacter,
     reorderCharacters,
-    refetch: fetchCharacters,
+    refetch,
   };
 }
