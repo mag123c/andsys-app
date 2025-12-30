@@ -17,6 +17,8 @@ import {
   FileText,
   LetterText,
   Type,
+  Link2,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -353,6 +355,29 @@ export default function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* 공유 링크 관리 (로그인 사용자만) */}
+        {isAuthenticated && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-base">공유 링크</CardTitle>
+              </div>
+              <CardDescription>
+                생성한 공유 링크를 관리합니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/settings/shares">
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  공유 링크 관리
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 계정 관리 (로그인 사용자만) */}
         {isAuthenticated && (

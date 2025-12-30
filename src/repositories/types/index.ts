@@ -6,3 +6,4 @@ export * from "./relationship";
 export * from "./user";
 export * from "./version";
 export * from "./settings";
+export * from "./shared-chapter";

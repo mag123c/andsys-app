@@ -21,6 +21,8 @@ import { RightSidebar } from "@/components/features/workspace";
 import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
+import { ShareButton } from "@/components/features/share";
+import { useAuth } from "@/hooks/useAuth";
 
 const RIGHT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-right-sidebar-collapsed";
 
@@ -53,6 +55,8 @@ export function EditorLayout({
   onTitleChange,
   onContentChange,
 }: EditorLayoutProps) {
+  const { auth } = useAuth();
+  const isAuthenticated = auth.status === "authenticated";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
@@ -285,6 +289,13 @@ export function EditorLayout({
                 )}
               </div>
 
+              {/* Share button - only for logged in users */}
+              {isAuthenticated && (
+                <ShareButton
+                  project={project}
+                  chapter={currentChapter}
+                />
+              )}
             </div>
           </div>
         </header>
