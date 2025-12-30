@@ -32,4 +32,7 @@ features:
   - title: 클라우드 동기화
     details: 회원가입하면 여러 기기에서 이어쓰기 가능
     link: /getting-started/guest-vs-member
+  - title: 공유 링크
+    details: 특정 회차를 임시 링크로 공유하여 피드백 받기
+    link: /share/create
 ---
