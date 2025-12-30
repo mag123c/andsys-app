@@ -121,8 +121,9 @@ export function ShareDialog({
             회차 공유
           </DialogTitle>
           <DialogDescription>
-            이 회차를 다른 사람과 공유합니다. 링크를 받은 사람은 내용을 볼 수
-            있지만 편집할 수 없습니다.
+            이 회차를 다른 사람과 공유합니다.
+            <br />
+            링크를 받은 사람은 내용을 볼 수 있지만 편집할 수 없습니다.
           </DialogDescription>
         </DialogHeader>
 
