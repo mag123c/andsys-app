@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
 
@@ -107,11 +107,23 @@ export async function GET() {
       );
     }
 
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const chapterId = searchParams.get("chapterId");
+
+    let query = supabase
       .from("shared_chapters")
       .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("user_id", user.id);
+
+    // 특정 회차의 활성 링크만 조회
+    if (chapterId) {
+      query = query
+        .eq("chapter_id", chapterId)
+        .eq("is_active", true)
+        .or("expires_at.is.null,expires_at.gt.now()");
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
       console.error("Failed to fetch shared chapters:", error);
