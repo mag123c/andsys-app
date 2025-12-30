@@ -1,8 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { User } from "lucide-react";
+import { Handle, Position, useReactFlow, type Node, type NodeProps } from "@xyflow/react";
+import { User, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface CharacterNodeData extends Record<string, unknown> {
@@ -15,17 +15,36 @@ export interface CharacterNodeData extends Record<string, unknown> {
 export type CharacterNodeType = Node<CharacterNodeData, "character">;
 
 function CharacterNodeComponent({
+  id,
   data,
   selected,
 }: NodeProps<CharacterNodeType>) {
+  const { deleteElements } = useReactFlow();
+
   // 핸들 스타일: 선택 시에만 표시
   const handleClassName = cn(
     "!w-2 !h-2 !bg-primary/50 hover:!bg-primary !border-0 transition-opacity",
     selected ? "!opacity-100" : "!opacity-0"
   );
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteElements({ nodes: [{ id }] });
+  };
+
   return (
     <>
+      {/* 삭제 버튼 - 선택 시에만 표시 */}
+      {selected && (
+        <button
+          onClick={handleDelete}
+          className="absolute -top-8 left-1/2 -translate-x-1/2 p-1.5 rounded-md bg-background border border-border shadow-md hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors z-10"
+          title="삭제 (Delete)"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
+
       {/* 4방위 핸들 - source와 target 모두 가능, 선택 시에만 표시 */}
       <Handle
         type="source"

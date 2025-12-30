@@ -3,10 +3,13 @@
 import { memo } from "react";
 import {
   BaseEdge,
+  EdgeLabelRenderer,
   getBezierPath,
+  useReactFlow,
   type Edge,
   type EdgeProps,
 } from "@xyflow/react";
+import { Trash2 } from "lucide-react";
 
 export interface RelationshipEdgeData extends Record<string, unknown> {
   color: string;
@@ -27,7 +30,9 @@ function RelationshipEdgeComponent({
   markerEnd,
   selected,
 }: EdgeProps<RelationshipEdgeType>) {
-  const [edgePath] = getBezierPath({
+  const { deleteElements } = useReactFlow();
+
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -37,6 +42,11 @@ function RelationshipEdgeComponent({
   });
 
   const color = data?.color || "#6B7280";
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteElements({ edges: [{ id }] });
+  };
 
   return (
     <>
@@ -70,6 +80,21 @@ function RelationshipEdgeComponent({
           strokeWidth: selected ? 3 : 2,
         }}
       />
+      {/* 삭제 버튼 - 선택 시에만 표시 */}
+      {selected && (
+        <EdgeLabelRenderer>
+          <button
+            onClick={handleDelete}
+            className="absolute p-1.5 rounded-md bg-background border border-border shadow-md hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors pointer-events-auto"
+            style={{
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+            }}
+            title="삭제 (Delete)"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </EdgeLabelRenderer>
+      )}
     </>
   );
 }
