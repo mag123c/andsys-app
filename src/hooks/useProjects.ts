@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import type { Project, CreateProjectInput, UpdateProjectInput } from "@/repositories/types";
 import { db } from "@/storage/local/db";
 import { projectLocalRepository } from "@/storage/local/project.local";
@@ -18,36 +19,36 @@ interface UseProjectsReturn {
 
 export function useProjects(): UseProjectsReturn {
   const { auth } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchProjects = useCallback(async () => {
-    if (auth.status === "loading") return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      let result: Project[];
-
-      if (auth.status === "authenticated") {
-        result = await projectLocalRepository.getByUserId(auth.user.id);
-      } else {
-        result = await projectLocalRepository.getByGuestId(auth.guestId);
+  // useLiveQuery: IndexedDB 변경 시 자동으로 re-render
+  // pullFromServer()가 IndexedDB에 데이터를 추가하면 자동으로 UI 갱신
+  const projects = useLiveQuery(
+    async () => {
+      if (auth.status === "loading") {
+        return undefined; // 로딩 중
       }
 
-      setProjects(result);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch projects"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auth]);
+      try {
+        setError(null);
+        let result: Project[];
 
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+        if (auth.status === "authenticated") {
+          result = await projectLocalRepository.getByUserId(auth.user.id);
+        } else {
+          result = await projectLocalRepository.getByGuestId(auth.guestId);
+        }
+
+        return result;
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to fetch projects"));
+        return [];
+      }
+    },
+    [auth] // auth 변경 시 재실행
+  );
+
+  const isLoading = projects === undefined;
 
   const createProject = useCallback(
     async (data: CreateProjectInput): Promise<Project> => {
@@ -61,7 +62,7 @@ export function useProjects(): UseProjectsReturn {
           : { guestId: auth.guestId };
 
       const project = await projectLocalRepository.create(data, owner);
-      setProjects((prev) => [project, ...prev]);
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
       return project;
     },
     [auth]
@@ -70,9 +71,7 @@ export function useProjects(): UseProjectsReturn {
   const updateProject = useCallback(
     async (id: string, data: UpdateProjectInput): Promise<Project> => {
       const updated = await projectLocalRepository.update(id, data);
-      setProjects((prev) =>
-        prev.map((p) => (p.id === id ? updated : p))
-      );
+      // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
       return updated;
     },
     []
@@ -99,16 +98,21 @@ export function useProjects(): UseProjectsReturn {
         });
       }
     );
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+    // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
+  }, []);
+
+  // refetch는 useLiveQuery에서는 불필요하지만 인터페이스 호환성 유지
+  const refetch = useCallback(async () => {
+    // useLiveQuery가 자동으로 데이터를 동기화하므로 no-op
   }, []);
 
   return {
-    projects,
+    projects: projects ?? [],
     isLoading,
     error,
     createProject,
     updateProject,
     deleteProject,
-    refetch: fetchProjects,
+    refetch,
   };
 }
