@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FilePenLine, LogOut, Settings, User } from "lucide-react";
+import { FilePenLine, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

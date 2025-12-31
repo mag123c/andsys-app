@@ -10,13 +10,11 @@ import {
   Link2,
   ArrowLeft,
   ChevronRight,
-  User,
 } from "lucide-react";
 import type { Project, Chapter, Character } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { SidebarToggle } from "./SidebarToggle";
 import { SidebarProfile } from "./SidebarProfile";
 
 const MAX_LIST_ITEMS = 20;
@@ -92,13 +90,16 @@ export function NovelSidebar({
   const isCharactersActive = pathname === `${basePath}/characters`;
 
   // 해당 페이지 진입 시 자동 펼침
+  // 사이드바 상태는 로컬 UI 상태이므로 페이지 전환 시 자동 펼침이 적절
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- 페이지 전환 시 자동 펼침 의도적 패턴 */
     if (isChaptersActive && chapters.length > 0) {
-      setExpandedChapters(true); // eslint-disable-line react-hooks/set-state-in-effect -- 페이지 진입 시 자동 펼침을 위한 의도적 패턴
+      setExpandedChapters(true);
     }
     if (isCharactersActive && characters.length > 0) {
-      setExpandedCharacters(true); // eslint-disable-line react-hooks/set-state-in-effect -- 페이지 진입 시 자동 펼침을 위한 의도적 패턴
+      setExpandedCharacters(true);
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [isChaptersActive, isCharactersActive, chapters.length, characters.length]);
 
   const getIsActive = (item: NavItem) => {

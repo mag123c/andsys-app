@@ -72,6 +72,7 @@ export default function SharePage({ params }: SharePageProps) {
   }, [token]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기 데이터 페칭 표준 패턴
     fetchData();
   }, [fetchData]);
 

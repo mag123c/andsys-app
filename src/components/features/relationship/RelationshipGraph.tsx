@@ -158,7 +158,6 @@ function RelationshipGraphInner({
         connectedIds.add(r.fromCharacterId);
         connectedIds.add(r.toCharacterId);
       });
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 관계가 있는 캐릭터를 그래프에 추가하기 위한 의도적 패턴
       setGraphNodeIds(connectedIds);
       isInitializedRef.current = true;
     } else {
@@ -173,7 +172,6 @@ function RelationshipGraphInner({
           newCharacterIds.add(r.toCharacterId);
         });
         // 새 캐릭터만 추가 (기존 노드는 유지)
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- 새 관계 추가 시 관련 캐릭터를 그래프에 추가하기 위한 의도적 패턴
         setGraphNodeIds((prev) => new Set([...prev, ...newCharacterIds]));
       }
     }
@@ -202,6 +200,9 @@ function RelationshipGraphInner({
 
     if (nodes.length > 0) {
       // 저장된 위치가 있는 노드와 없는 노드 분리
+      // 그래프 시각화에서 노드 위치 캐싱은 성능을 위해 ref 사용 필수
+      // (드래그 시마다 리렌더 방지 + 데이터 변경 시 위치 유지)
+      /* eslint-disable react-hooks/refs -- 그래프 노드 위치 캐싱은 의도적 패턴 */
       const existingNodes = nodes.filter((n) => nodePositionsRef.current.has(n.id));
       const newNodes = nodes.filter((n) => !nodePositionsRef.current.has(n.id));
 
@@ -210,6 +211,7 @@ function RelationshipGraphInner({
         ...node,
         position: nodePositionsRef.current.get(node.id)!,
       }));
+      /* eslint-enable react-hooks/refs */
 
       let newLayoutedNodes: Node<CharacterNodeData>[] = [];
 
@@ -229,7 +231,8 @@ function RelationshipGraphInner({
         );
         newLayoutedNodes = dagredNodes as Node<CharacterNodeData>[];
 
-        // 새로 계산된 위치를 저장
+        // 새로 계산된 위치를 저장 (다음 렌더에서 dagre 재계산 방지)
+        // eslint-disable-next-line react-hooks/refs -- 레이아웃 결과 캐싱
         newLayoutedNodes.forEach((node) => {
           nodePositionsRef.current.set(node.id, node.position);
         });

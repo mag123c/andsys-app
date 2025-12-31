@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
 
 const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
@@ -115,15 +116,11 @@ export default function LandingPage() {
   const router = useRouter();
   const { auth } = useAuth();
   const [showGuestNotice, setShowGuestNotice] = useState(false);
-  const [hasSeenNotice, setHasSeenNotice] = useState(true);
+  // useSyncExternalStore로 SSR/hydration 안전하게 localStorage 처리
+  const [hasSeenNotice, setHasSeenNotice] = useLocalStorageBoolean(GUEST_NOTICE_KEY, false);
 
   const isLoading = auth.status === "loading";
   const isAuthenticated = auth.status === "authenticated";
-
-  useEffect(() => {
-    const seen = localStorage.getItem(GUEST_NOTICE_KEY);
-    setHasSeenNotice(!!seen);
-  }, []);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -148,7 +145,7 @@ export default function LandingPage() {
   };
 
   const handleGuestConfirm = () => {
-    localStorage.setItem(GUEST_NOTICE_KEY, "true");
+    setHasSeenNotice(true);
     setShowGuestNotice(false);
     router.push("/novels");
   };

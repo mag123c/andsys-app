@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { NovelSidebar } from "./NovelSidebar";
+import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 
 const SIDEBAR_COLLAPSED_KEY = "4ndsys:novel-sidebar-collapsed";
 
@@ -29,22 +30,12 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
   const { chapters } = useChapters(projectId);
   const { characters } = useCharacters(projectId);
 
-  // 서버/클라이언트 일관성을 위해 초기값은 false, 클라이언트에서 localStorage 읽기
-  const [collapsed, setCollapsed] = useState(false);
+  // useSyncExternalStore로 SSR/hydration 안전하게 localStorage 처리
+  const [collapsed, setCollapsed] = useLocalStorageBoolean(SIDEBAR_COLLAPSED_KEY, false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    if (saved === "true") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration 안전을 위한 의도적 패턴
-      setCollapsed(true);
-    }
-  }, []);
-
   const handleToggle = () => {
-    const newValue = !collapsed;
-    setCollapsed(newValue);
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newValue));
+    setCollapsed(!collapsed);
   };
 
   // 프로젝트 로딩 중이면 사이드바 없이 렌더링

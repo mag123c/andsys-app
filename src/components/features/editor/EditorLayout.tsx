@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useLayoutEffect, useCallback } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 import { ShareButton } from "@/components/features/share";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 
 const RIGHT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-right-sidebar-collapsed";
 
@@ -59,7 +60,10 @@ export function EditorLayout({
   const isAuthenticated = auth.status === "authenticated";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
-  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(true);
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useLocalStorageBoolean(
+    RIGHT_SIDEBAR_COLLAPSED_KEY,
+    true
+  );
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(currentChapter.title);
 
@@ -72,25 +76,17 @@ export function EditorLayout({
   const [spellCheckCheckedLength, setSpellCheckCheckedLength] = useState<number>();
   const [spellCheckTotalLength, setSpellCheckTotalLength] = useState<number>();
 
-  // 챕터 변경 시 draftTitle 동기화
-  useEffect(() => {
+  // 챕터 변경 시 draftTitle 동기화 (useLayoutEffect로 깜빡임 방지)
+  // 챕터 전환 시 파생 상태 초기화 - React key 패턴 대안
+  useLayoutEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- 챕터 변경 시 파생 상태 초기화 패턴 */
     setDraftTitle(currentChapter.title);
     setIsEditingTitle(false);
-  }, [currentChapter.id]); // eslint-disable-line react-hooks/exhaustive-deps -- currentChapter.id 변경 시에만 동기화
-
-  // 클라이언트에서만 localStorage 읽기 (hydration 안전 패턴)
-  useEffect(() => {
-    const saved = localStorage.getItem(RIGHT_SIDEBAR_COLLAPSED_KEY);
-    if (saved === "false") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration 안전을 위한 의도적 패턴
-      setRightSidebarCollapsed(false);
-    }
-  }, []);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [currentChapter.id, currentChapter.title]);
 
   const handleRightSidebarToggle = () => {
-    const newValue = !rightSidebarCollapsed;
-    setRightSidebarCollapsed(newValue);
-    localStorage.setItem(RIGHT_SIDEBAR_COLLAPSED_KEY, String(newValue));
+    setRightSidebarCollapsed(!rightSidebarCollapsed);
   };
 
   // 제목 편집 시작
