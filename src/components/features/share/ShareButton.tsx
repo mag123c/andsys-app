@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Share2 } from "lucide-react";
+import { Link2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -60,27 +60,46 @@ export function ShareButton({ project, chapter, disabled }: ShareButtonProps) {
 
   return (
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant={isSharing ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setDialogOpen(true)}
-            disabled={disabled || isLoading}
-            className="gap-2"
-          >
-            <Share2 className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isSharing ? "공유중" : "공유"}
-            </span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          {isSharing
-            ? "공유 링크가 활성화되어 있습니다"
-            : "이 회차를 공유 링크로 공유합니다"}
-        </TooltipContent>
-      </Tooltip>
+      <div className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isSharing ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setDialogOpen(true)}
+              disabled={disabled || isLoading}
+              className="gap-2"
+            >
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isSharing ? "링크 활성" : "미리보기 링크"}
+              </span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {isSharing
+              ? "미리보기 링크가 활성화되어 있습니다"
+              : "이 회차의 미리보기 링크를 만듭니다"}
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="미리보기 링크 설명"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-[240px] text-center">
+            베타리더나 편집자에게 이 회차만 보여줄 수 있어요.
+            <br />
+            만료 시간과 비밀번호를 설정할 수 있습니다.
+          </TooltipContent>
+        </Tooltip>
+      </div>
 
       <ShareDialog
         open={dialogOpen}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -29,6 +30,22 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
+  // 선택 변경 시 툴바 리렌더 트리거
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleSelectionUpdate = () => forceUpdate((n) => n + 1);
+    editor.on("selectionUpdate", handleSelectionUpdate);
+    editor.on("transaction", handleSelectionUpdate);
+
+    return () => {
+      editor.off("selectionUpdate", handleSelectionUpdate);
+      editor.off("transaction", handleSelectionUpdate);
+    };
+  }, [editor]);
+
   if (!editor) return null;
 
   // Tiptap에서 설정된 폰트가 없으면 defaultFont 사용

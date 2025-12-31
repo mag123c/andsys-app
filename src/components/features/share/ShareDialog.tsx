@@ -130,14 +130,14 @@ export function ShareDialog({
       });
 
       if (response.ok) {
-        toast.success("공유가 취소되었습니다");
+        toast.success("링크가 비활성화되었습니다");
         onShareDeleted?.();
         handleClose();
       } else {
-        toast.error("공유 취소에 실패했습니다");
+        toast.error("링크 비활성화에 실패했습니다");
       }
     } catch {
-      toast.error("공유 취소 중 오류가 발생했습니다");
+      toast.error("링크 비활성화 중 오류가 발생했습니다");
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -175,15 +175,15 @@ export function ShareDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Link2 className="h-5 w-5" />
-              회차 공유
+              미리보기 링크
             </DialogTitle>
             <DialogDescription>
               {currentMode === "manage"
-                ? "이 회차는 현재 공유중입니다."
-                : "이 회차를 다른 사람과 공유합니다."}
+                ? "이 회차의 미리보기 링크가 활성화되어 있습니다."
+                : "베타리더나 편집자에게 이 회차만 보여줄 수 있어요."}
               <br />
               {currentMode === "manage"
-                ? "링크를 복사하거나 공유를 관리할 수 있습니다."
+                ? "링크를 복사하거나 관리할 수 있습니다."
                 : "링크를 받은 사람은 내용을 볼 수 있지만 편집할 수 없습니다."}
             </DialogDescription>
           </DialogHeader>
@@ -242,7 +242,7 @@ export function ShareDialog({
                   className="flex-1"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  공유 취소
+                  링크 비활성화
                 </Button>
                 <Button
                   variant="outline"
@@ -392,9 +392,9 @@ export function ShareDialog({
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>공유를 취소하시겠습니까?</AlertDialogTitle>
+            <AlertDialogTitle>링크를 비활성화하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
-              공유 링크가 비활성화되어 더 이상 접근할 수 없게 됩니다.
+              링크가 비활성화되어 더 이상 접근할 수 없게 됩니다.
               <br />
               이미 링크를 받은 사람도 내용을 볼 수 없게 됩니다.
             </AlertDialogDescription>
@@ -409,10 +409,10 @@ export function ShareDialog({
               {isDeleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  삭제 중...
+                  비활성화 중...
                 </>
               ) : (
-                "공유 취소"
+                "링크 비활성화"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
