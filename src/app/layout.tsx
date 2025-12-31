@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ServiceWorkerProvider } from "@/components/providers/ServiceWorkerProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -85,6 +86,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
+            <ServiceWorkerProvider />
             {children}
             <Toaster />
           </AuthProvider>
