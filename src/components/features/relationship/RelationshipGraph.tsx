@@ -34,6 +34,8 @@ interface RelationshipGraphProps {
   relationships: Relationship[];
   onDelete?: (id: string) => void;
   onCreate?: (fromCharacterId: string, toCharacterId: string) => void;
+  /** 엣지 더블클릭 시 편집 다이얼로그 열기 */
+  onEdit?: (relationship: Relationship) => void;
   /** 읽기 전용 모드 (회차 상세에서 사용) */
   readonly?: boolean;
 }
@@ -88,6 +90,7 @@ function RelationshipGraphInner({
   relationships,
   onDelete,
   onCreate,
+  onEdit,
   readonly = false,
 }: RelationshipGraphProps) {
   const { screenToFlowPosition } = useReactFlow();
@@ -431,6 +434,19 @@ function RelationshipGraphInner({
     [onDelete]
   );
 
+  // 엣지 더블클릭 시 편집 다이얼로그 열기
+  const handleEdgeDoubleClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      if (readonly || !onEdit) return;
+
+      const relationship = relationships.find((r) => r.id === edge.id);
+      if (relationship) {
+        onEdit(relationship);
+      }
+    },
+    [readonly, onEdit, relationships]
+  );
+
   // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)
   const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
 
@@ -451,6 +467,7 @@ function RelationshipGraphInner({
             onNodeDragStop={readonly ? undefined : handleNodeDragStop}
             onNodesDelete={readonly ? undefined : handleNodesDelete}
             onEdgesDelete={readonly ? undefined : handleEdgesDelete}
+            onEdgeDoubleClick={handleEdgeDoubleClick}
             onConnect={readonly ? undefined : handleConnect}
             onMove={handleViewportChange}
             onDrop={readonly ? undefined : onDrop}

@@ -85,8 +85,8 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
     [deleteRelationship]
   );
 
-  // TODO: RelationshipGraph에서 노드 더블클릭 시 편집 기능 구현 필요
-  const _handleEdit = useCallback((relationship: Relationship) => {
+  // 엣지 더블클릭 시 편집 다이얼로그 열기
+  const handleEdit = useCallback((relationship: Relationship) => {
     setEditingRelationship(relationship);
   }, []);
 
@@ -130,6 +130,7 @@ export default function RelationshipsPage({ params }: RelationshipsPageProps) {
           relationships={relationships}
           onDelete={handleDelete}
           onCreate={handleCreateFromGraph}
+          onEdit={handleEdit}
         />
       )}
 
