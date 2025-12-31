@@ -36,13 +36,12 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
   useEffect(() => {
     if (!editor) return;
 
+    // selectionUpdate만 구독 - transaction은 매 키 입력마다 발생하여 과도한 리렌더링 유발
     const handleSelectionUpdate = () => forceUpdate((n) => n + 1);
     editor.on("selectionUpdate", handleSelectionUpdate);
-    editor.on("transaction", handleSelectionUpdate);
 
     return () => {
       editor.off("selectionUpdate", handleSelectionUpdate);
-      editor.off("transaction", handleSelectionUpdate);
     };
   }, [editor]);
 

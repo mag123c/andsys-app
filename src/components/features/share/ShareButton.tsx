@@ -87,7 +87,7 @@ export function ShareButton({ project, chapter, disabled }: ShareButtonProps) {
           <TooltipTrigger asChild>
             <button
               type="button"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
               aria-label="미리보기 링크 설명"
             >
               <HelpCircle className="h-4 w-4" />
