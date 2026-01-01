@@ -64,6 +64,25 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        {/* Service Worker 정리 (PWA 제거 후 잔여 SW unregister) */}
+        <Script id="sw-cleanup" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (var registration of registrations) {
+                  registration.unregister();
+                }
+              });
+              if ('caches' in window) {
+                caches.keys().then(function(names) {
+                  for (var name of names) {
+                    caches.delete(name);
+                  }
+                });
+              }
+            }
+          `}
+        </Script>
         {GA_ID && (
           <>
             <Script

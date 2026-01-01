@@ -43,14 +43,14 @@ export class ProjectRemoteRepository implements ProjectRepository {
   }
 
   async getById(id: string): Promise<Project | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("projects")
       .select("*")
       .eq("id", id)
       .neq("status", "deleted")
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 

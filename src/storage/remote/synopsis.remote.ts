@@ -37,13 +37,13 @@ export class SynopsisRemoteRepository implements SynopsisRepository {
   }
 
   async getById(id: string): Promise<Synopsis | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("synopses")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 
@@ -51,13 +51,13 @@ export class SynopsisRemoteRepository implements SynopsisRepository {
   }
 
   async getByProjectId(projectId: string): Promise<Synopsis | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("synopses")
       .select("*")
       .eq("project_id", projectId)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 

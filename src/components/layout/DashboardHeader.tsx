@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SyncStatusIndicator } from "@/components/features/sync/SyncStatusIndicator";
 
 export function DashboardHeader() {
   const { auth, signOut } = useAuth();
@@ -31,6 +32,7 @@ export function DashboardHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <SyncStatusIndicator />
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -64,13 +64,13 @@ export class CharacterRemoteRepository implements CharacterRepository {
   }
 
   async getById(id: string): Promise<Character | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("characters")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 

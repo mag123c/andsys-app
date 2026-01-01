@@ -43,13 +43,13 @@ export class ChapterRemoteRepository implements ChapterRepository {
   }
 
   async getById(id: string): Promise<Chapter | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("chapters")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 

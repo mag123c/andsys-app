@@ -1,6 +1,8 @@
 import { db, type SyncQueueItem } from "@/storage/local/db";
 
 const MAX_ATTEMPTS = 5;
+const RETRY_DELAY_BASE = 1000; // 1초
+const RETRY_DELAY_MAX = 30000; // 30초
 
 export type SyncOperation = "create" | "update" | "delete";
 export type EntityType = "project" | "chapter" | "synopsis" | "character" | "relationship";
@@ -12,10 +14,17 @@ interface EnqueueParams {
   payload: unknown;
 }
 
+interface QueueStats {
+  total: number;
+  pending: number;
+  failed: number;
+}
+
 /**
  * 동기화 대기열 관리
  * - 오프라인 시 변경사항을 큐에 저장
  * - 온라인 복귀 시 순차 처리
+ * - 지수 백오프 재시도
  */
 export class SyncQueue {
   /**
@@ -58,12 +67,26 @@ export class SyncQueue {
   }
 
   /**
-   * 처리할 다음 항목 가져오기
+   * 처리할 다음 항목 가져오기 (재시도 딜레이 고려)
    */
   async dequeue(): Promise<SyncQueueItem | null> {
+    const now = Date.now();
+
     const items = await db.syncQueue
       .orderBy("createdAt")
-      .filter((item) => item.attempts < MAX_ATTEMPTS)
+      .filter((item) => {
+        // 최대 시도 횟수 초과 시 건너뛰기
+        if (item.attempts >= MAX_ATTEMPTS) return false;
+
+        // 재시도 딜레이 체크
+        if (item.lastAttemptAt) {
+          const delay = this.getRetryDelay(item.attempts);
+          const nextRetryTime = item.lastAttemptAt.getTime() + delay;
+          if (now < nextRetryTime) return false;
+        }
+
+        return true;
+      })
       .limit(1)
       .toArray();
 
@@ -71,12 +94,33 @@ export class SyncQueue {
   }
 
   /**
-   * 큐의 모든 pending 항목 가져오기
+   * 큐의 모든 pending 항목 가져오기 (재시도 딜레이 고려)
    */
   async getAll(): Promise<SyncQueueItem[]> {
+    const now = Date.now();
+
     return db.syncQueue
       .orderBy("createdAt")
-      .filter((item) => item.attempts < MAX_ATTEMPTS)
+      .filter((item) => {
+        if (item.attempts >= MAX_ATTEMPTS) return false;
+
+        if (item.lastAttemptAt) {
+          const delay = this.getRetryDelay(item.attempts);
+          const nextRetryTime = item.lastAttemptAt.getTime() + delay;
+          if (now < nextRetryTime) return false;
+        }
+
+        return true;
+      })
+      .toArray();
+  }
+
+  /**
+   * 실패한 항목 가져오기 (MAX_ATTEMPTS 초과)
+   */
+  async getFailed(): Promise<SyncQueueItem[]> {
+    return db.syncQueue
+      .filter((item) => item.attempts >= MAX_ATTEMPTS)
       .toArray();
   }
 
@@ -101,6 +145,29 @@ export class SyncQueue {
   }
 
   /**
+   * 실패한 항목 재시도 (attempts 초기화)
+   */
+  async retry(id: number): Promise<void> {
+    await db.syncQueue.update(id, {
+      attempts: 0,
+      lastAttemptAt: null,
+    });
+  }
+
+  /**
+   * 모든 실패한 항목 재시도
+   */
+  async retryAllFailed(): Promise<number> {
+    const failed = await this.getFailed();
+
+    for (const item of failed) {
+      await this.retry(item.id!);
+    }
+
+    return failed.length;
+  }
+
+  /**
    * 특정 엔티티의 큐 항목 제거
    */
   async removeByEntity(entityType: EntityType, entityId: string): Promise<void> {
@@ -120,7 +187,33 @@ export class SyncQueue {
    * 큐 항목 수
    */
   async count(): Promise<number> {
-    return db.syncQueue.count();
+    return db.syncQueue
+      .filter((item) => item.attempts < MAX_ATTEMPTS)
+      .count();
+  }
+
+  /**
+   * 큐 통계
+   */
+  async getStats(): Promise<QueueStats> {
+    const all = await db.syncQueue.toArray();
+    const pending = all.filter((item) => item.attempts < MAX_ATTEMPTS);
+    const failed = all.filter((item) => item.attempts >= MAX_ATTEMPTS);
+
+    return {
+      total: all.length,
+      pending: pending.length,
+      failed: failed.length,
+    };
+  }
+
+  /**
+   * 지수 백오프 재시도 딜레이 계산
+   * 1초, 2초, 4초, 8초, 16초... 최대 30초
+   */
+  private getRetryDelay(attempts: number): number {
+    const delay = RETRY_DELAY_BASE * Math.pow(2, attempts);
+    return Math.min(delay, RETRY_DELAY_MAX);
   }
 
   /**

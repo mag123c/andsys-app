@@ -40,13 +40,13 @@ export class RelationshipRemoteRepository implements RelationshipRepository {
   }
 
   async getById(id: string): Promise<Relationship | null> {
-    const { data, error } = await this.supabase
+    const { data } = await this.supabase
       .from("relationships")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (!data) {
       return null;
     }
 
