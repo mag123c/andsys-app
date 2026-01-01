@@ -94,7 +94,9 @@ export function ShareButton({ project, chapter, disabled }: ShareButtonProps) {
             </button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-[240px] text-center">
-            베타리더나 편집자에게 이 회차만 보여줄 수 있어요.
+            베타리더나 편집자에게
+            <br />
+            이 회차만 보여줄 수 있어요.
             <br />
             만료 시간과 비밀번호를 설정할 수 있습니다.
           </TooltipContent>
