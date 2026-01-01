@@ -110,7 +110,12 @@ export function EditorLayout({
 
   // 좌측 사이드바 토글
   const handleLeftSidebarToggle = () => {
-    setLeftSidebarCollapsed(!leftSidebarCollapsed);
+    const newState = !leftSidebarCollapsed;
+    setLeftSidebarCollapsed(newState);
+    // 우측이 열려있으면 이전 상태도 업데이트 (닫을 때 올바른 상태로 복원)
+    if (!rightSidebarCollapsed) {
+      setLeftSidebarPreviousState(newState);
+    }
   };
 
   // 시놉시스 변경 핸들러
