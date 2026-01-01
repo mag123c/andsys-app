@@ -19,7 +19,7 @@ interface UseSynopsisReturn {
   restoreContent: (content: JSONContent) => Promise<void>;
 }
 
-const DEBOUNCE_MS = 2000;
+const DEBOUNCE_MS = 500;
 
 export function useSynopsis(projectId: string): UseSynopsisReturn {
   const [synopsis, setSynopsis] = useState<Synopsis | null>(null);

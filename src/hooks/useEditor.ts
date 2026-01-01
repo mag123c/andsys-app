@@ -17,7 +17,7 @@ interface UseEditorReturn {
   saveNow: () => Promise<void>;
 }
 
-const DEBOUNCE_MS = 2000;
+const DEBOUNCE_MS = 500;
 
 export function useEditor(chapterId: string): UseEditorReturn {
   const [chapter, setChapter] = useState<Chapter | null>(null);
