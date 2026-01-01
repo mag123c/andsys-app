@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useCallback, useSyncExternalStore, useRef } from "react";
+import { liveQuery } from "dexie";
 import { syncEngine, type SyncStatus, type SyncResult, type SyncEventPayload } from "@/sync/sync-engine";
 import { useRealOnline } from "./useOnline";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { createClient } from "@/storage/remote/client";
 import { db } from "@/storage/local/db";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+
+const SYNC_DEBOUNCE_MS = 2000; // 2초 debounce
 
 interface UseSyncEngineReturn {
   status: SyncStatus;
@@ -69,6 +72,45 @@ export function useSyncEngine(): UseSyncEngineReturn {
     }, 1000);
 
     return () => clearTimeout(timer);
+  }, [isOnline, auth.status]);
+
+  // pending 항목 변경 감지 + debounce 자동 동기화
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!isOnline) return;
+    if (auth.status !== "authenticated") return;
+
+    // IndexedDB pending 항목 변경 감지
+    const subscription = liveQuery(async () => {
+      const pendingProjects = await db.projects.where("syncStatus").equals("pending").count();
+      const pendingChapters = await db.chapters.where("syncStatus").equals("pending").count();
+      const pendingSynopses = await db.synopses.where("syncStatus").equals("pending").count();
+      const pendingCharacters = await db.characters.where("syncStatus").equals("pending").count();
+      const pendingRelationships = await db.relationships.where("syncStatus").equals("pending").count();
+      return pendingProjects + pendingChapters + pendingSynopses + pendingCharacters + pendingRelationships;
+    }).subscribe({
+      next: (count) => {
+        if (count > 0) {
+          // 기존 타이머 취소 (debounce)
+          if (syncTimerRef.current) {
+            clearTimeout(syncTimerRef.current);
+          }
+          // debounce 후 동기화
+          syncTimerRef.current = setTimeout(() => {
+            syncEngine.syncAll().catch(console.error);
+            syncTimerRef.current = null;
+          }, SYNC_DEBOUNCE_MS);
+        }
+      },
+      error: (err) => console.error("Pending watch error:", err),
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (syncTimerRef.current) {
+        clearTimeout(syncTimerRef.current);
+      }
+    };
   }, [isOnline, auth.status]);
 
   // 로그인 시 서버 데이터 pull
