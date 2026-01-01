@@ -111,3 +111,29 @@ export function replaceMultipleInContent(
   return result;
 }
 
+/**
+ * Plain text를 Tiptap JSONContent로 변환
+ * 줄바꿈은 paragraph로 분리
+ */
+export function plainTextToTiptapContent(plainText: string): {
+  type: "doc";
+  content: Array<{ type: "paragraph"; content?: Array<{ type: "text"; text: string }> }>;
+} {
+  if (!plainText.trim()) {
+    return { type: "doc", content: [] };
+  }
+
+  const lines = plainText.split("\n");
+  const paragraphs = lines.map((line) => {
+    if (!line) {
+      return { type: "paragraph" as const };
+    }
+    return {
+      type: "paragraph" as const,
+      content: [{ type: "text" as const, text: line }],
+    };
+  });
+
+  return { type: "doc", content: paragraphs };
+}
+

@@ -18,7 +18,8 @@ import {
 import { EditorSidebar } from "./EditorSidebar";
 import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
-import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
+import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent, plainTextToTiptapContent } from "@/lib/content-utils";
+import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 import { ShareButton } from "@/components/features/share";
@@ -109,6 +110,13 @@ export function EditorLayout({
   const handleLeftSidebarToggle = () => {
     setLeftSidebarCollapsed(!leftSidebarCollapsed);
   };
+
+  // 시놉시스 변경 핸들러
+  const handleSynopsisChange = useCallback(async (plainText: string) => {
+    if (!synopsis) return;
+    const content = plainTextToTiptapContent(plainText);
+    await synopsisLocalRepository.update(synopsis.id, { content });
+  }, [synopsis]);
 
   // 제목 편집 시작
   const handleTitleClick = () => {
@@ -334,6 +342,7 @@ export function EditorLayout({
         <RightSidebar
           synopsis={synopsis}
           synopsisLoading={synopsisLoading}
+          onSynopsisChange={handleSynopsisChange}
           characters={characters}
           relationships={relationships}
           chapters={chapters}

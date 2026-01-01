@@ -26,6 +26,7 @@ type TabType = "synopsis" | "characters" | "chapters";
 interface RightSidebarProps {
   synopsis: Synopsis | null;
   synopsisLoading: boolean;
+  onSynopsisChange?: (plainText: string) => Promise<void>;
   characters: Character[];
   relationships: Relationship[];
   chapters: Chapter[];
@@ -38,6 +39,7 @@ interface RightSidebarProps {
 export function RightSidebar({
   synopsis,
   synopsisLoading,
+  onSynopsisChange,
   characters,
   relationships,
   chapters,
@@ -224,12 +226,12 @@ export function RightSidebar({
           {/* Tab content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === "synopsis" && (
-              <div className="h-full overflow-y-auto">
-                <RightSidebarSynopsis
-                  synopsis={synopsis}
-                  isLoading={synopsisLoading}
-                />
-              </div>
+              <RightSidebarSynopsis
+                synopsis={synopsis}
+                isLoading={synopsisLoading}
+                onContentChange={onSynopsisChange}
+                className="h-full"
+              />
             )}
             {activeTab === "characters" && (
               <RightSidebarCharacters characters={characters} className="h-full" />
