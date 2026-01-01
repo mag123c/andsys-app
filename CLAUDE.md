@@ -36,6 +36,16 @@ IndexedDB (로컬) ←→ SyncEngine ←→ Supabase (서버)
 - **로컬 우선 저장**: 저장 시 IndexedDB 먼저 → 온라인이면 debounce 후 Supabase 동기화
 - **Dexie 스키마 버전**: 현재 v7 (projects, chapters, synopses, characters, relationships, versions 테이블)
 
+### 동기화 흐름 (SyncEngine)
+```
+로컬 저장 → syncStatus: "pending" → SyncEngine.syncAll() → Supabase 업로드 → syncStatus: "synced"
+                                                        ↓
+                              Supabase Realtime 구독 → 다른 기기 변경 감지 → 로컬 업데이트
+```
+
+- **충돌 해결**: Latest-wins (updatedAt 비교)
+- **이미지 동기화**: Base64(로컬) → Storage 업로드 → Signed URL(서버)
+
 ### 주요 폴더 구조
 ```
 src/
