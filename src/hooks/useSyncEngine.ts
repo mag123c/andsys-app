@@ -260,7 +260,15 @@ export function useSyncEngine(): UseSyncEngineReturn {
           syncEngine.handleRealtimeEvent(eventPayload);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[Realtime] Connected successfully");
+        } else if (status === "CHANNEL_ERROR") {
+          console.error("[Realtime] Connection error");
+        } else if (status === "TIMED_OUT") {
+          console.error("[Realtime] Connection timed out");
+        }
+      });
 
     channelRef.current = channel;
 
