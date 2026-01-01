@@ -61,6 +61,43 @@ src/
 - **relationships**: 캐릭터 관계도 (양방향 관계 지원)
 - **versions**: 히스토리 스냅샷 (synopsis, character용)
 
+## 코드 철학 (Kent Beck Style)
+
+### 핵심 원칙
+```
+OOP + FP 하이브리드: 구조는 클래스/인터페이스, 로직은 순수 함수
+```
+
+| 원칙 | 설명 |
+|------|------|
+| **SRP** | 하나의 모듈 = 하나의 책임. 변경 이유가 하나뿐이어야 함 |
+| **순수 함수** | 같은 입력 → 같은 출력, 사이드 이펙트 격리 |
+| **명확한 의도** | 코드가 곧 문서. 이름만으로 역할이 드러나야 함 |
+| **작은 단위** | 함수는 한 가지 일만, 커밋도 한 가지 변경만 |
+
+### YAGNI + KISS + 미래지향
+- **YAGNI**: 지금 필요없는 기능은 만들지 않음
+- **KISS**: 가장 단순한 해결책 선택
+- **미래지향**: 단, 확장 포인트(인터페이스, 추상화)는 미리 설계
+- **성능 최적화**: 측정 가능한 병목은 즉시 개선
+
+### 코드 스타일
+```typescript
+// Good: 순수 함수 + 명확한 의도
+function calculateWordCount(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Good: 인터페이스로 확장 포인트 확보
+interface Repository<T> {
+  getById(id: string): Promise<T | null>;
+  save(entity: T): Promise<void>;
+}
+
+// Bad: 여러 책임 혼합
+function saveAndNotify(data) { /* 저장 + 알림 + 로깅... */ }
+```
+
 ## 핵심 규칙
 
 1. **RSC 보안**: Server Action에서 민감 데이터 반환 금지, 필요한 필드만 명시적 반환
@@ -68,6 +105,7 @@ src/
 3. **게스트 = 로컬 전용**: 게스트는 서버 동기화 없음 (IndexedDB만), 회원만 Supabase 동기화
 4. **Cascade Delete**: 프로젝트 삭제 시 관련 데이터(chapters, synopses, characters, relationships, versions) 함께 삭제
 5. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지, git -C 명령어 사용 금지
+6. **디렉토리 문서화**: 새 디렉토리 생성 시 `CLAUDE.md` 작성 (역할, 파일 설명, 최종 수정일)
 
 ## Tech Stack
 
