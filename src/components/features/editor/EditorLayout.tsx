@@ -20,6 +20,8 @@ import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
 import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent, plainTextToTiptapContent } from "@/lib/content-utils";
 import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
+import { characterLocalRepository } from "@/storage/local/character.local";
+import type { UpdateCharacterInput } from "@/repositories/types";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 import { ShareButton } from "@/components/features/share";
@@ -117,6 +119,16 @@ export function EditorLayout({
     const content = plainTextToTiptapContent(plainText);
     await synopsisLocalRepository.update(synopsis.id, { content });
   }, [synopsis]);
+
+  // 캐릭터 업데이트 핸들러
+  const handleCharacterUpdate = useCallback(async (id: string, data: UpdateCharacterInput) => {
+    await characterLocalRepository.update(id, data);
+  }, []);
+
+  // 캐릭터 삭제 핸들러
+  const handleCharacterDelete = useCallback(async (id: string) => {
+    await characterLocalRepository.delete(id);
+  }, []);
 
   // 제목 편집 시작
   const handleTitleClick = () => {
@@ -345,6 +357,8 @@ export function EditorLayout({
           onSynopsisChange={handleSynopsisChange}
           characters={characters}
           relationships={relationships}
+          onCharacterUpdate={handleCharacterUpdate}
+          onCharacterDelete={handleCharacterDelete}
           chapters={chapters}
           currentChapterId={currentChapter.id}
           collapsed={rightSidebarCollapsed}

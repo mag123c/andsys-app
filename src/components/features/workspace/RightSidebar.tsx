@@ -29,6 +29,9 @@ interface RightSidebarProps {
   onSynopsisChange?: (plainText: string) => Promise<void>;
   characters: Character[];
   relationships: Relationship[];
+  onCharacterUpdate?: (id: string, data: import("@/repositories/types").UpdateCharacterInput) => Promise<void>;
+  onCharacterDelete?: (id: string) => Promise<void>;
+  onCharacterAdd?: () => void;
   chapters: Chapter[];
   currentChapterId: string;
   collapsed: boolean;
@@ -42,6 +45,9 @@ export function RightSidebar({
   onSynopsisChange,
   characters,
   relationships,
+  onCharacterUpdate,
+  onCharacterDelete,
+  onCharacterAdd,
   chapters,
   currentChapterId,
   collapsed,
@@ -234,7 +240,15 @@ export function RightSidebar({
               />
             )}
             {activeTab === "characters" && (
-              <RightSidebarCharacters characters={characters} className="h-full" />
+              <RightSidebarCharacters
+                characters={characters}
+                relationships={relationships}
+                onCharacterUpdate={onCharacterUpdate}
+                onCharacterDelete={onCharacterDelete}
+                onCharacterAdd={onCharacterAdd}
+                onShowRelationshipGraph={() => setRelationshipDialogOpen(true)}
+                className="h-full"
+              />
             )}
             {activeTab === "chapters" && (
               <RightSidebarChapters

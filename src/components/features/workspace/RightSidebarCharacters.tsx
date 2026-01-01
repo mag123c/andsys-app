@@ -1,25 +1,34 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, User, Users } from "lucide-react";
-import type { Character } from "@/repositories/types";
+import { useState, useMemo, useCallback } from "react";
+import { Search, Users, Plus, Network } from "lucide-react";
+import type { Character, Relationship, UpdateCharacterInput } from "@/repositories/types";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CharacterPreviewCard } from "./CharacterPreviewCard";
+import { CharacterWikiCard } from "./CharacterWikiCard";
 
 interface RightSidebarCharactersProps {
   characters: Character[];
+  relationships: Relationship[];
+  onCharacterUpdate?: (id: string, data: UpdateCharacterInput) => Promise<void>;
+  onCharacterDelete?: (id: string) => Promise<void>;
+  onCharacterAdd?: () => void;
+  onShowRelationshipGraph?: () => void;
   className?: string;
 }
 
 export function RightSidebarCharacters({
   characters,
+  relationships,
+  onCharacterUpdate,
+  onCharacterDelete,
+  onCharacterAdd,
+  onShowRelationshipGraph,
   className,
 }: RightSidebarCharactersProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
-    null
-  );
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filteredCharacters = useMemo(() => {
     if (!searchQuery.trim()) return characters;
@@ -32,29 +41,85 @@ export function RightSidebarCharacters({
     );
   }, [characters, searchQuery]);
 
+  const handleToggle = useCallback((id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const handleUpdate = useCallback(
+    async (id: string, data: UpdateCharacterInput) => {
+      if (onCharacterUpdate) {
+        await onCharacterUpdate(id, data);
+      }
+    },
+    [onCharacterUpdate]
+  );
+
+  const handleDelete = useCallback(
+    async (id: string) => {
+      if (onCharacterDelete) {
+        await onCharacterDelete(id);
+        if (expandedId === id) {
+          setExpandedId(null);
+        }
+      }
+    },
+    [onCharacterDelete, expandedId]
+  );
+
   if (characters.length === 0) {
     return (
-      <div className={cn("p-4", className)}>
-        <div className="flex items-center gap-2 mb-3">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">등장인물</span>
+      <div className={cn("flex flex-col h-full", className)}>
+        <div className="p-3 border-b shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">등장인물</span>
+            </div>
+            {onCharacterAdd && (
+              <Button variant="ghost" size="sm" className="h-7" onClick={onCharacterAdd}>
+                <Plus className="h-4 w-4 mr-1" />
+                추가
+              </Button>
+            )}
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground text-center py-4">
-          등장인물이 없습니다
-        </p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">등장인물이 없습니다</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="p-3 border-b">
-        <div className="flex items-center gap-2 mb-2">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">
-            등장인물 ({characters.length})
-          </span>
+      <div className="p-3 border-b shrink-0">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">
+              등장인물 ({characters.length})
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            {onCharacterAdd && (
+              <Button variant="ghost" size="sm" className="h-7" onClick={onCharacterAdd}>
+                <Plus className="h-4 w-4 mr-1" />
+                추가
+              </Button>
+            )}
+            {onShowRelationshipGraph && characters.length >= 2 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7"
+                onClick={onShowRelationshipGraph}
+              >
+                <Network className="h-4 w-4 mr-1" />
+                관계도
+              </Button>
+            )}
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
@@ -68,63 +133,25 @@ export function RightSidebarCharacters({
         </div>
       </div>
 
-      {/* Selected Character Preview */}
-      {selectedCharacter && (
-        <div className="p-2 border-b">
-          <CharacterPreviewCard
-            character={selectedCharacter}
-            onClose={() => setSelectedCharacter(null)}
-          />
-        </div>
-      )}
-
-      {/* Character List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Character List - Wiki Style */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {filteredCharacters.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-4">
             검색 결과가 없습니다
           </p>
         ) : (
-          <ul className="p-2 space-y-1">
-            {filteredCharacters.map((character) => (
-              <li key={character.id}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSelectedCharacter(
-                      selectedCharacter?.id === character.id ? null : character
-                    )
-                  }
-                  className={cn(
-                    "w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm",
-                    "hover:bg-accent transition-colors",
-                    selectedCharacter?.id === character.id &&
-                      "bg-accent text-accent-foreground"
-                  )}
-                >
-                  <div className="w-6 h-6 rounded-full bg-muted overflow-hidden shrink-0">
-                    {character.imageUrl ? (
-                      <img
-                        src={character.imageUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="h-3 w-3 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="truncate">{character.name}</span>
-                  {character.nickname && (
-                    <span className="text-xs text-muted-foreground truncate">
-                      ({character.nickname})
-                    </span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
+          filteredCharacters.map((character) => (
+            <CharacterWikiCard
+              key={character.id}
+              character={character}
+              relationships={relationships}
+              allCharacters={characters}
+              isExpanded={expandedId === character.id}
+              onToggle={() => handleToggle(character.id)}
+              onUpdate={handleUpdate}
+              onDelete={onCharacterDelete ? handleDelete : undefined}
+            />
+          ))
         )}
       </div>
     </div>

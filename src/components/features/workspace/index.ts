@@ -9,3 +9,4 @@ export { RightSidebarSynopsis } from "./RightSidebarSynopsis";
 export { RightSidebarCharacters } from "./RightSidebarCharacters";
 export { RightSidebarChapters } from "./RightSidebarChapters";
 export { CharacterPreviewCard } from "./CharacterPreviewCard";
+export { CharacterWikiCard } from "./CharacterWikiCard";
