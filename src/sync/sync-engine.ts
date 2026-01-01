@@ -5,6 +5,11 @@ import { chapterRemoteRepository } from "@/storage/remote/chapter.remote";
 import { synopsisRemoteRepository } from "@/storage/remote/synopsis.remote";
 import { characterRemoteRepository } from "@/storage/remote/character.remote";
 import { relationshipRemoteRepository } from "@/storage/remote/relationship.remote";
+import {
+  isBase64Image,
+  uploadProjectCover,
+  uploadCharacterImage,
+} from "@/storage/remote/storage";
 import { syncQueue, type EntityType, type SyncOperation } from "./sync-queue";
 import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 
@@ -467,6 +472,18 @@ export class SyncEngine {
       if (!local.userId) continue;
 
       try {
+        // 이미지 업로드 (Base64 → Storage)
+        let coverImageUrl = local.coverImageUrl;
+        if (isBase64Image(local.coverImageBase64)) {
+          coverImageUrl = await uploadProjectCover(
+            local.userId,
+            local.id,
+            local.coverImageBase64!
+          );
+          // 로컬 coverImageUrl도 업데이트
+          await db.projects.update(local.id, { coverImageUrl });
+        }
+
         // 서버에 존재하는지 확인
         const remote = await projectRemoteRepository.getById(local.id);
 
@@ -478,6 +495,7 @@ export class SyncEngine {
             title: local.title,
             description: local.description,
             genre: local.genre,
+            cover_image_url: coverImageUrl,
             status: local.status,
             created_at: local.createdAt.toISOString(),
             updated_at: local.updatedAt.toISOString(),
@@ -493,6 +511,7 @@ export class SyncEngine {
               title: local.title,
               description: local.description,
               genre: local.genre,
+              coverImageUrl,
               status: local.status,
             });
           }
@@ -640,6 +659,22 @@ export class SyncEngine {
       if (!validProjectIds.has(local.projectId)) continue;
 
       try {
+        // 프로젝트에서 userId 가져오기
+        const project = await db.projects.get(local.projectId);
+        if (!project?.userId) continue;
+
+        // 이미지 업로드 (Base64 → Storage)
+        let imageUrl = local.imageUrl;
+        if (isBase64Image(local.imageBase64)) {
+          imageUrl = await uploadCharacterImage(
+            project.userId,
+            local.id,
+            local.imageBase64!
+          );
+          // 로컬 imageUrl도 업데이트
+          await db.characters.update(local.id, { imageUrl });
+        }
+
         const remote = await characterRemoteRepository.getById(local.id);
 
         if (!remote) {
@@ -651,7 +686,7 @@ export class SyncEngine {
             age: local.age,
             gender: local.gender,
             race: local.race,
-            image_url: local.imageUrl,
+            image_url: imageUrl,
             order: local.order,
             height: local.height,
             weight: local.weight,
@@ -678,7 +713,7 @@ export class SyncEngine {
               age: local.age,
               gender: local.gender,
               race: local.race,
-              imageUrl: local.imageUrl,
+              imageUrl,
               height: local.height,
               weight: local.weight,
               appearance: local.appearance,
