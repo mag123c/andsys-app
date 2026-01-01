@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useSyncExternalStore, useRef } from "react";
 import { liveQuery } from "dexie";
+import { toast } from "sonner";
 import { syncEngine, type SyncStatus, type SyncResult, type SyncEventPayload } from "@/sync/sync-engine";
 import { useRealOnline } from "./useOnline";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -10,6 +11,21 @@ import { db } from "@/storage/local/db";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 const SYNC_DEBOUNCE_MS = 2000; // 2초 debounce
+
+/**
+ * 동기화 실행 및 에러 피드백
+ */
+async function syncWithFeedback(): Promise<void> {
+  try {
+    const result = await syncEngine.syncAll();
+    if (result.failed > 0) {
+      toast.error(`동기화 실패: ${result.failed}개 항목`);
+    }
+  } catch (error) {
+    toast.error("동기화 중 오류가 발생했습니다");
+    console.error("Sync error:", error);
+  }
+}
 
 interface UseSyncEngineReturn {
   status: SyncStatus;
@@ -68,7 +84,7 @@ export function useSyncEngine(): UseSyncEngineReturn {
 
     // 약간의 딜레이 후 동기화 (네트워크 안정화 대기)
     const timer = setTimeout(() => {
-      syncEngine.syncAll().catch(console.error);
+      syncWithFeedback();
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -97,7 +113,7 @@ export function useSyncEngine(): UseSyncEngineReturn {
           }
           // debounce 후 동기화
           syncTimerRef.current = setTimeout(() => {
-            syncEngine.syncAll().catch(console.error);
+            syncWithFeedback();
             syncTimerRef.current = null;
           }, SYNC_DEBOUNCE_MS);
         }
@@ -119,7 +135,10 @@ export function useSyncEngine(): UseSyncEngineReturn {
     if (!userId) return;
     if (!isOnline) return;
 
-    syncEngine.pullFromServer(userId).catch(console.error);
+    syncEngine.pullFromServer(userId).catch((error) => {
+      console.error("Pull from server error:", error);
+      // 초기 로딩 시에는 조용히 실패 (서버 연결 문제일 수 있음)
+    });
   }, [userId, isOnline]);
 
   // Supabase Realtime 구독

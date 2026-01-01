@@ -9,6 +9,8 @@ import {
   isBase64Image,
   uploadProjectCover,
   uploadCharacterImage,
+  deleteProjectCover,
+  deleteCharacterImage,
 } from "@/storage/remote/storage";
 import { syncQueue, type EntityType, type SyncOperation } from "./sync-queue";
 import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
@@ -471,6 +473,9 @@ export class SyncEngine {
       // 게스트 프로젝트는 동기화하지 않음
       if (!local.userId) continue;
 
+      // 이미지 업로드 여부 추적 (롤백용)
+      let uploadedNewImage = false;
+
       try {
         // 이미지 업로드 (Base64 → Storage)
         let coverImageUrl = local.coverImageUrl;
@@ -480,6 +485,7 @@ export class SyncEngine {
             local.id,
             local.coverImageBase64!
           );
+          uploadedNewImage = true;
           // 로컬 coverImageUrl도 업데이트
           await db.projects.update(local.id, { coverImageUrl });
         }
@@ -525,6 +531,10 @@ export class SyncEngine {
         syncedProjectIds.add(local.id);
         result.synced++;
       } catch (error) {
+        // 이미지 업로드 후 DB 실패 시 Storage에서 삭제 (orphan 방지)
+        if (uploadedNewImage && local.userId) {
+          deleteProjectCover(local.userId, local.id).catch(() => {});
+        }
         result.failed++;
         result.errors.push(
           `project/${local.id}: ${error instanceof Error ? error.message : String(error)}`
@@ -658,10 +668,15 @@ export class SyncEngine {
     for (const local of pendingCharacters) {
       if (!validProjectIds.has(local.projectId)) continue;
 
+      // 이미지 업로드 여부 추적 (롤백용)
+      let uploadedNewImage = false;
+      let uploadUserId: string | null = null;
+
       try {
         // 프로젝트에서 userId 가져오기
         const project = await db.projects.get(local.projectId);
         if (!project?.userId) continue;
+        uploadUserId = project.userId;
 
         // 이미지 업로드 (Base64 → Storage)
         let imageUrl = local.imageUrl;
@@ -671,6 +686,7 @@ export class SyncEngine {
             local.id,
             local.imageBase64!
           );
+          uploadedNewImage = true;
           // 로컬 imageUrl도 업데이트
           await db.characters.update(local.id, { imageUrl });
         }
@@ -734,6 +750,10 @@ export class SyncEngine {
         });
         result.synced++;
       } catch (error) {
+        // 이미지 업로드 후 DB 실패 시 Storage에서 삭제 (orphan 방지)
+        if (uploadedNewImage && uploadUserId) {
+          deleteCharacterImage(uploadUserId, local.id).catch(() => {});
+        }
         result.failed++;
         result.errors.push(
           `character/${local.id}: ${error instanceof Error ? error.message : String(error)}`
