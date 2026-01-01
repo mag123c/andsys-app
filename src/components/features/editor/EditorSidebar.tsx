@@ -12,6 +12,8 @@ interface EditorSidebarProps {
   project: Project;
   chapters: Chapter[];
   currentChapterId: string;
+  collapsed?: boolean;
+  onToggle?: () => void;
   className?: string;
 }
 
@@ -19,6 +21,8 @@ export function EditorSidebar({
   project,
   chapters,
   currentChapterId,
+  collapsed = false,
+  onToggle,
   className,
 }: EditorSidebarProps) {
   const { auth } = useAuth();
@@ -28,8 +32,33 @@ export function EditorSidebar({
   const userName = auth.status === "authenticated" ? auth.user.displayName || auth.user.email : null;
   const avatarUrl = auth.status === "authenticated" ? auth.user.avatarUrl : null;
 
+  if (collapsed) {
+    return (
+      <aside className={cn("flex flex-col h-full w-12", className)}>
+        <div className="flex-1 flex flex-col items-center py-4 gap-2">
+          <Link
+            href={`/novels/${project.id}`}
+            className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
+            title={project.title}
+          >
+            <FolderOpen className="h-4 w-4" />
+          </Link>
+        </div>
+        <SidebarProfile
+          isLoading={isLoading}
+          isGuest={isGuest}
+          userName={userName}
+          avatarUrl={avatarUrl}
+          collapsed={true}
+          onToggle={onToggle}
+          showToggle={!!onToggle}
+        />
+      </aside>
+    );
+  }
+
   return (
-    <aside className={cn("flex flex-col h-full", className)}>
+    <aside className={cn("flex flex-col h-full w-64", className)}>
       <div className="p-4 border-b">
         <Link
           href={`/novels/${project.id}`}
@@ -75,7 +104,8 @@ export function EditorSidebar({
         userName={userName}
         avatarUrl={avatarUrl}
         collapsed={false}
-        showToggle={false}
+        onToggle={onToggle}
+        showToggle={!!onToggle}
       />
     </aside>
   );

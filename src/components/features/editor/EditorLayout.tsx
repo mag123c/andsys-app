@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 
 const RIGHT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-right-sidebar-collapsed";
+const LEFT_SIDEBAR_COLLAPSED_KEY = "4ndsys:editor-left-sidebar-collapsed";
 
 interface EditorLayoutProps {
   project: Project;
@@ -64,6 +65,12 @@ export function EditorLayout({
     RIGHT_SIDEBAR_COLLAPSED_KEY,
     true
   );
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useLocalStorageBoolean(
+    LEFT_SIDEBAR_COLLAPSED_KEY,
+    false
+  );
+  // 우측 사이드바 열기 전 좌측 상태 저장 (복원용)
+  const [leftSidebarPreviousState, setLeftSidebarPreviousState] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(currentChapter.title);
 
@@ -85,8 +92,22 @@ export function EditorLayout({
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [currentChapter.id, currentChapter.title]);
 
+  // 우측 사이드바 토글 (좌측과 연동)
   const handleRightSidebarToggle = () => {
+    if (rightSidebarCollapsed) {
+      // 우측 열기 → 좌측 상태 저장 후 접기
+      setLeftSidebarPreviousState(leftSidebarCollapsed);
+      setLeftSidebarCollapsed(true);
+    } else {
+      // 우측 닫기 → 좌측 복원
+      setLeftSidebarCollapsed(leftSidebarPreviousState);
+    }
     setRightSidebarCollapsed(!rightSidebarCollapsed);
+  };
+
+  // 좌측 사이드바 토글
+  const handleLeftSidebarToggle = () => {
+    setLeftSidebarCollapsed(!leftSidebarCollapsed);
   };
 
   // 제목 편집 시작
@@ -209,12 +230,18 @@ export function EditorLayout({
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Desktop left sidebar - fixed */}
-      <aside className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:flex-col lg:border-r lg:bg-background lg:z-20">
+      {/* Desktop left sidebar - fixed (w-64 또는 w-12) */}
+      <aside
+        className={`hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:flex-col lg:border-r lg:bg-background lg:z-20 transition-[width] duration-200 ${
+          leftSidebarCollapsed ? "lg:w-12" : "lg:w-64"
+        }`}
+      >
         <EditorSidebar
           project={project}
           chapters={chapters}
           currentChapterId={currentChapter.id}
+          collapsed={leftSidebarCollapsed}
+          onToggle={handleLeftSidebarToggle}
         />
       </aside>
 
@@ -234,8 +261,10 @@ export function EditorLayout({
 
       {/* Main content area */}
       <div
-        className={`flex-1 lg:pl-64 transition-[padding] duration-200 ${
-          rightSidebarCollapsed ? "lg:pr-12" : "lg:pr-72"
+        className={`flex-1 transition-[padding] duration-200 ${
+          leftSidebarCollapsed ? "lg:pl-12" : "lg:pl-64"
+        } ${
+          rightSidebarCollapsed ? "lg:pr-12" : "lg:pr-[50%]"
         }`}
       >
         {/* Header */}

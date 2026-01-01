@@ -139,7 +139,7 @@ export function RightSidebar({
       ) : (
         <aside
           className={cn(
-            "flex flex-col border-l bg-background w-72 h-full",
+            "flex flex-col border-l bg-background w-[50vw] h-full",
             className
           )}
         >
