@@ -7,7 +7,6 @@ import {
   BookOpen,
   FileText,
   Users,
-  Link2,
   ArrowLeft,
   ChevronRight,
 } from "lucide-react";
@@ -32,10 +31,6 @@ const MENU_COLORS = {
   characters: {
     icon: "text-violet-500",
     active: "bg-violet-100 dark:bg-violet-900",
-  },
-  relationships: {
-    icon: "text-rose-500",
-    active: "bg-rose-100 dark:bg-rose-900",
   },
 } as const;
 
@@ -83,7 +78,6 @@ export function NovelSidebar({
     { id: "chapters", label: "회차 목록", icon: BookOpen, href: basePath, expandable: true },
     { id: "synopsis", label: "시놉시스", icon: FileText, href: `${basePath}/synopsis` },
     { id: "characters", label: "등장인물", icon: Users, href: `${basePath}/characters`, expandable: true },
-    { id: "relationships", label: "관계도", icon: Link2, href: `${basePath}/relationships` },
   ];
 
   const isChaptersActive = pathname === basePath;
