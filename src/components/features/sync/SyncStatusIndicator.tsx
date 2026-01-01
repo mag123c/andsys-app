@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Cloud, CloudOff, RefreshCw, AlertCircle, Check } from "lucide-react";
+import { Cloud, CloudOff, RefreshCw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useSyncEngine } from "@/hooks/useSyncEngine";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 /**
  * 동기화 상태 인디케이터
@@ -20,21 +19,19 @@ import { cn } from "@/lib/utils";
  * - pending 있음: 클라우드 + 숫자 뱃지
  * - 에러: 빨간색 경고
  * - 오프라인: 연결 끊김 아이콘
- * - 정상: 표시 안함 (또는 체크 아이콘)
+ * - 정상: 표시 안함
  */
 export function SyncStatusIndicator() {
   const { auth } = useAuth();
   const { status, isOnline, pendingCount, lastError, syncNow } = useSyncEngine();
   const prevStatusRef = useRef(status);
   const prevPendingRef = useRef(pendingCount);
+  const isAuthenticated = auth.status === "authenticated";
 
-  // 게스트는 동기화 표시 안함
-  if (auth.status !== "authenticated") {
-    return null;
-  }
-
-  // 상태 변화에 따른 토스트 알림
+  // 상태 변화에 따른 토스트 알림 (Hook은 조건부 return 전에 호출)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     // 동기화 완료 시 (syncing → idle, pending 감소)
     if (
       prevStatusRef.current === "syncing" &&
@@ -61,7 +58,12 @@ export function SyncStatusIndicator() {
 
     prevStatusRef.current = status;
     prevPendingRef.current = pendingCount;
-  }, [status, pendingCount, lastError, syncNow]);
+  }, [isAuthenticated, status, pendingCount, lastError, syncNow]);
+
+  // 게스트는 동기화 표시 안함
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // 오프라인
   if (!isOnline) {
@@ -153,72 +155,6 @@ export function SyncStatusIndicator() {
     );
   }
 
-  // 정상 상태 - 표시 안함 (사용자 요청대로)
+  // 정상 상태 - 표시 안함
   return null;
-}
-
-/**
- * 동기화 상태를 항상 표시하는 버전 (설정에서 사용)
- */
-export function SyncStatusBadge() {
-  const { auth } = useAuth();
-  const { status, isOnline, pendingCount, lastError, syncNow } = useSyncEngine();
-
-  if (auth.status !== "authenticated") {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CloudOff className="h-4 w-4" />
-        <span>게스트 모드 (로컬 저장)</span>
-      </div>
-    );
-  }
-
-  if (!isOnline) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CloudOff className="h-4 w-4" />
-        <span>오프라인</span>
-      </div>
-    );
-  }
-
-  if (status === "syncing") {
-    return (
-      <div className="flex items-center gap-2 text-sm text-blue-500">
-        <RefreshCw className="h-4 w-4 animate-spin" />
-        <span>동기화 중...</span>
-      </div>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <button
-        onClick={() => syncNow()}
-        className="flex items-center gap-2 text-sm text-destructive hover:underline"
-      >
-        <AlertCircle className="h-4 w-4" />
-        <span>동기화 오류 - 클릭하여 재시도</span>
-      </button>
-    );
-  }
-
-  if (pendingCount > 0) {
-    return (
-      <button
-        onClick={() => syncNow()}
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <Cloud className="h-4 w-4" />
-        <span>{pendingCount}개 동기화 대기 중</span>
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-2 text-sm text-green-600">
-      <Check className="h-4 w-4" />
-      <span>동기화 완료</span>
-    </div>
-  );
 }

@@ -2,9 +2,10 @@
 
 import { useEffect, useCallback, useSyncExternalStore, useRef } from "react";
 import { syncEngine, type SyncStatus, type SyncResult, type SyncEventPayload } from "@/sync/sync-engine";
-import { useOnline } from "./useOnline";
+import { useRealOnline } from "./useOnline";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { createClient } from "@/storage/remote/client";
+import { db } from "@/storage/local/db";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface UseSyncEngineReturn {
@@ -22,7 +23,7 @@ interface UseSyncEngineReturn {
  * - Supabase Realtime 구독으로 실시간 동기화
  */
 export function useSyncEngine(): UseSyncEngineReturn {
-  const isOnline = useOnline();
+  const { isOnline } = useRealOnline();
   const { auth } = useAuth();
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -120,21 +121,15 @@ export function useSyncEngine(): UseSyncEngineReturn {
           table: "chapters",
         },
         async (payload) => {
-          // 해당 프로젝트가 현재 사용자 소유인지 확인
           const projectId =
             (payload.new as Record<string, unknown>)?.project_id ||
             (payload.old as Record<string, unknown>)?.project_id;
 
           if (!projectId) return;
 
-          // 프로젝트 소유 확인
-          const { data: project } = await supabase
-            .from("projects")
-            .select("user_id")
-            .eq("id", projectId)
-            .maybeSingle();
-
-          if (project?.user_id !== userId) return;
+          // 로컬 캐시에서 프로젝트 소유 확인 (N+1 쿼리 방지)
+          const localProject = await db.projects.get(projectId as string);
+          if (!localProject || localProject.userId !== userId) return;
 
           const eventPayload: SyncEventPayload = {
             type: payload.eventType.toUpperCase() as SyncEventPayload["type"],
@@ -159,13 +154,8 @@ export function useSyncEngine(): UseSyncEngineReturn {
 
           if (!projectId) return;
 
-          const { data: project } = await supabase
-            .from("projects")
-            .select("user_id")
-            .eq("id", projectId)
-            .maybeSingle();
-
-          if (project?.user_id !== userId) return;
+          const localProject = await db.projects.get(projectId as string);
+          if (!localProject || localProject.userId !== userId) return;
 
           const eventPayload: SyncEventPayload = {
             type: payload.eventType.toUpperCase() as SyncEventPayload["type"],
@@ -190,13 +180,8 @@ export function useSyncEngine(): UseSyncEngineReturn {
 
           if (!projectId) return;
 
-          const { data: project } = await supabase
-            .from("projects")
-            .select("user_id")
-            .eq("id", projectId)
-            .maybeSingle();
-
-          if (project?.user_id !== userId) return;
+          const localProject = await db.projects.get(projectId as string);
+          if (!localProject || localProject.userId !== userId) return;
 
           const eventPayload: SyncEventPayload = {
             type: payload.eventType.toUpperCase() as SyncEventPayload["type"],
@@ -221,13 +206,8 @@ export function useSyncEngine(): UseSyncEngineReturn {
 
           if (!projectId) return;
 
-          const { data: project } = await supabase
-            .from("projects")
-            .select("user_id")
-            .eq("id", projectId)
-            .maybeSingle();
-
-          if (project?.user_id !== userId) return;
+          const localProject = await db.projects.get(projectId as string);
+          if (!localProject || localProject.userId !== userId) return;
 
           const eventPayload: SyncEventPayload = {
             type: payload.eventType.toUpperCase() as SyncEventPayload["type"],
