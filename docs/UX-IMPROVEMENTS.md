@@ -372,12 +372,14 @@ Phase 3: 우측 사이드바 개편 (feat/right-sidebar)
 - [x] 10화 단위 그룹핑
 
 ### Phase 2: 회차 플롯
-- [x] DB 스키마 변경 (Dexie v8, Supabase migration)
-- [x] 타입 정의 업데이트
-- [x] Repository 업데이트
-- [x] useEditor 훅 수정
-- [x] PlotMemo 컴포넌트 생성
-- [x] 에디터 페이지에 통합
+- [ ] DB 스키마 변경 (Dexie v8, Supabase migration)
+- [ ] 타입 정의 업데이트
+- [ ] Repository 업데이트
+- [ ] useEditor 훅 수정
+- [ ] PlotMemo 컴포넌트 생성
+- [ ] 에디터 페이지에 통합
+
+> Note: feat/chapter-plot 브랜치에서 작업 중, main 미머지
 
 ### Phase 3: 우측 사이드바 개편
 - [x] 좌우 사이드바 연동 (우측 열면 좌측 접힘)
@@ -391,4 +393,4 @@ Phase 3: 우측 사이드바 개편 (feat/right-sidebar)
 
 ---
 
-최종 수정: 2026-01-01
+최종 수정: 2026-01-02

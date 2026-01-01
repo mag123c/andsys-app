@@ -9,6 +9,7 @@
 | AuthProvider.tsx | 인증 상태 관리 (Supabase Auth + 게스트 모드) |
 | SyncProvider.tsx | 동기화 상태 전역 제공 |
 | ThemeProvider.tsx | 다크/라이트 테마 관리 (next-themes) |
+| ServiceWorkerProvider.tsx | PWA 서비스 워커 등록 및 관리 |
 
 ## AuthProvider 주요 기능
 - OAuth 로그인 (Google, Discord)
@@ -22,4 +23,4 @@
 - `sync/sync-engine`
 
 ---
-최종 수정: 2026-01-01
+최종 수정: 2026-01-02
