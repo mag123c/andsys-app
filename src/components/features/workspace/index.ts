@@ -1,5 +1,7 @@
 export { NovelDetailLayout } from "./NovelDetailLayout";
+export { NovelsListLayout } from "./NovelsListLayout";
 export { NovelSidebar } from "./NovelSidebar";
+export { NovelsListSidebar } from "./NovelsListSidebar";
 export { SidebarToggle } from "./SidebarToggle";
 export { SidebarProfile } from "./SidebarProfile";
 export { RightSidebar } from "./RightSidebar";

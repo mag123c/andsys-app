@@ -14,12 +14,9 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const hideHeader = HEADER_HIDDEN_PATTERN.test(pathname);
 
+  // /novels 경로는 하위 layout에서 자체 레이아웃 처리
   if (hideHeader) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return (
