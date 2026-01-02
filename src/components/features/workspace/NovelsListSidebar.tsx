@@ -41,10 +41,8 @@ const MENU_ITEMS: MenuItem[] = [
     id: "desktop",
     label: "데스크톱 앱",
     icon: Download,
-    href: "#", // TODO: PWA 설치 또는 다운로드 링크
-    external: false,
-    disabled: true,
-    badge: "준비중",
+    href: "https://github.com/mag123c/andsys-app/releases/latest",
+    external: true,
   },
 ];
 

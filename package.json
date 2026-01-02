@@ -1,6 +1,8 @@
 {
   "name": "4ndsys",
   "version": "0.1.0",
+  "description": "웹소설 작가를 위한 로컬 우선 글쓰기 플랫폼",
+  "author": "4ndSYS <support@4ndsys.net>",
   "private": true,
   "main": "dist-electron/main.js",
   "pnpm": {

@@ -8,10 +8,20 @@ directories:
 
 files:
   - dist-electron/**/*
-  - out/**/*
+  - "!**/node_modules/**/*"
+  - "!guide/**/*"
+  - "!supabase/**/*"
+  - "!docs/**/*"
+  - "!src/**/*"
+  - "!**/*.md"
+  - "!**/*.ts"
+  - "!**/*.tsx"
 
 extraMetadata:
   main: dist-electron/main.js
+
+# 네이티브 모듈 재빌드 비활성화 (네이티브 모듈 없음)
+npmRebuild: false
 
 # 자동 업데이트 설정
 publish:
