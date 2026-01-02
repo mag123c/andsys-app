@@ -171,12 +171,10 @@ Next.js 16 (App Router, Turbopack) + React 19 + shadcn/ui + Tailwind CSS 4 + Sup
 
 | 문서 | 용도 |
 |------|------|
-| `docs/TASK.md` | 작업 현황 |
-| `docs/PLANNING.md` | MVP 기능, 로드맵 |
-| `docs/SCHEMA.md` | DB 스키마 (Supabase + IndexedDB) |
-| `docs/ARCHITECTURE.md` | 상세 아키텍처, 동기화 전략 |
-| `docs/DESIGN.md` | 디자인/UX 가이드 |
-| `docs/AI-CONTEXT-OPTIMIZATION.md` | AI Context 최적화 결정 문서 |
+| `docs/PWA.md` | PWA 전환 작업 (진행 중) |
+| `docs/AI-CONTEXT-OPTIMIZATION.md` | AI Context 최적화 설계 결정 |
+
+> 기타 문서(아키텍처, 스키마, 기획 등)는 `ai-context/` JSON 파일로 대체됨
 
 ---
 
