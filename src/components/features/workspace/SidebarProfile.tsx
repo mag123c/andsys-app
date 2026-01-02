@@ -13,6 +13,7 @@ interface SidebarProfileProps {
   collapsed: boolean;
   onToggle?: () => void;
   showToggle?: boolean;
+  onSettingsClick?: () => void;
 }
 
 export function SidebarProfile({
@@ -23,6 +24,7 @@ export function SidebarProfile({
   collapsed,
   onToggle,
   showToggle = true,
+  onSettingsClick,
 }: SidebarProfileProps) {
   const initials = userName?.charAt(0).toUpperCase() ?? "?";
 
@@ -33,24 +35,29 @@ export function SidebarProfile({
           <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
         ) : (
           <>
-            <Link
-              href={isGuest ? "/signup" : "/settings"}
-              title={isGuest ? "회원가입" : userName ?? "프로필"}
-            >
-              <Avatar className="h-8 w-8">
-                {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
-                <AvatarFallback className="text-xs">
-                  {isGuest ? <User className="h-4 w-4" /> : initials}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-            <Link
-              href="/settings"
+            {isGuest ? (
+              <Link href="/signup" title="회원가입">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs">
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            ) : (
+              <button onClick={onSettingsClick} title={userName ?? "프로필"}>
+                <Avatar className="h-8 w-8">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
+                  <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                </Avatar>
+              </button>
+            )}
+            <button
+              onClick={onSettingsClick}
               className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors"
               title="설정"
             >
               <Settings className="h-4 w-4 text-muted-foreground" />
-            </Link>
+            </button>
             <a
               href="https://guide.4ndsys.net"
               target="_blank"
@@ -72,18 +79,22 @@ export function SidebarProfile({
   return (
     <div className="p-3 border-t">
       <div className="flex items-center gap-3">
-        <Link
-          href={isGuest ? "/signup" : "/settings"}
-          className="shrink-0"
-          title={isGuest ? "회원가입" : userName ?? "프로필"}
-        >
-          <Avatar className="h-8 w-8">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
-            <AvatarFallback className="text-xs">
-              {isGuest ? <User className="h-4 w-4" /> : initials}
-            </AvatarFallback>
-          </Avatar>
-        </Link>
+        {isGuest ? (
+          <Link href="/signup" className="shrink-0" title="회원가입">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="text-xs">
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <button onClick={onSettingsClick} className="shrink-0" title={userName ?? "프로필"}>
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={userName ?? "프로필"} />}
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            </Avatar>
+          </button>
+        )}
         <div className="flex-1 min-w-0">
           {isLoading ? (
             <div className="h-4 w-20 bg-muted rounded animate-pulse" />
@@ -93,13 +104,13 @@ export function SidebarProfile({
             </span>
           )}
         </div>
-        <Link
-          href="/settings"
+        <button
+          onClick={onSettingsClick}
           className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent transition-colors shrink-0"
           title="설정"
         >
           <Settings className="h-4 w-4 text-muted-foreground" />
-        </Link>
+        </button>
         <a
           href="https://guide.4ndsys.net"
           target="_blank"

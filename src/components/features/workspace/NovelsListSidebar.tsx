@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "./SidebarProfile";
+import { SettingsModal } from "@/components/features/settings";
 
 // Discord 공식 로고 아이콘
 function DiscordIcon({ className }: { className?: string }) {
@@ -62,6 +64,7 @@ export function NovelsListSidebar({
   className,
 }: NovelsListSidebarProps) {
   const { auth } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -127,7 +130,10 @@ export function NovelsListSidebar({
           avatarUrl={avatarUrl}
           collapsed={collapsed}
           onToggle={onToggle}
+          onSettingsClick={() => setSettingsOpen(true)}
         />
+
+        <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       </aside>
     );
   }
@@ -200,7 +206,10 @@ export function NovelsListSidebar({
         avatarUrl={avatarUrl}
         collapsed={collapsed}
         onToggle={onToggle}
+        onSettingsClick={() => setSettingsOpen(true)}
       />
+
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </aside>
   );
 }

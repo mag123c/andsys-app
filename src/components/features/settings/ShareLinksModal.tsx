@@ -1,23 +1,33 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ShareLinkList } from "@/components/features/share";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SharedChapterListItem } from "@/repositories/types";
 
-export default function SharesSettingsPage() {
-  const router = useRouter();
+interface ShareLinksModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ShareLinksModal({ open, onOpenChange }: ShareLinksModalProps) {
   const { auth } = useAuth();
   const [items, setItems] = useState<SharedChapterListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = auth.status === "authenticated";
-  const isAuthLoading = auth.status === "loading";
 
   const fetchItems = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await fetch("/api/share/chapters");
       const result = await response.json();
@@ -39,15 +49,10 @@ export default function SharesSettingsPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.push("/login");
-      return;
-    }
-
-    if (isAuthenticated) {
+    if (open && isAuthenticated) {
       fetchItems();
     }
-  }, [isAuthenticated, isAuthLoading, router, fetchItems]);
+  }, [open, isAuthenticated, fetchItems]);
 
   const handleDelete = async (id: string) => {
     const response = await fetch(`/api/share/chapters/${id}`, {
@@ -61,38 +66,28 @@ export default function SharesSettingsPage() {
     }
   };
 
-  if (isAuthLoading || isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="max-w-lg mx-auto">
-      <nav className="mb-4">
-        <Link
-          href="/settings"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          설정
-        </Link>
-      </nav>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] p-0">
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogTitle>공유 링크 관리</DialogTitle>
+          <DialogDescription>
+            생성한 공유 링크를 관리합니다.
+          </DialogDescription>
+        </DialogHeader>
 
-      <header className="mb-6">
-        <h1 className="text-xl font-bold">공유 링크 관리</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          생성한 공유 링크를 관리합니다.
-        </p>
-      </header>
-
-      <ShareLinkList items={items} onDelete={handleDelete} />
-    </div>
+        <ScrollArea className="max-h-[calc(85vh-100px)]">
+          <div className="px-6 pb-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <ShareLinkList items={items} onDelete={handleDelete} />
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }
