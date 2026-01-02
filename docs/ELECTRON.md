@@ -143,33 +143,33 @@
 ## 4. 개발 단계
 
 ### Phase 1: 기본 설정 (1일)
-- [ ] Electron 패키지 설치
-- [ ] electron-builder 설정
-- [ ] 프로젝트 구조 생성 (`src/electron/`)
-- [ ] Main Process 기본 코드 작성
-- [ ] Preload 스크립트 작성
-- [ ] 개발 환경 설정 (동시 실행)
+- [x] Electron 패키지 설치
+- [x] electron-builder 설정
+- [x] 프로젝트 구조 생성 (`src/electron/`)
+- [x] Main Process 기본 코드 작성
+- [x] Preload 스크립트 작성
+- [x] 개발 환경 설정 (동시 실행)
 
 ### Phase 2: Next.js 연동 (1일)
-- [ ] 개발 모드: localhost:3000 로드
-- [ ] 프로덕션 모드: 정적 파일 로드 또는 내장 서버
-- [ ] 핫 리로드 설정
+- [x] 개발 모드: localhost:3000 로드
+- [x] 프로덕션 모드: 정적 파일 로드 또는 내장 서버
+- [x] 핫 리로드 설정
 
 ### Phase 3: OAuth 처리 (1일)
-- [ ] 딥링크 방식 또는 localhost 리다이렉트
+- [x] 딥링크 방식 또는 localhost 리다이렉트
 - [ ] Supabase Auth 연동 확인
 - [ ] 토큰 저장 (Electron safeStorage)
 
 ### Phase 4: 네이티브 기능 (선택)
 - [ ] 시스템 트레이 아이콘
-- [ ] 네이티브 메뉴
+- [x] 네이티브 메뉴
 - [ ] 알림 (Notification API)
-- [ ] 파일 시스템 접근 (내보내기/백업)
+- [x] 파일 시스템 접근 (내보내기/백업)
 
 ### Phase 5: 빌드 및 배포 (1일)
 - [ ] Windows 빌드 (.exe, NSIS installer)
 - [ ] macOS 빌드 (.dmg, 코드 서명)
-- [ ] 자동 업데이트 설정 (GitHub Releases)
+- [x] 자동 업데이트 설정 (GitHub Releases)
 - [ ] CI/CD 설정 (GitHub Actions)
 
 ---
@@ -328,4 +328,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 ---
 
-최종 수정: 2026-01-01
+최종 수정: 2026-01-02
