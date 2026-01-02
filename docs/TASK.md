@@ -131,6 +131,54 @@
 
 ---
 
+## AI Context 최적화 및 클린 아키텍처
+
+> 컬리 OMS팀의 Claude AI 협업 방식을 적용한 구조 개선 작업
+> 참고: [컬리 OMS팀 사례](https://helloworld.kurly.com/blog/oms-claude-ai-workflow/)
+
+### Phase 1: AI Context 기반 구축
+- [x] `.claude/ai-context/` 디렉토리 생성
+- [x] `domain/glossary.json` - 웹소설 도메인 용어
+- [x] `domain/rules.json` - 비즈니스 규칙 12개
+- [x] `domain/entities.json` - 6개 테이블 구조
+- [x] `technical/routes.json` - App Router 5개 그룹
+- [x] `technical/sync-flow.json` - 동기화 흐름
+- [x] `technical/editor-config.json` - 에디터 설정
+- [x] `technical/schema-history.json` - Dexie v1~v8 마이그레이션
+- [x] `components/dependency-map.json` - 15개 컴포넌트, 13개 훅
+
+### Phase 2: CLAUDE.md 인덱스화
+- [x] 루트 `CLAUDE.md` 리팩토링 (인덱스 구조)
+- [x] 선택적 로딩 규칙 정의
+- [x] 토큰 예측 가이드 추가
+
+### Phase 3: UseCase 레이어 도입
+- [x] `src/application/` 디렉토리 생성
+- [x] `deleteProjectUseCase` - CASCADE DELETE, 트랜잭션 에러 처리
+- [x] `createChapterUseCase` - 프로젝트 검증 후 생성
+- [x] `reorderChaptersUseCase` - ID 유효성 검증, 중복 체크
+- [x] `useProjects.ts` 리팩토링 - UseCase 호출
+- [x] `useChapters.ts` 리팩토링 - UseCase 호출
+- [x] `dependency-map.json` UseCase 섹션 추가
+
+### Phase 4: 검증 및 문서화
+- [x] 빌드/린트 검증
+- [x] `src/application/CLAUDE.md` 작성
+- [x] `docs/TASK.md` 업데이트 (이 섹션)
+- [x] 디렉토리별 `CLAUDE.md` 갱신
+- [ ] 실제 AI 세션 검증 (사용하면서 개선)
+
+### 예상 효과
+
+| 항목 | Before | After |
+|------|--------|-------|
+| 토큰 효율성 | 자연어 문서 | JSON으로 ~3배 절감 |
+| 비즈니스 로직 | 훅에 분산 | UseCase에 집중 |
+| AI 이해도 | 암묵적 지식 | 명시적 JSON |
+| 테스트 용이성 | 훅 테스트 어려움 | UseCase 단위 테스트 가능 |
+
+---
+
 ## Phase 5: Post-MVP (차후)
 
 ### P1 기능
