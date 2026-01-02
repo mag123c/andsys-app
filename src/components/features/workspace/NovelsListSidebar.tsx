@@ -93,8 +93,11 @@ export function NovelsListSidebar({
           />
         </div>
 
-        {/* 메뉴 */}
-        <nav className="flex-1 flex flex-col items-center py-4 gap-2">
+        {/* 빈 공간 */}
+        <div className="flex-1" />
+
+        {/* 메뉴 - 프로필 바로 위 */}
+        <nav className="flex flex-col items-center py-2 gap-2 border-t">
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             if (item.disabled) {
@@ -159,8 +162,11 @@ export function NovelsListSidebar({
         </div>
       </div>
 
-      {/* 메뉴 */}
-      <nav className="flex-1 overflow-y-auto p-2">
+      {/* 빈 공간 */}
+      <div className="flex-1" />
+
+      {/* 메뉴 - 프로필 바로 위 */}
+      <nav className="p-2 border-t">
         <ul className="space-y-1">
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
