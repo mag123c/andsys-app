@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Book } from "lucide-react";
+import { Book, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "./SidebarProfile";
 import { SettingsModal } from "@/components/features/settings";
+import { Button } from "@/components/ui/button";
+import { isPWA } from "@/lib/pwa";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 // Discord 공식 로고 아이콘
 function DiscordIcon({ className }: { className?: string }) {
@@ -65,6 +72,29 @@ export function NovelsListSidebar({
 }: NovelsListSidebarProps) {
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  // PWA 설치 프롬프트 캡처
+  useEffect(() => {
+    if (isPWA()) return;
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") {
+      setInstallPrompt(null);
+    }
+  };
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -93,8 +123,19 @@ export function NovelsListSidebar({
           />
         </div>
 
-        {/* 빈 공간 */}
-        <div className="flex-1" />
+        {/* 빈 공간 + 앱 설치 버튼 */}
+        <div className="flex-1 flex flex-col items-center justify-center">
+          {installPrompt && (
+            <button
+              onClick={handleInstall}
+              className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent/50 transition-colors text-muted-foreground hover:text-foreground"
+              title="앱 다운로드"
+            >
+              <Download className="h-5 w-5" />
+              <span className="text-[10px]">앱 설치</span>
+            </button>
+          )}
+        </div>
 
         {/* 메뉴 - 프로필 바로 위 */}
         <nav className="flex flex-col items-center py-2 gap-2 border-t">
@@ -162,8 +203,20 @@ export function NovelsListSidebar({
         </div>
       </div>
 
-      {/* 빈 공간 */}
-      <div className="flex-1" />
+      {/* 빈 공간 + 앱 설치 버튼 */}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {installPrompt && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleInstall}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            앱 다운로드
+          </Button>
+        )}
+      </div>
 
       {/* 메뉴 - 프로필 바로 위 */}
       <nav className="p-2 border-t">
