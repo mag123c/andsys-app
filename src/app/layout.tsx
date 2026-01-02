@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallPrompt, UpdatePrompt } from "@/components/features/pwa";
+import { PWAInstallProvider } from "@/hooks/usePWAInstall";
 import "./globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -97,10 +98,12 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <SyncProvider>
-              {children}
-              <Toaster />
-              <InstallPrompt />
-              <UpdatePrompt />
+              <PWAInstallProvider>
+                {children}
+                <Toaster />
+                <InstallPrompt />
+                <UpdatePrompt />
+              </PWAInstallProvider>
             </SyncProvider>
           </AuthProvider>
         </ThemeProvider>

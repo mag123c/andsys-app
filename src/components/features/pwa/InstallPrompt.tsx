@@ -3,45 +3,25 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Download } from "lucide-react";
-import { isPWA } from "@/lib/pwa";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 const STORAGE_KEY = "pwa-prompt-dismissed";
 
 export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const { canInstall, install } = usePWAInstall();
   const [dismissed, setDismissed] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // 이미 PWA로 실행 중이면 표시 안 함
-    if (isPWA()) return;
-
-    // 이전에 닫았으면 표시 안 함
-    if (localStorage.getItem(STORAGE_KEY)) return;
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    // localStorage 확인은 클라이언트에서만
+    if (localStorage.getItem(STORAGE_KEY)) {
+      setDismissed(true);
+    }
+    setInitialized(true);
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      setDeferredPrompt(null);
-    }
+    await install();
   };
 
   const handleDismiss = () => {
@@ -49,7 +29,7 @@ export function InstallPrompt() {
     localStorage.setItem(STORAGE_KEY, "true");
   };
 
-  if (!deferredPrompt || dismissed) return null;
+  if (!initialized || !canInstall || dismissed) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-background border rounded-lg shadow-lg p-4 z-50">
