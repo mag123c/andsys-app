@@ -30,6 +30,8 @@
 | usePWAMode.ts | PWA 모드 감지 (standalone 여부) | - |
 | useLocalStorage.ts | localStorage 동기화 | - |
 | useUserSettings.ts | 사용자 설정 관리 | - |
+| useUserStats.ts | 사용자 통계 (프로젝트/챕터/글자수) | - |
+| usePWAInstall.tsx | PWA 설치 프롬프트 전역 공유 | - |
 | useAdmin.ts | 관리자 권한 확인 | - |
 
 ## 핵심 패턴

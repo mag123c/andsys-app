@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useProjects } from "@/hooks/useProjects";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserStats } from "@/hooks/useUserStats";
 import { EDITOR_FONTS } from "@/components/features/editor/extensions";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { exportBackup, type BackupData } from "@/lib/export";
@@ -62,37 +63,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [shareLinksOpen, setShareLinksOpen] = useState(false);
 
   const isAuthenticated = auth.status === "authenticated";
-
-  // 통계 계산
-  const [stats, setStats] = useState({ totalProjects: 0, totalChapters: 0, totalWords: 0 });
-
-  useEffect(() => {
-    async function calculateStats() {
-      try {
-        const chaptersArrays = await Promise.all(
-          projects.map((p) => chapterLocalRepository.getByProjectId(p.id))
-        );
-        const totalChapters = chaptersArrays.reduce((sum, chs) => sum + chs.length, 0);
-        const totalWords = chaptersArrays
-          .flat()
-          .reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
-
-        setStats({
-          totalProjects: projects.length,
-          totalChapters,
-          totalWords,
-        });
-      } catch {
-        // 에러 시 기본값 유지
-      }
-    }
-
-    if (open && projects.length > 0) {
-      calculateStats();
-    } else if (projects.length === 0) {
-      setStats({ totalProjects: 0, totalChapters: 0, totalWords: 0 });
-    }
-  }, [projects, open]);
+  const stats = useUserStats();
 
   const handleExportBackup = async () => {
     setIsExporting(true);
