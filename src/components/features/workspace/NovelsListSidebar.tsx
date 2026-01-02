@@ -65,7 +65,7 @@ export function NovelsListSidebar({
         {/* 로고 */}
         <div className="flex items-center justify-center py-4 border-b">
           <Image
-            src="/icons/icon.svg"
+            src="/icons/icon-192.png"
             alt="4ndSYS"
             width={24}
             height={24}
@@ -126,7 +126,7 @@ export function NovelsListSidebar({
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
           <Image
-            src="/icons/icon.svg"
+            src="/icons/icon-192.png"
             alt="4ndSYS"
             width={32}
             height={32}
