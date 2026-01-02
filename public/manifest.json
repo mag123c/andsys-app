@@ -4,11 +4,18 @@
   "description": "회차·시놉시스·캐릭터를 한 곳에서",
   "start_url": "/novels",
   "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#000000",
   "background_color": "#ffffff",
   "categories": ["productivity", "utilities"],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://4ndsys.net/manifest.json"
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",

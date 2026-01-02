@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Book, Download } from "lucide-react";
+import { Book, Download, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "./SidebarProfile";
@@ -66,7 +66,7 @@ export function NovelsListSidebar({
 }: NovelsListSidebarProps) {
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { canInstall, install, showInstallButton } = usePWAInstall();
+  const { canInstall, isInstalled, install, openInApp, showInstallButton } = usePWAInstall();
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -128,17 +128,27 @@ export function NovelsListSidebar({
           })}
           {showInstallButton && (
             <button
-              onClick={canInstall ? install : undefined}
-              disabled={!canInstall}
+              onClick={isInstalled ? openInApp : canInstall ? install : undefined}
+              disabled={!canInstall && !isInstalled}
               className={cn(
                 "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
-                canInstall
+                canInstall || isInstalled
                   ? "hover:bg-accent/50 cursor-pointer"
                   : "opacity-50 cursor-not-allowed"
               )}
-              title={canInstall ? "앱 다운로드" : "이 브라우저에서는 앱 설치를 지원하지 않습니다"}
+              title={
+                isInstalled
+                  ? "앱에서 열기"
+                  : canInstall
+                    ? "앱 다운로드"
+                    : "이 브라우저에서는 앱 설치를 지원하지 않습니다"
+              }
             >
-              <Download className="h-4 w-4 text-sky-500" />
+              {isInstalled ? (
+                <ExternalLink className="h-4 w-4 text-sky-500" />
+              ) : (
+                <Download className="h-4 w-4 text-sky-500" />
+              )}
             </button>
           )}
         </nav>
@@ -222,18 +232,31 @@ export function NovelsListSidebar({
           {showInstallButton && (
             <li>
               <button
-                onClick={canInstall ? install : undefined}
-                disabled={!canInstall}
+                onClick={isInstalled ? openInApp : canInstall ? install : undefined}
+                disabled={!canInstall && !isInstalled}
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-md text-sm w-full transition-colors",
-                  canInstall
+                  canInstall || isInstalled
                     ? "text-muted-foreground hover:bg-accent/50 hover:text-foreground cursor-pointer"
                     : "text-muted-foreground/50 cursor-not-allowed"
                 )}
-                title={!canInstall ? "이 브라우저에서는 앱 설치를 지원하지 않습니다" : undefined}
+                title={
+                  !canInstall && !isInstalled
+                    ? "이 브라우저에서는 앱 설치를 지원하지 않습니다"
+                    : undefined
+                }
               >
-                <Download className="h-4 w-4 text-sky-500" />
-                <span>앱 다운로드</span>
+                {isInstalled ? (
+                  <>
+                    <ExternalLink className="h-4 w-4 text-sky-500" />
+                    <span>앱에서 열기</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 text-sky-500" />
+                    <span>앱 다운로드</span>
+                  </>
+                )}
               </button>
             </li>
           )}
