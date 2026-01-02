@@ -19,14 +19,14 @@ import {
 import { EditorSidebar } from "./EditorSidebar";
 import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
-import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
+import { extractText, countCharacters } from "@/lib/content-utils";
 import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
 import { characterLocalRepository } from "@/storage/local/character.local";
 import { relationshipLocalRepository } from "@/storage/local/relationship.local";
 import type { UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
-import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
+import { useSpellCheck } from "@/hooks/useSpellCheck";
 import { ShareButton } from "@/components/features/share";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
@@ -83,14 +83,8 @@ export function EditorLayout({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(currentChapter.title);
 
-  // 맞춤법 검사 상태
-  const [spellCheckOpen, setSpellCheckOpen] = useState(false);
-  const [spellCheckLoading, setSpellCheckLoading] = useState(false);
-  const [spellCheckErrors, setSpellCheckErrors] = useState<SpellCheckError[]>([]);
-  const [spellCheckMessage, setSpellCheckMessage] = useState<string>();
-  const [spellCheckTruncated, setSpellCheckTruncated] = useState(false);
-  const [spellCheckCheckedLength, setSpellCheckCheckedLength] = useState<number>();
-  const [spellCheckTotalLength, setSpellCheckTotalLength] = useState<number>();
+  // 맞춤법 검사 훅
+  const spellCheck = useSpellCheck({ content, onContentChange });
 
   // 챕터 변경 시 draftTitle 동기화 (useLayoutEffect로 깜빡임 방지)
   // 챕터 전환 시 파생 상태 초기화 - React key 패턴 대안
@@ -202,71 +196,6 @@ export function EditorLayout({
       toast.error("클립보드 복사에 실패했습니다");
     }
   };
-
-  // 맞춤법 검사 실행
-  const handleSpellCheck = useCallback(async () => {
-    if (!content) {
-      toast.error("검사할 내용이 없습니다");
-      return;
-    }
-
-    setSpellCheckOpen(true);
-    setSpellCheckLoading(true);
-    setSpellCheckErrors([]);
-    setSpellCheckMessage(undefined);
-    setSpellCheckTruncated(false);
-    setSpellCheckCheckedLength(undefined);
-    setSpellCheckTotalLength(undefined);
-
-    const text = extractTextForSpellCheck(content);
-    if (!text) {
-      setSpellCheckLoading(false);
-      return;
-    }
-
-    const result = await checkSpelling(text);
-    setSpellCheckLoading(false);
-
-    if (result.success) {
-      setSpellCheckErrors(result.errors);
-      setSpellCheckTruncated(result.truncated ?? false);
-      setSpellCheckCheckedLength(result.checkedLength);
-      setSpellCheckTotalLength(result.totalLength);
-    } else {
-      setSpellCheckMessage(result.message);
-    }
-  }, [content]);
-
-  // 맞춤법 오류 하나 적용
-  const handleApplyCorrection = useCallback(
-    (error: SpellCheckError) => {
-      if (!content || !onContentChange || !error.suggestions[0]) return;
-
-      const newContent = replaceTextInContent(
-        content,
-        error.token,
-        error.suggestions[0]
-      ) as JSONContent;
-
-      onContentChange(newContent);
-      toast.success(`"${error.token}" → "${error.suggestions[0]}" 적용됨`);
-    },
-    [content, onContentChange]
-  );
-
-  // 모든 맞춤법 오류 적용
-  const handleApplyAllCorrections = useCallback(() => {
-    if (!content || !onContentChange || spellCheckErrors.length === 0) return;
-
-    const replacements = spellCheckErrors
-      .filter((e) => e.suggestions[0])
-      .map((e) => ({ from: e.token, to: e.suggestions[0] }));
-
-    const newContent = replaceMultipleInContent(content, replacements) as JSONContent;
-
-    onContentChange(newContent);
-    toast.success(`${replacements.length}개의 오류가 수정되었습니다`);
-  }, [content, onContentChange, spellCheckErrors]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -406,22 +335,22 @@ export function EditorLayout({
         saveStatus={saveStatus}
         onExportTxt={handleExportTxt}
         onCopyToClipboard={handleCopyToClipboard}
-        onSpellCheck={handleSpellCheck}
+        onSpellCheck={spellCheck.runSpellCheck}
         rightSidebarCollapsed={rightSidebarCollapsed}
       />
 
       {/* 맞춤법 검사 Sheet */}
       <SpellCheckSheet
-        open={spellCheckOpen}
-        onOpenChange={setSpellCheckOpen}
-        errors={spellCheckErrors}
-        isLoading={spellCheckLoading}
-        errorMessage={spellCheckMessage}
-        truncated={spellCheckTruncated}
-        checkedLength={spellCheckCheckedLength}
-        totalLength={spellCheckTotalLength}
-        onApply={handleApplyCorrection}
-        onApplyAll={handleApplyAllCorrections}
+        open={spellCheck.isOpen}
+        onOpenChange={spellCheck.setIsOpen}
+        errors={spellCheck.errors}
+        isLoading={spellCheck.isLoading}
+        errorMessage={spellCheck.errorMessage}
+        truncated={spellCheck.truncated}
+        checkedLength={spellCheck.checkedLength}
+        totalLength={spellCheck.totalLength}
+        onApply={spellCheck.applyCorrection}
+        onApplyAll={spellCheck.applyAllCorrections}
       />
     </div>
   );

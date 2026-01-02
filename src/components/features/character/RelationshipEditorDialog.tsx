@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Plus, X, User, Network } from "lucide-react";
 import type { Character, Relationship, CreateRelationshipInput, RelationshipType } from "@/repositories/types";
 import {
@@ -19,28 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const RELATIONSHIP_TYPES = [
-  { value: "family", label: "가족" },
-  { value: "friend", label: "친구" },
-  { value: "lover", label: "연인" },
-  { value: "rival", label: "라이벌" },
-  { value: "enemy", label: "적" },
-  { value: "colleague", label: "동료" },
-  { value: "master", label: "사제" },
-  { value: "custom", label: "기타" },
-] as const;
-
-const TYPE_LABELS: Record<string, string> = {
-  family: "가족",
-  friend: "친구",
-  lover: "연인",
-  rival: "라이벌",
-  enemy: "적",
-  colleague: "동료",
-  master: "사제",
-  custom: "기타",
-};
+import { RELATIONSHIP_TYPES, RELATIONSHIP_TYPE_LABELS } from "@/lib/constants";
 
 interface RelationshipEditorDialogProps {
   open: boolean;
@@ -120,7 +100,7 @@ export function RelationshipEditorDialog({
                   const isFrom = rel.fromCharacterId === character.id;
                   const otherId = isFrom ? rel.toCharacterId : rel.fromCharacterId;
                   const other = allCharacters.find((c) => c.id === otherId);
-                  const typeLabel = TYPE_LABELS[rel.type] || rel.type;
+                  const typeLabel = RELATIONSHIP_TYPE_LABELS[rel.type] || rel.type;
                   const label = rel.description || typeLabel;
 
                   if (!other) return null;
@@ -131,12 +111,14 @@ export function RelationshipEditorDialog({
                       className="flex items-center gap-3 p-3 rounded-lg border bg-card group"
                     >
                       {/* 상대 캐릭터 이미지 */}
-                      <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0 relative">
                         {other.imageUrl ? (
-                          <img
+                          <Image
                             src={other.imageUrl}
                             alt={other.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="40px"
+                            className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

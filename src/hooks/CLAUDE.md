@@ -15,6 +15,7 @@
 | useRelationships.ts | 관계도 CRUD |
 | useVersionHistory.ts | 버전 히스토리 조회 |
 | useEditor.ts | Tiptap 에디터 상태 관리 |
+| useSpellCheck.ts | 맞춤법 검사 상태 및 교정 |
 | useSyncEngine.ts | 동기화 엔진 상태 및 Realtime 구독 |
 | useOnline.ts | 온라인/오프라인 상태 감지 |
 | useLocalStorage.ts | localStorage 동기화 |
@@ -31,4 +32,4 @@
 - `dexie-react-hooks`
 
 ---
-최종 수정: 2026-01-01
+최종 수정: 2026-01-02

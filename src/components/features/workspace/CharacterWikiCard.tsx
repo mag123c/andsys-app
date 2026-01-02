@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 import { User, ChevronDown, Pencil, Trash2, Plus, X } from "lucide-react";
 import type { Character, Relationship, UpdateCharacterInput, CreateRelationshipInput, RelationshipType } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { RELATIONSHIP_TYPES, RELATIONSHIP_TYPE_LABELS } from "@/lib/constants";
 
 const MBTI_OPTIONS = [
   "INTJ", "INTP", "ENTJ", "ENTP",
@@ -28,17 +30,6 @@ const MBTI_OPTIONS = [
 ] as const;
 
 const GENDER_OPTIONS = ["남성", "여성", "기타"] as const;
-
-const RELATIONSHIP_TYPES = [
-  { value: "family", label: "가족" },
-  { value: "friend", label: "친구" },
-  { value: "lover", label: "연인" },
-  { value: "rival", label: "라이벌" },
-  { value: "enemy", label: "적" },
-  { value: "colleague", label: "동료" },
-  { value: "master", label: "사제" },
-  { value: "custom", label: "기타" },
-] as const;
 
 // 편집 가능한 필드 정의
 interface FieldConfig {
@@ -113,12 +104,14 @@ export function CharacterWikiCard({
             type="button"
             className="w-full flex items-center gap-2 p-3 bg-primary/10 hover:bg-primary/15 transition-colors text-left"
           >
-            <div className="w-8 h-8 rounded-full bg-muted overflow-hidden shrink-0">
+            <div className="w-8 h-8 rounded-full bg-muted overflow-hidden shrink-0 relative">
               {character.imageUrl ? (
-                <img
+                <Image
                   src={character.imageUrl}
                   alt=""
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="32px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -144,12 +137,14 @@ export function CharacterWikiCard({
             {/* 프로필 이미지 + 기본 정보 */}
             <div className="p-3">
               <div className="flex gap-3 mb-3">
-                <div className="w-16 h-24 rounded bg-muted overflow-hidden shrink-0">
+                <div className="w-16 h-24 rounded bg-muted overflow-hidden shrink-0 relative">
                   {character.imageUrl ? (
-                    <img
+                    <Image
                       src={character.imageUrl}
                       alt={character.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="64px"
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -558,17 +553,6 @@ function RelationshipEditor({
     setDescription("");
   };
 
-  const typeLabels: Record<string, string> = {
-    family: "가족",
-    friend: "친구",
-    lover: "연인",
-    rival: "라이벌",
-    enemy: "적",
-    colleague: "동료",
-    master: "사제",
-    custom: "기타",
-  };
-
   return (
     <div className="space-y-2">
       {relatedRelationships.length === 0 && !isAdding ? (
@@ -581,7 +565,7 @@ function RelationshipEditor({
             const isFrom = rel.fromCharacterId === characterId;
             const otherId = isFrom ? rel.toCharacterId : rel.fromCharacterId;
             const other = allCharacters.find((c) => c.id === otherId);
-            const typeLabel = typeLabels[rel.type] || rel.type;
+            const typeLabel = RELATIONSHIP_TYPE_LABELS[rel.type] || rel.type;
             const label = rel.description || typeLabel;
 
             if (!other) return null;

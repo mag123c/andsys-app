@@ -23,6 +23,24 @@ export function PlotMemo({
   const [draft, setDraft] = useState(plot ?? "");
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 최신 값 참조용 ref (cleanup에서 사용)
+  const draftRef = useRef(draft);
+  const plotRef = useRef(plot);
+  const onPlotChangeRef = useRef(onPlotChange);
+
+  // ref 동기화
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
+
+  useEffect(() => {
+    plotRef.current = plot;
+  }, [plot]);
+
+  useEffect(() => {
+    onPlotChangeRef.current = onPlotChange;
+  }, [onPlotChange]);
+
   // 외부 plot이 변경되면 draft 동기화
   useEffect(() => {
     setDraft(plot ?? "");
@@ -46,11 +64,18 @@ export function PlotMemo({
     [onPlotChange]
   );
 
-  // cleanup on unmount
+  // cleanup on unmount - 저장되지 않은 내용 저장
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
+      }
+
+      // 저장되지 않은 내용이 있으면 즉시 저장
+      const currentDraft = draftRef.current.trim() || null;
+      const currentPlot = plotRef.current;
+      if (onPlotChangeRef.current && currentDraft !== currentPlot) {
+        onPlotChangeRef.current(currentDraft);
       }
     };
   }, []);
