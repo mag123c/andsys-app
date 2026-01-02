@@ -1,0 +1,226 @@
+{
+  "$schema": "ai-context/components/dependency-map",
+  "version": "1.1.0",
+  "description": "컴포넌트-훅-UseCase 의존성 맵",
+  "components": {
+    "features/editor/EditorLayout": {
+      "path": "src/components/features/editor/EditorLayout.tsx",
+      "description": "에디터 페이지 전체 레이아웃",
+      "hooks": ["useChapters", "useEditor", "useSyncEngine", "useSpellCheck", "useUserSettings"],
+      "components": ["Editor", "EditorToolbar", "EditorSidebar", "EditorStatusBar", "PlotMemo", "SpellCheckSheet"],
+      "features": ["autosave", "spellcheck", "plotMemo", "chapterNavigation"]
+    },
+    "features/editor/Editor": {
+      "path": "src/components/features/editor/Editor.tsx",
+      "description": "Tiptap EditorContent 래퍼",
+      "hooks": [],
+      "libs": ["@tiptap/react"],
+      "props": ["editor", "className"]
+    },
+    "features/editor/EditorToolbar": {
+      "path": "src/components/features/editor/EditorToolbar.tsx",
+      "description": "서식 툴바 (폰트, 크기, 정렬 등)",
+      "hooks": ["useUserSettings"],
+      "props": ["editor"]
+    },
+    "features/editor/EditorSidebar": {
+      "path": "src/components/features/editor/EditorSidebar.tsx",
+      "description": "사이드바 (챕터 목록, 플롯 메모)",
+      "hooks": ["useChapters"],
+      "components": ["PlotMemo"]
+    },
+    "features/editor/SpellCheckSheet": {
+      "path": "src/components/features/editor/SpellCheckSheet.tsx",
+      "description": "맞춤법 검사 결과 시트",
+      "hooks": ["useSpellCheck"],
+      "props": ["editor"]
+    },
+    "features/project/ProjectCard": {
+      "path": "src/components/features/project/ProjectCard.tsx",
+      "description": "프로젝트 카드 (표지, 제목, 메뉴)",
+      "hooks": ["useProject"],
+      "components": ["CoverImage", "ProjectMenu"],
+      "features": ["coverImage", "delete", "archive"]
+    },
+    "features/project/ProjectList": {
+      "path": "src/components/features/project/ProjectList.tsx",
+      "description": "프로젝트 목록 그리드",
+      "hooks": ["useProjects"],
+      "components": ["ProjectCard", "CreateProjectDialog"]
+    },
+    "features/chapter/ChapterList": {
+      "path": "src/components/features/chapter/ChapterList.tsx",
+      "description": "챕터 목록 (드래그앤드롭 정렬)",
+      "hooks": ["useChapters"],
+      "libs": ["@dnd-kit/core", "@dnd-kit/sortable"],
+      "components": ["ChapterItem"]
+    },
+    "features/character/CharacterCard": {
+      "path": "src/components/features/character/CharacterCard.tsx",
+      "description": "캐릭터 카드",
+      "hooks": ["useCharacters", "useVersionHistory"],
+      "components": ["CharacterImage", "CharacterForm", "CustomFieldsEditor"],
+      "features": ["imageUpload", "customFields", "history"]
+    },
+    "features/character/CharacterList": {
+      "path": "src/components/features/character/CharacterList.tsx",
+      "description": "캐릭터 목록 그리드 (드래그앤드롭 정렬)",
+      "hooks": ["useCharacters"],
+      "libs": ["@dnd-kit/core", "@dnd-kit/sortable"],
+      "components": ["CharacterCard"]
+    },
+    "features/relationship/RelationshipGraph": {
+      "path": "src/components/features/relationship/RelationshipGraph.tsx",
+      "description": "관계도 그래프 (React Flow)",
+      "hooks": ["useCharacters", "useRelationships"],
+      "libs": ["@xyflow/react"],
+      "components": ["CharacterNode", "RelationshipEdge", "RelationshipDialog"],
+      "features": ["dragDrop", "zoom", "filter", "addRelationship"]
+    },
+    "features/synopsis/SynopsisEditor": {
+      "path": "src/components/features/synopsis/SynopsisEditor.tsx",
+      "description": "시놉시스 에디터",
+      "hooks": ["useSynopsis", "useVersionHistory"],
+      "components": ["Editor"],
+      "features": ["autosave", "history"]
+    },
+    "features/workspace/WorkspaceSidebar": {
+      "path": "src/components/features/workspace/WorkspaceSidebar.tsx",
+      "description": "대시보드 사이드바",
+      "hooks": ["useProjects", "useChapters", "useAuth"],
+      "components": ["ProjectList", "ChapterList", "SyncStatusIndicator"],
+      "features": ["projectSwitch", "chapterNavigation", "syncStatus"]
+    },
+    "features/sync/SyncStatusIndicator": {
+      "path": "src/components/features/sync/SyncStatusIndicator.tsx",
+      "description": "동기화 상태 표시",
+      "hooks": ["useSyncEngine", "useOnline"],
+      "features": ["pendingCount", "lastSyncTime", "manualSync"]
+    },
+    "features/share/ShareDialog": {
+      "path": "src/components/features/share/ShareDialog.tsx",
+      "description": "공유 링크 생성 다이얼로그",
+      "hooks": ["useAuth"],
+      "features": ["password", "expiration", "copyLink"]
+    }
+  },
+  "hooks": {
+    "useAuth": {
+      "path": "src/hooks/useAuth.ts",
+      "description": "AuthProvider에서 auth 상태 가져오기",
+      "returns": ["user", "isGuest", "isMember", "signOut"],
+      "provider": "AuthProvider"
+    },
+    "useProject": {
+      "path": "src/hooks/useProject.ts",
+      "description": "단일 프로젝트 CRUD",
+      "storage": "storage/local/project.local.ts",
+      "sync": "sync/sync-engine.ts",
+      "reactivity": "dexie-react-hooks/useLiveQuery"
+    },
+    "useProjects": {
+      "path": "src/hooks/useProjects.ts",
+      "description": "프로젝트 목록 및 CRUD (deleteProject는 UseCase 사용)",
+      "storage": "storage/local/project.local.ts",
+      "useCases": ["deleteProjectUseCase"],
+      "reactivity": "dexie-react-hooks/useLiveQuery"
+    },
+    "useChapters": {
+      "path": "src/hooks/useChapters.ts",
+      "description": "챕터 목록 및 CRUD (create/reorder는 UseCase 사용)",
+      "storage": "storage/local/chapter.local.ts",
+      "useCases": ["createChapterUseCase", "reorderChaptersUseCase"],
+      "reactivity": "dexie-react-hooks/useLiveQuery"
+    },
+    "useSynopsis": {
+      "path": "src/hooks/useSynopsis.ts",
+      "description": "시놉시스 CRUD (getOrCreate 패턴)",
+      "storage": "storage/local/synopsis.local.ts",
+      "sync": "sync/sync-engine.ts"
+    },
+    "useCharacters": {
+      "path": "src/hooks/useCharacters.ts",
+      "description": "캐릭터 목록 및 CRUD",
+      "storage": "storage/local/character.local.ts",
+      "sync": "sync/sync-engine.ts",
+      "reactivity": "dexie-react-hooks/useLiveQuery"
+    },
+    "useRelationships": {
+      "path": "src/hooks/useRelationships.ts",
+      "description": "관계도 CRUD",
+      "storage": "storage/local/relationship.local.ts",
+      "sync": "sync/sync-engine.ts",
+      "reactivity": "dexie-react-hooks/useLiveQuery"
+    },
+    "useVersionHistory": {
+      "path": "src/hooks/useVersionHistory.ts",
+      "description": "버전 히스토리 조회",
+      "storage": "storage/local/version.local.ts",
+      "note": "로컬 전용, 서버 동기화 없음"
+    },
+    "useEditor": {
+      "path": "src/hooks/useEditor.ts",
+      "description": "Tiptap 에디터 상태 관리",
+      "features": ["autosave", "wordCount", "content"]
+    },
+    "useSpellCheck": {
+      "path": "src/hooks/useSpellCheck.ts",
+      "description": "맞춤법 검사 상태 및 교정",
+      "api": "/api/spellcheck"
+    },
+    "useSyncEngine": {
+      "path": "src/hooks/useSyncEngine.ts",
+      "description": "동기화 엔진 상태 및 Realtime 구독",
+      "dependencies": ["useAuth", "useOnline"],
+      "realtime": "Supabase Realtime"
+    },
+    "useOnline": {
+      "path": "src/hooks/useOnline.ts",
+      "description": "온라인/오프라인 상태 감지",
+      "api": "navigator.onLine + event listeners"
+    },
+    "useUserSettings": {
+      "path": "src/hooks/useUserSettings.ts",
+      "description": "사용자 설정 관리 (폰트, 테마 등)",
+      "storage": "localStorage"
+    }
+  },
+  "providers": {
+    "AuthProvider": {
+      "path": "src/components/providers/AuthProvider.tsx",
+      "description": "인증 상태 관리 (게스트/회원)",
+      "context": "AuthContext"
+    },
+    "ThemeProvider": {
+      "path": "src/components/providers/ThemeProvider.tsx",
+      "description": "테마 관리 (light/dark/system)",
+      "lib": "next-themes"
+    },
+    "SyncProvider": {
+      "path": "src/components/providers/SyncProvider.tsx",
+      "description": "동기화 엔진 초기화 및 Realtime 구독",
+      "context": "SyncContext"
+    }
+  },
+  "useCases": {
+    "deleteProjectUseCase": {
+      "path": "src/application/project/delete-project.usecase.ts",
+      "description": "프로젝트 삭제 (CASCADE DELETE 적용)",
+      "rule": "CASCADE_DELETE",
+      "dependencies": ["storage/local/db"],
+      "usedBy": ["useProjects"]
+    },
+    "createChapterUseCase": {
+      "path": "src/application/chapter/create-chapter.usecase.ts",
+      "description": "챕터 생성 (프로젝트 검증 포함)",
+      "dependencies": ["storage/local/db", "storage/local/chapter.local.ts"],
+      "usedBy": ["useChapters"]
+    },
+    "reorderChaptersUseCase": {
+      "path": "src/application/chapter/reorder-chapters.usecase.ts",
+      "description": "챕터 순서 변경 (ID 검증 포함)",
+      "dependencies": ["storage/local/db", "storage/local/chapter.local.ts"],
+      "usedBy": ["useChapters"]
+    }
+  }
+}

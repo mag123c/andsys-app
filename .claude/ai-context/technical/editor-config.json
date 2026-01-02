@@ -1,0 +1,116 @@
+{
+  "$schema": "ai-context/technical/editor-config",
+  "version": "1.0.0",
+  "description": "Tiptap 에디터 설정",
+  "tiptap": {
+    "version": "3.14.0",
+    "package": "@tiptap/react",
+    "extensions": {
+      "StarterKit": {
+        "enabled": true,
+        "config": {
+          "heading": false,
+          "bulletList": false,
+          "orderedList": false,
+          "blockquote": false,
+          "codeBlock": false
+        },
+        "reason": "소설 에디터에 불필요한 마크다운 기능 비활성화"
+      },
+      "Underline": {
+        "enabled": true,
+        "package": "@tiptap/extension-underline"
+      },
+      "TextStyle": {
+        "enabled": true,
+        "package": "@tiptap/extension-text-style"
+      },
+      "FontFamily": {
+        "enabled": true,
+        "package": "@tiptap/extension-font-family"
+      },
+      "TextAlign": {
+        "enabled": true,
+        "package": "@tiptap/extension-text-align"
+      },
+      "FontSize": {
+        "enabled": true,
+        "custom": true,
+        "path": "src/components/features/editor/extensions.ts",
+        "description": "커스텀 폰트 크기 확장"
+      }
+    }
+  },
+  "fonts": {
+    "default": "RIDIBatang",
+    "categories": {
+      "명조": [
+        { "name": "리디바탕", "value": "RIDIBatang", "default": true },
+        { "name": "본명조", "value": "Noto Serif KR" },
+        { "name": "마루 부리", "value": "MaruBuri" }
+      ],
+      "고딕": [
+        { "name": "Pretendard", "value": "Pretendard" },
+        { "name": "본고딕", "value": "Noto Sans KR" },
+        { "name": "나눔스퀘어 네오", "value": "NanumSquareNeo" },
+        { "name": "Gmarket Sans", "value": "GmarketSansMedium" }
+      ]
+    },
+    "webfontLoader": "src/app/layout.tsx (next/font 또는 CSS @font-face)"
+  },
+  "fontSize": {
+    "default": "12pt",
+    "options": [
+      { "name": "9", "value": "9pt" },
+      { "name": "10", "value": "10pt" },
+      { "name": "11", "value": "11pt" },
+      { "name": "12", "value": "12pt" },
+      { "name": "14", "value": "14pt" },
+      { "name": "16", "value": "16pt" },
+      { "name": "18", "value": "18pt" },
+      { "name": "20", "value": "20pt" },
+      { "name": "24", "value": "24pt" }
+    ]
+  },
+  "autosave": {
+    "enabled": true,
+    "delay": 2000,
+    "unit": "ms",
+    "implementation": "src/hooks/useEditor.ts",
+    "ui": "src/components/features/editor/SaveStatus.tsx"
+  },
+  "spellCheck": {
+    "enabled": true,
+    "api": "/api/spellcheck",
+    "provider": "부산대 맞춤법 검사기",
+    "implementation": "src/lib/spellcheck.ts",
+    "ui": "src/components/features/editor/SpellCheckSheet.tsx",
+    "hook": "src/hooks/useSpellCheck.ts"
+  },
+  "toolbar": {
+    "features": [
+      "bold", "italic", "underline", "strikethrough",
+      "fontFamily", "fontSize",
+      "textAlign (left, center, right, justify)"
+    ],
+    "implementation": "src/components/features/editor/EditorToolbar.tsx"
+  },
+  "layout": {
+    "components": {
+      "EditorLayout": "전체 에디터 페이지 레이아웃",
+      "Editor": "Tiptap EditorContent 래퍼",
+      "EditorToolbar": "서식 툴바",
+      "EditorSidebar": "챕터 목록, 플롯 메모",
+      "EditorStatusBar": "글자수, 저장 상태",
+      "PlotMemo": "플롯 메모 입력",
+      "SpellCheckSheet": "맞춤법 검사 결과 시트"
+    },
+    "path": "src/components/features/editor/"
+  },
+  "contentFormat": {
+    "storage": "Tiptap JSONContent",
+    "plainText": "contentText 필드에 별도 저장 (검색/글자수용)",
+    "wordCount": "공백 제외 글자 수",
+    "implementation": "src/lib/content-utils.ts"
+  }
+}

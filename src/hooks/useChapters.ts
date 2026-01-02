@@ -4,17 +4,26 @@ import { useCallback, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import type {
   Chapter,
-  CreateChapterInput,
   UpdateChapterInput,
 } from "@/repositories/types";
 import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { db } from "@/storage/local/db";
+import {
+  createChapterUseCase,
+  reorderChaptersUseCase,
+} from "@/application/chapter";
+
+interface CreateChapterData {
+  title: string;
+  content?: Chapter["content"];
+  plot?: string | null;
+}
 
 interface UseChaptersReturn {
   chapters: Chapter[];
   isLoading: boolean;
   error: Error | null;
-  createChapter: (data: Omit<CreateChapterInput, "projectId">) => Promise<Chapter>;
+  createChapter: (data: CreateChapterData) => Promise<Chapter>;
   updateChapter: (id: string, data: UpdateChapterInput) => Promise<Chapter>;
   deleteChapter: (id: string) => Promise<void>;
   reorderChapters: (chapterIds: string[]) => Promise<void>;
@@ -61,13 +70,21 @@ export function useChapters(projectId: string): UseChaptersReturn {
   const isLoading = chapters === undefined;
 
   const createChapter = useCallback(
-    async (data: Omit<CreateChapterInput, "projectId">): Promise<Chapter> => {
-      const chapter = await chapterLocalRepository.create({
-        ...data,
+    async (data: CreateChapterData): Promise<Chapter> => {
+      // UseCase로 챕터 생성 (유효성 검증 포함)
+      const result = await createChapterUseCase({
         projectId,
+        title: data.title,
+        content: data.content,
+        plot: data.plot,
       });
+
+      if (!result.success || !result.chapter) {
+        throw new Error(result.error || "Failed to create chapter");
+      }
+
       // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
-      return chapter;
+      return result.chapter;
     },
     [projectId]
   );
@@ -88,7 +105,16 @@ export function useChapters(projectId: string): UseChaptersReturn {
 
   const reorderChapters = useCallback(
     async (chapterIds: string[]): Promise<void> => {
-      await chapterLocalRepository.reorder(projectId, chapterIds);
+      // UseCase로 순서 변경 (유효성 검증 포함)
+      const result = await reorderChaptersUseCase({
+        projectId,
+        chapterIds,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to reorder chapters");
+      }
+
       // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
     },
     [projectId]

@@ -1,0 +1,93 @@
+{
+  "$schema": "ai-context/technical/sync-flow",
+  "version": "1.0.0",
+  "description": "로컬-서버 동기화 상세 흐름",
+  "overview": {
+    "strategy": "Local-First",
+    "conflictResolution": "Latest-Wins (updatedAt 비교)",
+    "debounce": 2000,
+    "implementation": "src/sync/sync-engine.ts"
+  },
+  "saveFlow": {
+    "description": "데이터 저장 흐름",
+    "steps": [
+      { "step": 1, "action": "사용자 입력 발생 (에디터, 폼 등)" },
+      { "step": 2, "action": "즉시 IndexedDB 저장 (optimistic)", "syncStatus": "pending" },
+      { "step": 3, "action": "UI에 '저장됨' 표시 (SaveStatus 컴포넌트)" },
+      { "step": 4, "action": "debounce 타이머 시작 (2초)", "condition": "온라인 & 회원" },
+      { "step": 5, "action": "Supabase 동기화 요청", "condition": "타이머 완료" },
+      { "step": 6, "action": "syncStatus: 'synced' 업데이트", "condition": "성공" },
+      { "step": 6, "action": "재시도 큐에 추가", "condition": "실패" }
+    ],
+    "offlineCase": {
+      "action": "로컬만 저장, pendingSync 플래그 유지",
+      "recovery": "온라인 복귀 시 syncAll() 자동 호출"
+    }
+  },
+  "pullFlow": {
+    "description": "서버 → 로컬 데이터 가져오기",
+    "trigger": ["앱 시작 시", "수동 새로고침", "Realtime 이벤트"],
+    "steps": [
+      { "step": 1, "action": "서버에서 최신 데이터 조회", "filter": "updatedAt > lastSyncedAt" },
+      { "step": 2, "action": "로컬 데이터와 비교" },
+      { "step": 3, "action": "로컬 업데이트 + syncStatus: 'synced'", "condition": "충돌 없음" },
+      { "step": 3, "action": "Latest-Wins 적용", "condition": "충돌 발생" }
+    ],
+    "conflictResolution": {
+      "strategy": "Latest-Wins",
+      "compare": "updatedAt",
+      "winner": "더 최신인 데이터"
+    }
+  },
+  "realtimeFlow": {
+    "description": "Supabase Realtime 구독",
+    "subscription": {
+      "channel": "db-changes",
+      "tables": ["projects", "chapters", "synopses", "characters", "relationships"],
+      "filter": "user_id=eq.{currentUserId}"
+    },
+    "events": {
+      "INSERT": {
+        "action": "새 데이터 로컬에 추가",
+        "syncStatus": "synced"
+      },
+      "UPDATE": {
+        "action": "로컬 데이터 업데이트 (충돌 해결 적용)",
+        "syncStatus": "synced"
+      },
+      "DELETE": {
+        "action": "로컬 데이터 삭제"
+      }
+    }
+  },
+  "imageSync": {
+    "description": "이미지 동기화 (Base64 ↔ Storage URL)",
+    "uploadFlow": [
+      { "step": 1, "action": "이미지 선택" },
+      { "step": 2, "action": "100x150 리사이즈 (lib/image-utils.ts)" },
+      { "step": 3, "action": "Base64 변환 → IndexedDB 저장 (xxxBase64 필드)" },
+      { "step": 4, "action": "동기화 시: Base64 → Supabase Storage 업로드", "condition": "온라인 & 회원" },
+      { "step": 5, "action": "Signed URL 생성 → Supabase DB 저장 (xxxUrl 필드)" }
+    ],
+    "downloadFlow": [
+      { "step": 1, "action": "서버에서 xxxUrl 가져옴" },
+      { "step": 2, "action": "URL에서 이미지 다운로드" },
+      { "step": 3, "action": "Base64 변환 → IndexedDB xxxBase64 필드에 저장" }
+    ],
+    "fields": {
+      "Project": { "local": "coverImageBase64", "remote": "coverImageUrl" },
+      "Character": { "local": "imageBase64", "remote": "imageUrl" }
+    }
+  },
+  "retryStrategy": {
+    "maxAttempts": 3,
+    "backoff": "exponential",
+    "initialDelay": 1000,
+    "maxDelay": 10000,
+    "implementation": "src/sync/sync-queue.ts"
+  },
+  "entities": {
+    "syncOrder": ["projects", "synopses", "chapters", "characters", "relationships"],
+    "note": "부모 → 자식 순서로 동기화 (FK 제약)"
+  }
+}

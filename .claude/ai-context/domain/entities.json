@@ -1,0 +1,147 @@
+{
+  "$schema": "ai-context/domain/entities",
+  "version": "1.0.0",
+  "description": "엔터티 관계 및 필드 정의",
+  "entities": {
+    "Project": {
+      "description": "소설 프로젝트",
+      "table": { "local": "projects", "remote": "projects" },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "userId": { "type": "uuid", "nullable": true, "description": "로그인 사용자 ID" },
+        "guestId": { "type": "uuid", "nullable": true, "description": "게스트 ID" },
+        "title": { "type": "string", "required": true },
+        "description": { "type": "string", "nullable": true },
+        "genre": { "type": "string", "nullable": true },
+        "coverImageUrl": { "type": "string", "nullable": true, "storage": "remote" },
+        "coverImageBase64": { "type": "string", "nullable": true, "storage": "local" },
+        "status": { "type": "enum", "values": ["active", "archived", "deleted"], "default": "active" },
+        "deletedAt": { "type": "datetime", "nullable": true },
+        "createdAt": { "type": "datetime" },
+        "updatedAt": { "type": "datetime" },
+        "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },
+        "lastSyncedAt": { "type": "datetime", "nullable": true, "storage": "local" }
+      },
+      "relations": {
+        "chapters": { "type": "hasMany", "entity": "Chapter", "cascade": true },
+        "synopsis": { "type": "hasOne", "entity": "Synopsis", "cascade": true },
+        "characters": { "type": "hasMany", "entity": "Character", "cascade": true },
+        "relationships": { "type": "hasMany", "entity": "Relationship", "cascade": true },
+        "versions": { "type": "hasMany", "entity": "Version", "cascade": true }
+      },
+      "constraints": ["userId OR guestId must be set"],
+      "indexes": ["userId", "guestId", "updatedAt", "syncStatus"]
+    },
+    "Chapter": {
+      "description": "소설 회차",
+      "table": { "local": "chapters", "remote": "chapters" },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "projectId": { "type": "uuid", "fk": "Project.id" },
+        "title": { "type": "string", "required": true },
+        "content": { "type": "json", "format": "Tiptap JSONContent" },
+        "contentText": { "type": "string", "nullable": true, "purpose": "검색/글자수 계산" },
+        "wordCount": { "type": "integer", "default": 0 },
+        "order": { "type": "integer", "required": true },
+        "status": { "type": "enum", "values": ["draft", "published"], "default": "draft" },
+        "plot": { "type": "string", "nullable": true, "purpose": "플롯 메모" },
+        "createdAt": { "type": "datetime" },
+        "updatedAt": { "type": "datetime" },
+        "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },
+        "lastSyncedAt": { "type": "datetime", "nullable": true, "storage": "local" }
+      },
+      "indexes": ["projectId", "[projectId+order]", "updatedAt", "syncStatus"]
+    },
+    "Synopsis": {
+      "description": "소설 시놉시스 (프로젝트당 1개)",
+      "table": { "local": "synopses", "remote": "synopses" },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "projectId": { "type": "uuid", "fk": "Project.id", "unique": true },
+        "content": { "type": "json", "format": "Tiptap JSONContent" },
+        "plainText": { "type": "string", "nullable": true },
+        "wordCount": { "type": "integer", "default": 0 },
+        "createdAt": { "type": "datetime" },
+        "updatedAt": { "type": "datetime" },
+        "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },
+        "lastSyncedAt": { "type": "datetime", "nullable": true, "storage": "local" }
+      },
+      "constraints": ["ONE_PER_PROJECT"],
+      "indexes": ["projectId", "updatedAt", "syncStatus"]
+    },
+    "Character": {
+      "description": "등장인물",
+      "table": { "local": "characters", "remote": "characters" },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "projectId": { "type": "uuid", "fk": "Project.id" },
+        "name": { "type": "string", "required": true },
+        "nickname": { "type": "string", "nullable": true },
+        "age": { "type": "integer", "nullable": true },
+        "gender": { "type": "string", "nullable": true },
+        "race": { "type": "string", "nullable": true },
+        "imageUrl": { "type": "string", "nullable": true, "storage": "remote" },
+        "imageBase64": { "type": "string", "nullable": true, "storage": "local" },
+        "order": { "type": "integer", "required": true },
+        "height": { "type": "integer", "nullable": true, "unit": "cm" },
+        "weight": { "type": "integer", "nullable": true, "unit": "kg" },
+        "appearance": { "type": "string", "nullable": true },
+        "mbti": { "type": "string", "nullable": true },
+        "personality": { "type": "string", "nullable": true },
+        "education": { "type": "string", "nullable": true },
+        "occupation": { "type": "string", "nullable": true },
+        "affiliation": { "type": "string", "nullable": true },
+        "background": { "type": "string", "nullable": true },
+        "customFields": { "type": "array", "items": { "key": "string", "value": "string" } },
+        "createdAt": { "type": "datetime" },
+        "updatedAt": { "type": "datetime" },
+        "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },
+        "lastSyncedAt": { "type": "datetime", "nullable": true, "storage": "local" }
+      },
+      "indexes": ["projectId", "[projectId+order]", "updatedAt", "syncStatus"]
+    },
+    "Relationship": {
+      "description": "캐릭터 관계",
+      "table": { "local": "relationships", "remote": "relationships" },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "projectId": { "type": "uuid", "fk": "Project.id" },
+        "fromCharacterId": { "type": "uuid", "fk": "Character.id" },
+        "toCharacterId": { "type": "uuid", "fk": "Character.id" },
+        "type": { "type": "enum", "values": ["family", "friend", "lover", "rival", "enemy", "colleague", "master", "custom"] },
+        "description": { "type": "string", "nullable": true },
+        "bidirectional": { "type": "boolean", "default": false },
+        "createdAt": { "type": "datetime" },
+        "updatedAt": { "type": "datetime" },
+        "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },
+        "lastSyncedAt": { "type": "datetime", "nullable": true, "storage": "local" }
+      },
+      "indexes": ["projectId", "fromCharacterId", "toCharacterId", "updatedAt", "syncStatus"]
+    },
+    "Version": {
+      "description": "버전 히스토리 (로컬 전용)",
+      "table": { "local": "versions", "remote": null },
+      "fields": {
+        "id": { "type": "uuid", "pk": true },
+        "projectId": { "type": "uuid", "fk": "Project.id" },
+        "entityType": { "type": "enum", "values": ["synopsis", "character"] },
+        "entityId": { "type": "uuid" },
+        "snapshot": { "type": "json", "description": "엔터티의 전체 스냅샷" },
+        "diff": { "type": "json", "nullable": true, "description": "이전 버전과의 차이" },
+        "createdAt": { "type": "datetime" }
+      },
+      "note": "서버 동기화 없음, 로컬 전용",
+      "indexes": ["projectId", "[entityType+entityId]", "createdAt"]
+    }
+  },
+  "relationshipTypes": [
+    { "value": "family", "label": "가족", "color": "#f87171" },
+    { "value": "friend", "label": "친구", "color": "#60a5fa" },
+    { "value": "lover", "label": "연인", "color": "#f472b6" },
+    { "value": "rival", "label": "라이벌", "color": "#fbbf24" },
+    { "value": "enemy", "label": "적", "color": "#ef4444" },
+    { "value": "colleague", "label": "동료", "color": "#34d399" },
+    { "value": "master", "label": "사제", "color": "#a78bfa" },
+    { "value": "custom", "label": "기타", "color": "#9ca3af" }
+  ]
+}

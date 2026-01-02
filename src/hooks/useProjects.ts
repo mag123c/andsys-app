@@ -3,9 +3,9 @@
 import { useState, useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Project, CreateProjectInput, UpdateProjectInput } from "@/repositories/types";
-import { db } from "@/storage/local/db";
 import { projectLocalRepository } from "@/storage/local/project.local";
 import { useAuth } from "@/hooks/useAuth";
+import { deleteProjectUseCase } from "@/application/project";
 
 interface UseProjectsReturn {
   projects: Project[];
@@ -78,26 +78,11 @@ export function useProjects(): UseProjectsReturn {
   );
 
   const deleteProject = useCallback(async (id: string): Promise<void> => {
-    // 트랜잭션으로 관련 데이터 cascade delete (원자성 보장)
-    await db.transaction(
-      "rw",
-      [db.projects, db.chapters, db.synopses, db.characters, db.relationships, db.versions],
-      async () => {
-        await db.chapters.where("projectId").equals(id).delete();
-        await db.synopses.where("projectId").equals(id).delete();
-        await db.versions.where("projectId").equals(id).delete();
-        await db.relationships.where("projectId").equals(id).delete();
-        await db.characters.where("projectId").equals(id).delete();
-
-        // soft delete
-        await db.projects.update(id, {
-          status: "deleted",
-          deletedAt: new Date(),
-          updatedAt: new Date(),
-          syncStatus: "pending",
-        });
-      }
-    );
+    // UseCase로 CASCADE DELETE 실행
+    const result = await deleteProjectUseCase({ projectId: id });
+    if (!result.success) {
+      throw new Error(`Failed to delete project: ${id}`);
+    }
     // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
   }, []);
 

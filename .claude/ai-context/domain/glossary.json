@@ -1,0 +1,65 @@
+{
+  "$schema": "ai-context/domain/glossary",
+  "version": "1.0.0",
+  "description": "웹소설 도메인 용어 정의",
+  "terms": {
+    "회차": {
+      "en": "chapter",
+      "description": "소설의 에피소드 단위. 웹소설에서는 '1화', '2화'로 표기",
+      "model": "Chapter",
+      "aliases": ["화", "에피소드", "챕터"]
+    },
+    "시놉시스": {
+      "en": "synopsis",
+      "description": "소설의 전체 줄거리. 프로젝트당 1개만 존재",
+      "model": "Synopsis",
+      "constraints": ["ONE_PER_PROJECT"]
+    },
+    "플롯 메모": {
+      "en": "plot",
+      "description": "챕터별 간단한 전개 메모. content와 별도로 저장되어 사이드바에서 확인 가능",
+      "field": "Chapter.plot"
+    },
+    "관계도": {
+      "en": "relationship graph",
+      "description": "캐릭터 간 관계를 시각화한 그래프. React Flow 기반",
+      "model": "Relationship",
+      "ui": "RelationshipGraph"
+    },
+    "캐릭터 시트": {
+      "en": "character sheet",
+      "description": "캐릭터의 상세 정보 (외형, 성격, 배경 등). 커스텀 필드 지원",
+      "model": "Character"
+    },
+    "표지 이미지": {
+      "en": "cover image",
+      "description": "프로젝트 대표 이미지. 100x150px로 리사이즈하여 저장",
+      "fields": ["coverImageBase64", "coverImageUrl"],
+      "resize": "100x150"
+    },
+    "글자수": {
+      "en": "word count",
+      "description": "공백 제외 글자 수. contentText에서 계산",
+      "field": "wordCount"
+    },
+    "동기화 상태": {
+      "en": "sync status",
+      "description": "로컬-서버 동기화 상태",
+      "values": {
+        "synced": "서버와 동기화 완료",
+        "pending": "동기화 대기 중",
+        "conflict": "충돌 발생"
+      }
+    },
+    "게스트": {
+      "en": "guest",
+      "description": "비로그인 사용자. IndexedDB만 사용, 서버 동기화 없음",
+      "identifier": "guestId"
+    },
+    "회원": {
+      "en": "member",
+      "description": "로그인 사용자. IndexedDB + Supabase 동기화",
+      "identifier": "userId"
+    }
+  }
+}

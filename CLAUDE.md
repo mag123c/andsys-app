@@ -6,6 +6,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 4ndSYS - 웹소설 작가를 위한 로컬 우선(Local-First) 글쓰기 플랫폼.
 
+---
+
+## AI Context Index
+
+### Knowledge (`.claude/ai-context/`)
+
+지식 문서는 JSON 형식으로 구조화되어 토큰 효율성을 높입니다.
+
+| 문서 | 경로 | 로딩 | 설명 |
+|------|------|------|------|
+| 도메인 용어 | `domain/glossary.json` | **항상** | 웹소설 용어 (회차, 시놉시스, 플롯 메모 등) |
+| 비즈니스 규칙 | `domain/rules.json` | **항상** | CASCADE_DELETE, GUEST_LOCAL_ONLY 등 12개 규칙 |
+| 엔터티 관계 | `domain/entities.json` | **항상** | 6개 테이블 구조, 필드, 관계 |
+| 라우트 구조 | `technical/routes.json` | 필요시 | App Router 5개 그룹 |
+| 동기화 흐름 | `technical/sync-flow.json` | sync 작업 | saveFlow, pullFlow, realtimeFlow, imageSync |
+| 에디터 설정 | `technical/editor-config.json` | editor 작업 | Tiptap 확장, 폰트 7개, 자동저장 |
+| 스키마 히스토리 | `technical/schema-history.json` | DB 변경 | Dexie v1~v8 마이그레이션 |
+| 컴포넌트 맵 | `components/dependency-map.json` | 필요시 | 15개 컴포넌트, 13개 훅 의존성 |
+
+### Behavior (`.claude/skills/`)
+
+| 스킬 | 용도 |
+|------|------|
+| `/task` | 전체 워크플로우 (분석→구현→리뷰→커밋) |
+| `/developer` | 데이터 계층, 로직, Repository |
+| `/frontend` | RSC, SEO, UI 컴포넌트 |
+| `/reviewer` | 코드 리뷰, 버그/보안/성능 |
+
+### Selective Loading Rules
+
+**기본 로딩** (모든 세션):
+- `glossary.json` - 도메인 용어 이해
+- `rules.json` - 비즈니스 규칙 준수
+- `entities.json` - 데이터 구조 이해
+
+**도메인별 추가 로딩**:
+
+| 작업 유형 | 추가 참조 |
+|----------|----------|
+| Editor 관련 (에디터, 폰트, 자동저장) | `editor-config.json` |
+| Sync 관련 (동기화, 충돌, Realtime) | `sync-flow.json` |
+| DB 스키마 변경 (Dexie 마이그레이션) | `schema-history.json` |
+| 라우트 추가/변경 | `routes.json` |
+| 컴포넌트 구조 파악 | `dependency-map.json` |
+
+### Token Estimation
+
+| 세션 유형 | 로딩 파일 | 예상 토큰 |
+|----------|----------|----------|
+| 일반 작업 | domain/* (3개) | ~2K |
+| Editor 작업 | + editor-config | ~2.5K |
+| Sync 작업 | + sync-flow | ~3K |
+| 전체 분석 | 모든 파일 | ~5K |
+
+---
+
 ## Commands
 
 ```bash
@@ -21,6 +77,8 @@ pnpm supabase:migrate     # DB 마이그레이션 적용
 pnpm supabase:reset       # DB 초기화 + 마이그레이션
 ```
 
+---
+
 ## Architecture
 
 ```
@@ -34,44 +92,54 @@ IndexedDB (로컬) ←→ SyncEngine ←→ Supabase (서버)
 
 - **Repository 패턴**: Supabase 직접 호출 금지, `src/repositories/` 인터페이스 통해 접근
 - **로컬 우선 저장**: 저장 시 IndexedDB 먼저 → 온라인이면 debounce 후 Supabase 동기화
-- **Dexie 스키마 버전**: 현재 v7 (projects, chapters, synopses, characters, relationships, versions 테이블)
-
-### 동기화 흐름 (SyncEngine)
-```
-로컬 저장 → syncStatus: "pending" → SyncEngine.syncAll() → Supabase 업로드 → syncStatus: "synced"
-                                                        ↓
-                              Supabase Realtime 구독 → 다른 기기 변경 감지 → 로컬 업데이트
-```
-
-- **충돌 해결**: Latest-wins (updatedAt 비교)
-- **이미지 동기화**: Base64(로컬) → Storage 업로드 → Signed URL(서버)
+- **Dexie 스키마 버전**: 현재 v8 → 상세: `ai-context/technical/schema-history.json`
 
 ### 주요 폴더 구조
 ```
 src/
-├── app/                  # Next.js App Router (page, layout)
+├── app/                  # Next.js App Router → 상세: ai-context/technical/routes.json
 ├── components/
 │   ├── ui/               # shadcn/ui 컴포넌트
-│   ├── features/         # 도메인별 컴포넌트 (editor/, project/, chapter/, character/, relationship/)
+│   ├── features/         # 도메인별 컴포넌트 → 상세: ai-context/components/dependency-map.json
 │   └── providers/        # Context Providers
-├── repositories/         # 데이터 인터페이스 + 타입 정의 (types/ 하위)
+├── repositories/         # 데이터 인터페이스 → 상세: ai-context/domain/entities.json
 ├── storage/
-│   ├── local/            # IndexedDB 구현 (Dexie) - db.ts가 스키마 정의
+│   ├── local/            # IndexedDB 구현 (Dexie)
 │   └── remote/           # Supabase 클라이언트
-├── hooks/                # 커스텀 훅 (useProject, useChapters, useCharacters, useSyncEngine 등)
-│                         # Dexie useLiveQuery로 IndexedDB 실시간 반응형 구독
+├── sync/                 # 동기화 엔진 → 상세: ai-context/technical/sync-flow.json
+├── hooks/                # 커스텀 훅 (useLiveQuery 반응형 구독)
 └── lib/                  # 유틸리티, 상수
 ```
 
-### 도메인 모델 (IndexedDB 테이블)
-- **projects**: 소설 프로젝트 (표지 이미지 Base64 저장)
-- **chapters**: 챕터/회차 (Tiptap JSON content)
-- **synopses**: 시놉시스 (프로젝트당 1개)
-- **characters**: 등장인물 (커스텀 필드 지원)
-- **relationships**: 캐릭터 관계도 (양방향 관계 지원)
-- **versions**: 히스토리 스냅샷 (synopsis, character용)
+### 도메인 모델
+→ 상세: `ai-context/domain/entities.json`
 
-## 코드 철학 (Kent Beck Style)
+| 테이블 | 설명 |
+|--------|------|
+| projects | 소설 프로젝트 (표지 이미지 Base64 저장) |
+| chapters | 챕터/회차 (Tiptap JSON, plot 메모) |
+| synopses | 시놉시스 (프로젝트당 1개) |
+| characters | 등장인물 (커스텀 필드 지원) |
+| relationships | 캐릭터 관계도 (양방향 관계 지원) |
+| versions | 히스토리 스냅샷 (로컬 전용) |
+
+---
+
+## Core Rules
+
+→ 상세: `ai-context/domain/rules.json`
+
+1. **RSC 보안**: Server Action에서 민감 데이터 반환 금지
+2. **로컬 우선 저장**: 모든 저장은 IndexedDB 먼저, syncStatus 추적
+3. **게스트 = 로컬 전용**: 게스트는 서버 동기화 없음, 회원만 Supabase 동기화
+4. **Cascade Delete**: 프로젝트 삭제 시 관련 데이터 함께 삭제
+5. **이미지 듀얼 저장**: 로컬(Base64) ↔ 서버(Storage URL)
+6. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지, git -C 금지
+7. **디렉토리 문서화**: 새 디렉토리 생성 시 `CLAUDE.md` 작성
+
+---
+
+## Code Philosophy (Kent Beck Style)
 
 ### 핵심 원칙
 ```
@@ -80,46 +148,24 @@ OOP + FP 하이브리드: 구조는 클래스/인터페이스, 로직은 순수 
 
 | 원칙 | 설명 |
 |------|------|
-| **SRP** | 하나의 모듈 = 하나의 책임. 변경 이유가 하나뿐이어야 함 |
+| **SRP** | 하나의 모듈 = 하나의 책임 |
 | **순수 함수** | 같은 입력 → 같은 출력, 사이드 이펙트 격리 |
-| **명확한 의도** | 코드가 곧 문서. 이름만으로 역할이 드러나야 함 |
-| **작은 단위** | 함수는 한 가지 일만, 커밋도 한 가지 변경만 |
+| **명확한 의도** | 코드가 곧 문서 |
+| **작은 단위** | 함수는 한 가지 일만 |
 
 ### YAGNI + KISS + 미래지향
 - **YAGNI**: 지금 필요없는 기능은 만들지 않음
 - **KISS**: 가장 단순한 해결책 선택
-- **미래지향**: 단, 확장 포인트(인터페이스, 추상화)는 미리 설계
-- **성능 최적화**: 측정 가능한 병목은 즉시 개선
+- **미래지향**: 확장 포인트(인터페이스)는 미리 설계
+- **성능**: 측정 가능한 병목은 즉시 최적화
 
-### 코드 스타일
-```typescript
-// Good: 순수 함수 + 명확한 의도
-function calculateWordCount(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
-}
-
-// Good: 인터페이스로 확장 포인트 확보
-interface Repository<T> {
-  getById(id: string): Promise<T | null>;
-  save(entity: T): Promise<void>;
-}
-
-// Bad: 여러 책임 혼합
-function saveAndNotify(data) { /* 저장 + 알림 + 로깅... */ }
-```
-
-## 핵심 규칙
-
-1. **RSC 보안**: Server Action에서 민감 데이터 반환 금지, 필요한 필드만 명시적 반환
-2. **로컬 우선 저장**: 모든 저장은 IndexedDB 먼저, syncStatus 추적
-3. **게스트 = 로컬 전용**: 게스트는 서버 동기화 없음 (IndexedDB만), 회원만 Supabase 동기화
-4. **Cascade Delete**: 프로젝트 삭제 시 관련 데이터(chapters, synopses, characters, relationships, versions) 함께 삭제
-5. **커밋**: Conventional Commits, Co-Author/Claude 마킹 금지, git -C 명령어 사용 금지
-6. **디렉토리 문서화**: 새 디렉토리 생성 시 `CLAUDE.md` 작성 (역할, 파일 설명, 최종 수정일)
+---
 
 ## Tech Stack
 
 Next.js 16 (App Router, Turbopack) + React 19 + shadcn/ui + Tailwind CSS 4 + Supabase + Dexie.js (IndexedDB) + Tiptap (에디터) + React Flow (관계도 그래프) + Vitest
+
+---
 
 ## Documentation
 
@@ -130,22 +176,20 @@ Next.js 16 (App Router, Turbopack) + React 19 + shadcn/ui + Tailwind CSS 4 + Sup
 | `docs/SCHEMA.md` | DB 스키마 (Supabase + IndexedDB) |
 | `docs/ARCHITECTURE.md` | 상세 아키텍처, 동기화 전략 |
 | `docs/DESIGN.md` | 디자인/UX 가이드 |
+| `docs/AI-CONTEXT-OPTIMIZATION.md` | AI Context 최적화 결정 문서 |
 
-## Skills
+---
 
-| 스킬 | 용도 | 호출 |
-|------|------|------|
-| `/task` | 전체 워크플로우 (분석→구현→리뷰→커밋) | 모든 작업의 시작점 |
-| `/developer` | 기능 개발 | 데이터 계층, 로직 |
-| `/frontend` | RSC, SEO, 컴포넌트 | UI, Provider |
-| `/reviewer` | 코드 리뷰 | 구현 후 검토 |
+## AI Context 업데이트 규칙
 
-### /task 워크플로우
+ai-context 문서는 코드와 함께 최신 상태를 유지해야 합니다:
 
-```
-/task "작업 설명"
-  → 분석 (타입, 브랜치, 영향 파일)
-  → 구현 (/developer, /frontend)
-  → 리뷰 (/reviewer) → 이슈 시 수정 루프
-  → 마무리 (빌드 확인, 커밋, 문서 업데이트)
-```
+| 변경 사항 | 업데이트 대상 |
+|----------|--------------|
+| 테이블/필드 변경 | `entities.json` |
+| 새 비즈니스 규칙 | `rules.json` |
+| Dexie 버전 변경 | `schema-history.json` |
+| 라우트 추가/변경 | `routes.json` |
+| 에디터 설정 변경 | `editor-config.json` |
+| 새 컴포넌트/훅 추가 | `dependency-map.json` |
+| 새 도메인 용어 | `glossary.json` |

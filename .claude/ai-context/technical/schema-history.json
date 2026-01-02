@@ -1,0 +1,119 @@
+{
+  "$schema": "ai-context/technical/schema-history",
+  "version": "1.0.0",
+  "description": "Dexie (IndexedDB) 스키마 마이그레이션 히스토리",
+  "database": {
+    "name": "4ndsys",
+    "implementation": "src/storage/local/db.ts"
+  },
+  "currentVersion": 8,
+  "migrations": [
+    {
+      "version": 1,
+      "date": "2024-12-22",
+      "description": "초기 스키마",
+      "tables": ["projects", "chapters", "syncQueue", "settings"],
+      "indexes": {
+        "projects": "id, userId, guestId, updatedAt, syncStatus",
+        "chapters": "id, projectId, [projectId+order], updatedAt, syncStatus",
+        "syncQueue": "++id, entityType, entityId, createdAt",
+        "settings": "key"
+      }
+    },
+    {
+      "version": 2,
+      "date": "2024-12-23",
+      "description": "표지 이미지 필드 추가",
+      "changes": [
+        "projects: coverImageUrl 필드 추가",
+        "projects: coverImageBase64 필드 추가"
+      ],
+      "reason": "프로젝트 표지 이미지 기능",
+      "upgrade": "기존 데이터에 null 기본값 설정"
+    },
+    {
+      "version": 3,
+      "date": "2024-12-24",
+      "description": "시놉시스 테이블 추가",
+      "tables": ["synopses"],
+      "indexes": {
+        "synopses": "id, projectId, updatedAt, syncStatus"
+      },
+      "reason": "시놉시스 기능"
+    },
+    {
+      "version": 4,
+      "date": "2024-12-24",
+      "description": "캐릭터 테이블 추가",
+      "tables": ["characters"],
+      "indexes": {
+        "characters": "id, projectId, [projectId+order], updatedAt, syncStatus"
+      },
+      "reason": "캐릭터 관리 기능"
+    },
+    {
+      "version": 5,
+      "date": "2024-12-24",
+      "description": "관계도 테이블 추가",
+      "tables": ["relationships"],
+      "indexes": {
+        "relationships": "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus"
+      },
+      "reason": "캐릭터 관계도 기능"
+    },
+    {
+      "version": 6,
+      "date": "2024-12-24",
+      "description": "버전 히스토리 테이블 추가",
+      "tables": ["versions"],
+      "indexes": {
+        "versions": "id, projectId, [entityType+entityId], createdAt"
+      },
+      "reason": "시놉시스/캐릭터 히스토리 추적"
+    },
+    {
+      "version": 7,
+      "date": "2024-12-25",
+      "description": "관계도 필드 정리",
+      "changes": [
+        "relationships: label 필드 제거",
+        "relationships: reverseLabel 필드 제거"
+      ],
+      "reason": "불필요한 필드 정리, type 필드로 충분",
+      "upgrade": "기존 데이터에서 label, reverseLabel 삭제"
+    },
+    {
+      "version": 8,
+      "date": "2024-12-XX",
+      "description": "플롯 메모 필드 추가",
+      "changes": [
+        "chapters: plot 필드 추가"
+      ],
+      "reason": "챕터별 플롯 메모 기능",
+      "upgrade": "기존 데이터에 null 기본값 설정"
+    }
+  ],
+  "upgradeNotes": {
+    "addField": {
+      "description": "필드 추가 시 .upgrade()에서 기존 데이터에 기본값 설정",
+      "example": "project.newField = project.newField ?? defaultValue"
+    },
+    "removeField": {
+      "description": "필드 제거 시 .upgrade()에서 delete 처리",
+      "example": "delete relationship.label"
+    },
+    "addTable": {
+      "description": "테이블 추가는 .stores()에 정의만으로 충분",
+      "note": "upgrade 함수 불필요"
+    },
+    "changeIndex": {
+      "description": "인덱스 변경 시 .stores()에 새 인덱스 정의",
+      "note": "기존 데이터 마이그레이션 불필요"
+    }
+  },
+  "conventions": {
+    "versionFormat": "정수 (1, 2, 3, ...)",
+    "dateFormat": "YYYY-MM-DD",
+    "descriptionFormat": "간결한 한글 설명"
+  }
+}

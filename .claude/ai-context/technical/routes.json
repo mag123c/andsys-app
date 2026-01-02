@@ -1,0 +1,134 @@
+{
+  "$schema": "ai-context/technical/routes",
+  "version": "1.0.0",
+  "description": "Next.js App Router 구조",
+  "basePath": "src/app",
+  "groups": {
+    "(auth)": {
+      "description": "인증 전용 레이아웃 (헤더 없음, 중앙 정렬)",
+      "layout": "src/app/(auth)/layout.tsx",
+      "routes": {
+        "/login": {
+          "file": "login/page.tsx",
+          "description": "로그인 페이지",
+          "auth": "guest-only"
+        },
+        "/signup": {
+          "file": "signup/page.tsx",
+          "description": "회원가입 페이지",
+          "auth": "guest-only"
+        }
+      }
+    },
+    "(dashboard)": {
+      "description": "대시보드 레이아웃 (사이드바 포함)",
+      "layout": "src/app/(dashboard)/layout.tsx",
+      "routes": {
+        "/novels": {
+          "file": "novels/page.tsx",
+          "description": "소설 목록 (프로젝트 카드 그리드)",
+          "auth": "any"
+        },
+        "/novels/[id]": {
+          "file": "novels/[id]/page.tsx",
+          "description": "소설 상세 (챕터 목록)",
+          "layout": "novels/[id]/layout.tsx",
+          "auth": "owner"
+        },
+        "/novels/[id]/synopsis": {
+          "file": "novels/[id]/synopsis/page.tsx",
+          "description": "시놉시스 편집",
+          "auth": "owner"
+        },
+        "/novels/[id]/characters": {
+          "file": "novels/[id]/characters/page.tsx",
+          "description": "캐릭터 관리 (카드 그리드)",
+          "auth": "owner"
+        },
+        "/novels/[id]/relationships": {
+          "file": "novels/[id]/relationships/page.tsx",
+          "description": "관계도 (React Flow 그래프)",
+          "auth": "owner"
+        },
+        "/settings": {
+          "file": "settings/page.tsx",
+          "description": "설정 페이지",
+          "auth": "any"
+        },
+        "/settings/shares": {
+          "file": "settings/shares/page.tsx",
+          "description": "공유 링크 관리",
+          "auth": "member-only"
+        }
+      }
+    },
+    "(editor)": {
+      "description": "에디터 전용 레이아웃 (전체화면, 사이드바 없음)",
+      "routes": {
+        "/novels/[id]/chapters/[chapterId]": {
+          "file": "(editor)/novels/[id]/chapters/[chapterId]/page.tsx",
+          "description": "챕터 에디터 (Tiptap)",
+          "auth": "owner",
+          "features": ["autosave", "spellcheck", "plotMemo"]
+        }
+      }
+    },
+    "(legal)": {
+      "description": "법적 문서 (최소 레이아웃)",
+      "routes": {
+        "/privacy": {
+          "file": "(legal)/privacy/page.tsx",
+          "description": "개인정보처리방침",
+          "auth": "public"
+        },
+        "/terms": {
+          "file": "(legal)/terms/page.tsx",
+          "description": "이용약관",
+          "auth": "public"
+        }
+      }
+    },
+    "public": {
+      "description": "공개 페이지 (그룹 없음)",
+      "routes": {
+        "/": {
+          "file": "page.tsx",
+          "description": "랜딩 페이지",
+          "auth": "public"
+        },
+        "/credits": {
+          "file": "credits/page.tsx",
+          "description": "크레딧 (폰트, 라이브러리)",
+          "auth": "public"
+        },
+        "/s/[token]": {
+          "file": "s/[token]/page.tsx",
+          "description": "공유 페이지 (토큰 기반 접근)",
+          "auth": "token"
+        }
+      }
+    }
+  },
+  "params": {
+    "[id]": {
+      "type": "uuid",
+      "description": "프로젝트 ID"
+    },
+    "[chapterId]": {
+      "type": "uuid",
+      "description": "챕터 ID"
+    },
+    "[token]": {
+      "type": "string",
+      "description": "공유 토큰 (URL-safe)"
+    }
+  },
+  "authTypes": {
+    "public": "누구나 접근 가능",
+    "guest-only": "비로그인 사용자만 (로그인 시 리다이렉트)",
+    "member-only": "로그인 사용자만",
+    "any": "게스트 또는 회원",
+    "owner": "해당 프로젝트 소유자만",
+    "token": "유효한 공유 토큰 보유자"
+  }
+}
