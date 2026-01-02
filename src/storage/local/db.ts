@@ -29,6 +29,7 @@ export interface LocalChapter {
   wordCount: number;
   order: number;
   status: "draft" | "published";
+  plot: string | null;
   createdAt: Date;
   updatedAt: Date;
   syncStatus: SyncStatus;
@@ -266,6 +267,28 @@ export class AppDatabase extends Dexie {
             delete relationship.label;
             delete relationship.reverseLabel;
           });
+      });
+
+    // Version 8: Add plot field to chapters
+    this.version(8)
+      .stores({
+        projects: "id, userId, guestId, updatedAt, syncStatus",
+        chapters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+        synopses: "id, projectId, updatedAt, syncStatus",
+        characters: "id, projectId, [projectId+order], updatedAt, syncStatus",
+        relationships:
+          "id, projectId, fromCharacterId, toCharacterId, updatedAt, syncStatus",
+        versions: "id, projectId, [entityType+entityId], createdAt",
+        syncQueue: "++id, entityType, entityId, createdAt",
+        settings: "key",
+      })
+      .upgrade((tx) => {
+        // Add plot field with null default to existing chapters
+        return tx.table("chapters").toCollection().modify((chapter) => {
+          if (chapter.plot === undefined) {
+            chapter.plot = null;
+          }
+        });
       });
   }
 }

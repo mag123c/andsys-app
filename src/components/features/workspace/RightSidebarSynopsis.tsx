@@ -1,11 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { FileText, Check, Loader2 } from "lucide-react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import type { JSONContent } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Placeholder from "@tiptap/extension-placeholder";
+import TextAlign from "@tiptap/extension-text-align";
+import FontFamily from "@tiptap/extension-font-family";
+import { TextStyle } from "@tiptap/extension-text-style";
 import type { Synopsis } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount } from "@/lib/format";
-import { Textarea } from "@/components/ui/textarea";
+import { EditorToolbar } from "@/components/features/editor/EditorToolbar";
+import { FontSize } from "@/components/features/editor/extensions";
 
 const DEBOUNCE_MS = 500;
 
@@ -14,8 +23,9 @@ type SaveStatus = "saved" | "saving" | "unsaved";
 interface RightSidebarSynopsisProps {
   synopsis: Synopsis | null;
   isLoading: boolean;
-  onContentChange?: (plainText: string) => Promise<void>;
+  onContentChange?: (content: JSONContent) => Promise<void>;
   className?: string;
+  defaultFont?: string;
 }
 
 export function RightSidebarSynopsis({
@@ -23,46 +33,109 @@ export function RightSidebarSynopsis({
   isLoading,
   onContentChange,
   className,
+  defaultFont,
 }: RightSidebarSynopsisProps) {
-  const [draftText, setDraftText] = useState(synopsis?.plainText ?? "");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingTextRef = useRef<string | null>(null);
+  const pendingContentRef = useRef<JSONContent | null>(null);
+  const synopsisIdRef = useRef<string | null>(null);
 
-  // synopsis 변경 시 draftText 동기화
+  // Tiptap 확장 기능
+  const extensions = useMemo(
+    () => [
+      StarterKit.configure({
+        heading: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        blockquote: false,
+        codeBlock: false,
+        code: false,
+        strike: false,
+        horizontalRule: false,
+        gapcursor: false,
+        dropcursor: {
+          color: "#DBEAFE",
+          width: 4,
+        },
+      }),
+      Placeholder.configure({
+        placeholder: "이 소설의 전체 줄거리를 작성하세요...",
+      }),
+      Underline,
+      TextStyle,
+      FontFamily.configure({
+        types: ["textStyle"],
+      }),
+      TextAlign.configure({
+        types: ["paragraph"],
+        alignments: ["left", "center"],
+      }),
+      FontSize,
+    ],
+    []
+  );
+
+  const editor = useEditor({
+    extensions,
+    content: synopsis?.content,
+    editable: !!onContentChange,
+    immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        class: cn(
+          "prose prose-sm dark:prose-invert max-w-none",
+          "focus:outline-none",
+          "min-h-[200px] p-3"
+        ),
+      },
+    },
+    onUpdate: ({ editor }) => {
+      if (!onContentChange) return;
+
+      const content = editor.getJSON();
+      pendingContentRef.current = content;
+      setSaveStatus("unsaved");
+
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+
+      debounceRef.current = setTimeout(() => {
+        if (pendingContentRef.current) {
+          save(pendingContentRef.current);
+          pendingContentRef.current = null;
+        }
+      }, DEBOUNCE_MS);
+    },
+  });
+
+  // synopsis ID 추적
   useEffect(() => {
-    setDraftText(synopsis?.plainText ?? "");
-    setSaveStatus("saved");
-  }, [synopsis?.id, synopsis?.plainText]);
+    synopsisIdRef.current = synopsis?.id ?? null;
+  }, [synopsis?.id]);
 
-  const save = useCallback(async (text: string) => {
+  // synopsis 변경 시 에디터 콘텐츠 동기화
+  useEffect(() => {
+    if (editor && synopsis?.content) {
+      const currentContent = editor.getJSON();
+      if (JSON.stringify(currentContent) !== JSON.stringify(synopsis.content)) {
+        editor.commands.setContent(synopsis.content);
+      }
+    }
+    setSaveStatus("saved");
+  }, [editor, synopsis?.id, synopsis?.content]);
+
+  const save = useCallback(async (content: JSONContent) => {
     if (!onContentChange) return;
     setSaveStatus("saving");
     try {
-      await onContentChange(text);
+      await onContentChange(content);
       setSaveStatus("saved");
     } catch {
       setSaveStatus("saved"); // 에러 시에도 UI 복구
     }
   }, [onContentChange]);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setDraftText(text);
-    pendingTextRef.current = text;
-    setSaveStatus("unsaved");
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      if (pendingTextRef.current !== null) {
-        save(pendingTextRef.current);
-        pendingTextRef.current = null;
-      }
-    }, DEBOUNCE_MS);
-  }, [save]);
 
   // 언마운트 시 저장
   useEffect(() => {
@@ -70,8 +143,8 @@ export function RightSidebarSynopsis({
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
-      if (pendingTextRef.current !== null && onContentChange) {
-        onContentChange(pendingTextRef.current).catch(() => {});
+      if (pendingContentRef.current && onContentChange) {
+        onContentChange(pendingContentRef.current).catch(() => {});
       }
     };
   }, [onContentChange]);
@@ -92,7 +165,7 @@ export function RightSidebarSynopsis({
     );
   }
 
-  const wordCount = draftText.trim().length;
+  const wordCount = synopsis?.wordCount ?? 0;
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
@@ -115,14 +188,17 @@ export function RightSidebarSynopsis({
         </div>
       </div>
 
+      {/* Toolbar */}
+      {onContentChange && (
+        <EditorToolbar editor={editor} defaultFont={defaultFont} />
+      )}
+
       {/* Editable Content */}
-      <div className="flex-1 p-3 min-h-0">
-        <Textarea
-          value={draftText}
-          onChange={handleChange}
-          placeholder="이 소설의 전체 줄거리를 작성하세요..."
-          className="h-full min-h-[200px] resize-none text-sm leading-relaxed"
-          disabled={!onContentChange}
+      <div className="flex-1 overflow-auto min-h-0">
+        <EditorContent
+          editor={editor}
+          className="h-full"
+          style={defaultFont ? { fontFamily: defaultFont } : undefined}
         />
       </div>
     </div>

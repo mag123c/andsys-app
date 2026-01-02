@@ -25,12 +25,14 @@ interface SortableCharacterItemProps {
   character: Character;
   onEdit: (character: Character) => void;
   onDelete: (id: string) => void;
+  onEditRelationship?: (character: Character) => void;
 }
 
 function SortableCharacterItem({
   character,
   onEdit,
   onDelete,
+  onEditRelationship,
 }: SortableCharacterItemProps) {
   const {
     attributes,
@@ -53,6 +55,7 @@ function SortableCharacterItem({
         character={character}
         onEdit={onEdit}
         onDelete={onDelete}
+        onEditRelationship={onEditRelationship}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </div>
@@ -63,6 +66,7 @@ interface SortableCharacterGridProps {
   characters: Character[];
   onEdit: (character: Character) => void;
   onDelete: (id: string) => void;
+  onEditRelationship?: (character: Character) => void;
   onReorder: (characterIds: string[]) => Promise<void>;
 }
 
@@ -70,6 +74,7 @@ export function SortableCharacterGrid({
   characters,
   onEdit,
   onDelete,
+  onEditRelationship,
   onReorder,
 }: SortableCharacterGridProps) {
   const [items, setItems] = useState(characters);
@@ -118,6 +123,7 @@ export function SortableCharacterGrid({
               character={character}
               onEdit={onEdit}
               onDelete={onDelete}
+              onEditRelationship={onEditRelationship}
             />
           ))}
         </div>

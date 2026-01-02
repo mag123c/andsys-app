@@ -45,6 +45,7 @@ export function useChapters(projectId: string): UseChaptersReturn {
           wordCount: ch.wordCount,
           order: ch.order,
           status: ch.status,
+          plot: ch.plot,
           createdAt: ch.createdAt,
           updatedAt: ch.updatedAt,
         }));

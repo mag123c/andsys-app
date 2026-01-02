@@ -14,6 +14,7 @@ interface UseEditorReturn {
   saveStatus: SaveStatus;
   updateContent: (content: JSONContent) => void;
   updateTitle: (title: string) => Promise<void>;
+  updatePlot: (plot: string | null) => Promise<void>;
   saveNow: () => Promise<void>;
 }
 
@@ -170,6 +171,13 @@ export function useEditor(chapterId: string): UseEditorReturn {
     [save]
   );
 
+  const updatePlot = useCallback(
+    async (plot: string | null) => {
+      await save({ plot });
+    },
+    [save]
+  );
+
   return {
     chapter,
     isLoading,
@@ -177,6 +185,7 @@ export function useEditor(chapterId: string): UseEditorReturn {
     saveStatus,
     updateContent,
     updateTitle,
+    updatePlot,
     saveNow,
   };
 }

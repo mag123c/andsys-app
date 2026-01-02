@@ -110,6 +110,7 @@ export async function createChunhyangMockup(
             wordCount: chapter.wordCount,
             order: chapter.order,
             status: "draft",
+            plot: null,
             createdAt: now,
             updatedAt: now,
             syncStatus: userId ? "pending" : "synced",

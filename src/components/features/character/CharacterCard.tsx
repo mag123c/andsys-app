@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreVertical, Trash2, GripVertical, Pencil, User } from "lucide-react";
+import { MoreVertical, Trash2, GripVertical, Pencil, User, Network } from "lucide-react";
 import type { Character } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ interface CharacterCardProps {
   character: Character;
   onEdit: (character: Character) => void;
   onDelete: (id: string) => void;
+  onEditRelationship?: (character: Character) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
@@ -34,6 +35,7 @@ export function CharacterCard({
   character,
   onEdit,
   onDelete,
+  onEditRelationship,
   dragHandleProps,
 }: CharacterCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -110,6 +112,12 @@ export function CharacterCard({
                 <Pencil className="mr-2 h-4 w-4" />
                 편집
               </DropdownMenuItem>
+              {onEditRelationship && (
+                <DropdownMenuItem onClick={() => onEditRelationship(character)}>
+                  <Network className="mr-2 h-4 w-4" />
+                  관계
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"

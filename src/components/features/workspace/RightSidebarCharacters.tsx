@@ -2,11 +2,18 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { Search, Users, Plus, Network } from "lucide-react";
-import type { Character, Relationship, UpdateCharacterInput } from "@/repositories/types";
+import type { Character, Relationship, UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { CharacterWikiCard } from "./CharacterWikiCard";
+import { RelationshipGraph } from "@/components/features/relationship";
 
 interface RightSidebarCharactersProps {
   characters: Character[];
@@ -14,7 +21,8 @@ interface RightSidebarCharactersProps {
   onCharacterUpdate?: (id: string, data: UpdateCharacterInput) => Promise<void>;
   onCharacterDelete?: (id: string) => Promise<void>;
   onCharacterAdd?: () => void;
-  onShowRelationshipGraph?: () => void;
+  onRelationshipCreate?: (data: CreateRelationshipInput) => Promise<void>;
+  onRelationshipDelete?: (id: string) => Promise<void>;
   className?: string;
 }
 
@@ -24,11 +32,13 @@ export function RightSidebarCharacters({
   onCharacterUpdate,
   onCharacterDelete,
   onCharacterAdd,
-  onShowRelationshipGraph,
+  onRelationshipCreate,
+  onRelationshipDelete,
   className,
 }: RightSidebarCharactersProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [relationshipDialogOpen, setRelationshipDialogOpen] = useState(false);
 
   const filteredCharacters = useMemo(() => {
     if (!searchQuery.trim()) return characters;
@@ -91,69 +101,89 @@ export function RightSidebarCharacters({
   }
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
-      {/* Header */}
-      <div className="p-3 border-b shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              등장인물 ({characters.length})
-            </span>
+    <>
+      <div className={cn("flex flex-col h-full", className)}>
+        {/* Header */}
+        <div className="p-3 border-b shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                등장인물 ({characters.length})
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              {onCharacterAdd && (
+                <Button variant="ghost" size="sm" className="h-7" onClick={onCharacterAdd}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  추가
+                </Button>
+              )}
+              {characters.length >= 2 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7"
+                  onClick={() => setRelationshipDialogOpen(true)}
+                >
+                  <Network className="h-4 w-4 mr-1" />
+                  관계도
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            {onCharacterAdd && (
-              <Button variant="ghost" size="sm" className="h-7" onClick={onCharacterAdd}>
-                <Plus className="h-4 w-4 mr-1" />
-                추가
-              </Button>
-            )}
-            {onShowRelationshipGraph && characters.length >= 2 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7"
-                onClick={onShowRelationshipGraph}
-              >
-                <Network className="h-4 w-4 mr-1" />
-                관계도
-              </Button>
-            )}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="이름, 별명, 직업..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-7 pl-7 text-xs"
+            />
           </div>
         </div>
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="이름, 별명, 직업..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 text-xs"
-          />
+
+        {/* Character List - Wiki Style */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {filteredCharacters.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">
+              검색 결과가 없습니다
+            </p>
+          ) : (
+            filteredCharacters.map((character) => (
+              <CharacterWikiCard
+                key={character.id}
+                character={character}
+                relationships={relationships}
+                allCharacters={characters}
+                isExpanded={expandedId === character.id}
+                onToggle={() => handleToggle(character.id)}
+                onUpdate={handleUpdate}
+                onDelete={onCharacterDelete ? handleDelete : undefined}
+                onRelationshipCreate={onRelationshipCreate}
+                onRelationshipDelete={onRelationshipDelete}
+              />
+            ))
+          )}
         </div>
       </div>
 
-      {/* Character List - Wiki Style */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {filteredCharacters.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">
-            검색 결과가 없습니다
-          </p>
-        ) : (
-          filteredCharacters.map((character) => (
-            <CharacterWikiCard
-              key={character.id}
-              character={character}
+      {/* Relationship Graph Dialog */}
+      <Dialog open={relationshipDialogOpen} onOpenChange={setRelationshipDialogOpen}>
+        <DialogContent className="max-w-6xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>관계도</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            <RelationshipGraph
+              characters={characters}
               relationships={relationships}
-              allCharacters={characters}
-              isExpanded={expandedId === character.id}
-              onToggle={() => handleToggle(character.id)}
-              onUpdate={handleUpdate}
-              onDelete={onCharacterDelete ? handleDelete : undefined}
+              readonly
             />
-          ))
-        )}
-      </div>
-    </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

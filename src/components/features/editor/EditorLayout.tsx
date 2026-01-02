@@ -6,6 +6,7 @@ import type { JSONContent } from "@tiptap/core";
 import { toast } from "sonner";
 import { Menu, ArrowLeft } from "lucide-react";
 import { EditorStatusBar } from "./EditorStatusBar";
+import { PlotMemo } from "./PlotMemo";
 import type { Project, Chapter, Synopsis, Character, Relationship } from "@/repositories/types";
 import type { SaveStatus as SaveStatusType } from "@/hooks/useEditor";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,12 @@ import {
 import { EditorSidebar } from "./EditorSidebar";
 import { SpellCheckSheet } from "./SpellCheckSheet";
 import { RightSidebar } from "@/components/features/workspace";
-import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent, plainTextToTiptapContent } from "@/lib/content-utils";
+import { extractText, extractTextForSpellCheck, countCharacters, replaceTextInContent, replaceMultipleInContent } from "@/lib/content-utils";
 import { synopsisLocalRepository } from "@/storage/local/synopsis.local";
 import { characterLocalRepository } from "@/storage/local/character.local";
-import type { UpdateCharacterInput } from "@/repositories/types";
+import { relationshipLocalRepository } from "@/storage/local/relationship.local";
+import type { UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { exportChapterAsText, copyChapterToClipboard } from "@/lib/export";
 import { checkSpelling, type SpellCheckError } from "@/lib/spellcheck";
 import { ShareButton } from "@/components/features/share";
@@ -44,6 +47,7 @@ interface EditorLayoutProps {
   children: React.ReactNode;
   onTitleChange?: (title: string) => Promise<void>;
   onContentChange?: (content: JSONContent) => void;
+  onPlotChange?: (plot: string | null) => void;
 }
 
 export function EditorLayout({
@@ -59,8 +63,10 @@ export function EditorLayout({
   children,
   onTitleChange,
   onContentChange,
+  onPlotChange,
 }: EditorLayoutProps) {
   const { auth } = useAuth();
+  const { settings } = useUserSettings();
   const isAuthenticated = auth.status === "authenticated";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [includeSpaces, setIncludeSpaces] = useState(false);
@@ -118,11 +124,10 @@ export function EditorLayout({
     }
   };
 
-  // 시놉시스 변경 핸들러
-  const handleSynopsisChange = useCallback(async (plainText: string) => {
+  // 시놉시스 변경 핸들러 (JSONContent 직접 저장)
+  const handleSynopsisChange = useCallback(async (synopsisContent: JSONContent) => {
     if (!synopsis) return;
-    const content = plainTextToTiptapContent(plainText);
-    await synopsisLocalRepository.update(synopsis.id, { content });
+    await synopsisLocalRepository.update(synopsis.id, { content: synopsisContent });
   }, [synopsis]);
 
   // 캐릭터 업데이트 핸들러
@@ -133,6 +138,16 @@ export function EditorLayout({
   // 캐릭터 삭제 핸들러
   const handleCharacterDelete = useCallback(async (id: string) => {
     await characterLocalRepository.delete(id);
+  }, []);
+
+  // 관계 생성 핸들러
+  const handleRelationshipCreate = useCallback(async (data: CreateRelationshipInput) => {
+    await relationshipLocalRepository.create(data);
+  }, []);
+
+  // 관계 삭제 핸들러
+  const handleRelationshipDelete = useCallback(async (id: string) => {
+    await relationshipLocalRepository.delete(id);
   }, []);
 
   // 제목 편집 시작
@@ -350,6 +365,14 @@ export function EditorLayout({
           </div>
         </header>
 
+        {/* Plot memo */}
+        <div className="mx-auto max-w-4xl">
+          <PlotMemo
+            plot={currentChapter.plot}
+            onPlotChange={onPlotChange}
+          />
+        </div>
+
         {/* Editor content */}
         <main className="mx-auto max-w-4xl px-4 py-8 pb-16">{children}</main>
       </div>
@@ -364,10 +387,13 @@ export function EditorLayout({
           relationships={relationships}
           onCharacterUpdate={handleCharacterUpdate}
           onCharacterDelete={handleCharacterDelete}
+          onRelationshipCreate={handleRelationshipCreate}
+          onRelationshipDelete={handleRelationshipDelete}
           chapters={chapters}
           currentChapterId={currentChapter.id}
           collapsed={rightSidebarCollapsed}
           onToggle={handleRightSidebarToggle}
+          defaultFont={settings.defaultFont}
           className="h-full"
         />
       </div>

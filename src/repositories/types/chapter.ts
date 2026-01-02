@@ -9,13 +9,14 @@ export interface Chapter {
   wordCount: number;
   order: number;
   status: "draft" | "published";
+  plot: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CreateChapterInput = Pick<Chapter, "projectId" | "title"> &
-  Partial<Pick<Chapter, "content">>;
+  Partial<Pick<Chapter, "content" | "plot">>;
 
 export type UpdateChapterInput = Partial<
-  Pick<Chapter, "title" | "content" | "status">
+  Pick<Chapter, "title" | "content" | "status" | "plot">
 >;

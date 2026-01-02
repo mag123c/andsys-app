@@ -4,12 +4,14 @@ import { use, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2, Plus } from "lucide-react";
 import { useCharacters } from "@/hooks/useCharacters";
-import type { Character, UpdateCharacterInput } from "@/repositories/types";
+import { useRelationships } from "@/hooks/useRelationships";
+import type { Character, UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
 import {
   CharacterDialog,
   SortableCharacterGrid,
   EmptyCharacters,
+  RelationshipEditorDialog,
 } from "@/components/features/character";
 
 interface CharactersPageProps {
@@ -29,10 +31,19 @@ export default function CharactersPage({ params }: CharactersPageProps) {
     reorderCharacters,
   } = useCharacters(projectId);
 
+  const {
+    relationships,
+    isLoading: relationshipsLoading,
+    createRelationship,
+    deleteRelationship,
+  } = useRelationships(projectId);
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(
     null
   );
+  const [relationshipEditingCharacter, setRelationshipEditingCharacter] =
+    useState<Character | null>(null);
 
   const handleCreate = useCallback(
     async (data: Parameters<typeof createCharacter>[0]) => {
@@ -103,7 +114,35 @@ export default function CharactersPage({ params }: CharactersPageProps) {
     setEditingCharacter(character);
   }, []);
 
-  if (isLoading) {
+  const handleEditRelationship = useCallback((character: Character) => {
+    setRelationshipEditingCharacter(character);
+  }, []);
+
+  const handleRelationshipCreate = useCallback(
+    async (data: CreateRelationshipInput) => {
+      try {
+        await createRelationship(data);
+        toast.success("관계가 추가되었습니다.");
+      } catch {
+        toast.error("관계 추가에 실패했습니다.");
+      }
+    },
+    [createRelationship]
+  );
+
+  const handleRelationshipDelete = useCallback(
+    async (id: string) => {
+      try {
+        await deleteRelationship(id);
+        toast.success("관계가 삭제되었습니다.");
+      } catch {
+        toast.error("관계 삭제에 실패했습니다.");
+      }
+    },
+    [deleteRelationship]
+  );
+
+  if (isLoading || relationshipsLoading) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -136,6 +175,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
           characters={characters}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onEditRelationship={handleEditRelationship}
           onReorder={handleReorder}
         />
       )}
@@ -153,6 +193,18 @@ export default function CharactersPage({ params }: CharactersPageProps) {
         onUpdate={handleUpdate}
         onRestore={handleRestore}
       />
+
+      {relationshipEditingCharacter && (
+        <RelationshipEditorDialog
+          open={!!relationshipEditingCharacter}
+          onOpenChange={(open) => !open && setRelationshipEditingCharacter(null)}
+          character={relationshipEditingCharacter}
+          allCharacters={characters}
+          relationships={relationships}
+          onRelationshipCreate={handleRelationshipCreate}
+          onRelationshipDelete={handleRelationshipDelete}
+        />
+      )}
     </>
   );
 }

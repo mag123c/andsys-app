@@ -17,6 +17,7 @@ function toChapter(local: LocalChapter): Chapter {
     wordCount: local.wordCount,
     order: local.order,
     status: local.status,
+    plot: local.plot,
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
   };
@@ -65,6 +66,7 @@ export class ChapterLocalRepository implements ChapterRepository {
       wordCount: countCharacters(contentText),
       order: maxOrder + 1,
       status: "draft",
+      plot: data.plot ?? null,
       createdAt: now,
       updatedAt: now,
       syncStatus: isGuest ? "synced" : "pending",

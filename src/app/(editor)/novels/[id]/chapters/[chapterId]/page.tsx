@@ -28,6 +28,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     saveStatus,
     updateContent,
     updateTitle,
+    updatePlot,
     saveNow,
   } = useEditor(chapterId);
   const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
@@ -111,6 +112,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       relationships={relationships}
       onTitleChange={handleTitleChange}
       onContentChange={updateContent}
+      onPlotChange={updatePlot}
     >
       <Editor
         initialContent={chapter.content}

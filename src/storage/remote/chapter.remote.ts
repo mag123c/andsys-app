@@ -18,6 +18,7 @@ interface ChapterRow {
   word_count: number;
   order: number;
   status: string;
+  plot: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,6 +33,7 @@ function toChapter(row: ChapterRow): Chapter {
     wordCount: row.word_count,
     order: row.order,
     status: row.status as Chapter["status"],
+    plot: row.plot,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };

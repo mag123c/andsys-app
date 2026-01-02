@@ -9,6 +9,7 @@ import {
   Users,
   ArrowLeft,
   ChevronRight,
+  Network,
 } from "lucide-react";
 import type { Project, Chapter, Character } from "@/repositories/types";
 import { cn } from "@/lib/utils";
@@ -280,6 +281,22 @@ export function NovelSidebar({
                 {/* 등장인물 목록 */}
                 {item.id === "characters" && expanded && (
                   <ul className="mt-1 ml-4 space-y-0.5">
+                    {/* 관계도 링크 */}
+                    <li>
+                      <Link
+                        href={`${basePath}/relationships`}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors",
+                          pathname === `${basePath}/relationships`
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        )}
+                      >
+                        <Network className="h-3 w-3" />
+                        <span>관계도</span>
+                      </Link>
+                    </li>
+                    {/* 캐릭터 목록 */}
                     {displayCharacters.map((character) => (
                       <li key={character.id}>
                         <span className="block px-3 py-1 text-xs text-muted-foreground truncate">
