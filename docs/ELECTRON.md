@@ -168,9 +168,9 @@
 
 ### Phase 5: 빌드 및 배포 (1일)
 - [ ] Windows 빌드 (.exe, NSIS installer)
-- [ ] macOS 빌드 (.dmg, 코드 서명)
+- [x] macOS 빌드 (.dmg, 코드 서명)
 - [x] 자동 업데이트 설정 (GitHub Releases)
-- [ ] CI/CD 설정 (GitHub Actions)
+- [x] CI/CD 설정 (GitHub Actions)
 
 ---
 
@@ -288,6 +288,52 @@ contextBridge.exposeInMainWorld('electronAPI', {
     "build:electron:linux": "next build && electron-builder --linux"
   }
 }
+```
+
+---
+
+## 8. CI/CD (GitHub Actions)
+
+### 워크플로우
+`.github/workflows/electron-build.yml`
+
+### 트리거
+| 이벤트 | 동작 |
+|--------|------|
+| Release 생성 | 자동 빌드 → GitHub Releases 업로드 |
+| 수동 실행 | 빌드만 (업로드 안함) |
+
+### 빌드 매트릭스
+| OS | 플랫폼 | 결과물 |
+|----|--------|--------|
+| macOS | mac | .dmg, .zip (x64 + arm64) |
+| Windows | win | .exe (NSIS) |
+| Linux | linux | .AppImage, .deb |
+
+### 코드 서명 (Secrets 설정)
+```
+# macOS
+APPLE_ID              # Apple ID 이메일
+APPLE_APP_SPECIFIC_PASSWORD  # 앱 암호
+APPLE_TEAM_ID         # 팀 ID
+MAC_CERTS            # .p12 인증서 (base64)
+MAC_CERTS_PASSWORD   # 인증서 비밀번호
+
+# Windows
+WIN_CSC_LINK         # .pfx 인증서 (base64)
+WIN_CSC_KEY_PASSWORD # 인증서 비밀번호
+```
+
+### 릴리즈 방법
+```bash
+# 1. 버전 업데이트
+npm version patch  # 0.1.0 → 0.1.1
+
+# 2. 태그 푸시
+git push --tags
+
+# 3. GitHub에서 Release 생성
+#    → CI가 자동으로 빌드 후 업로드
 ```
 
 ---
