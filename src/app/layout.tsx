@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
-import { ServiceWorkerProvider } from "@/components/providers/ServiceWorkerProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -88,7 +87,6 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <SyncProvider>
-              <ServiceWorkerProvider />
               {children}
               <Toaster />
             </SyncProvider>
