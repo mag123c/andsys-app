@@ -38,6 +38,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // 클라이언트에서 PWA 모드 확인
     const pwaMode = isPWA();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 1회성 초기화
     setIsPwaMode(pwaMode);
 
     // PWA 모드면 이벤트 캡처 불필요

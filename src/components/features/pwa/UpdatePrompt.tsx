@@ -6,16 +6,12 @@ import { RefreshCw } from "lucide-react";
 
 export function UpdatePrompt() {
   const [showUpdate, setShowUpdate] = useState(false);
-  const [registration, setRegistration] =
-    useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
     navigator.serviceWorker.ready
       .then((reg) => {
-        setRegistration(reg);
-
         reg.addEventListener("updatefound", () => {
           const newWorker = reg.installing;
           if (!newWorker) return;
@@ -36,9 +32,8 @@ export function UpdatePrompt() {
   }, []);
 
   const handleUpdate = () => {
-    if (registration?.waiting) {
-      registration.waiting.postMessage({ type: "SKIP_WAITING" });
-    }
+    // skipWaiting: true 설정으로 자동 활성화됨 (sw.ts)
+    // postMessage 불필요
     window.location.reload();
   };
 

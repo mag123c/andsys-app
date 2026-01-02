@@ -26,8 +26,15 @@
   "components": {
     "InstallPrompt": {
       "path": "src/components/features/pwa/InstallPrompt.tsx",
-      "location": "layout.tsx",
-      "shows": "브라우저에서 설치 가능할 때"
+      "location": "page.tsx (랜딩 페이지)",
+      "shows": "브라우저에서 설치 가능할 때",
+      "hooks": ["usePWAInstall"]
+    },
+    "SidebarInstallButton": {
+      "path": "src/components/features/workspace/NovelsListSidebar.tsx",
+      "location": "NovelsListSidebar 메뉴",
+      "shows": "브라우저 모드에서 (설치 불가 시 disabled)",
+      "hooks": ["usePWAInstall"]
     },
     "UpdatePrompt": {
       "path": "src/components/features/pwa/UpdatePrompt.tsx",
@@ -94,6 +101,7 @@
     "src/app/sw.ts",
     "src/lib/pwa.ts",
     "src/hooks/usePWAMode.ts",
+    "src/hooks/usePWAInstall.tsx",
     "src/hooks/useSyncEngine.ts",
     "src/components/features/pwa/PWASyncButton.tsx",
     "src/components/features/sync/SyncStatusIndicator.tsx",

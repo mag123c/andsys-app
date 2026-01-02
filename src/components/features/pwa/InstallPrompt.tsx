@@ -13,9 +13,14 @@ export function InstallPrompt() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // localStorage 확인은 클라이언트에서만
-    if (localStorage.getItem(STORAGE_KEY)) {
-      setDismissed(true);
+    // localStorage 확인 (시크릿 모드 등에서 실패 가능)
+    try {
+      if (localStorage.getItem(STORAGE_KEY)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 1회성 실행
+        setDismissed(true);
+      }
+    } catch {
+      // localStorage 접근 불가 시 무시
     }
     setInitialized(true);
   }, []);
@@ -26,7 +31,11 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    localStorage.setItem(STORAGE_KEY, "true");
+    try {
+      localStorage.setItem(STORAGE_KEY, "true");
+    } catch {
+      // localStorage 접근 불가 시 무시 (세션 동안만 dismissed 유지)
+    }
   };
 
   if (!initialized || !canInstall || dismissed) return null;

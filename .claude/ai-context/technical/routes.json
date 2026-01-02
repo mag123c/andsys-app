@@ -49,15 +49,17 @@
           "file": "novels/[id]/relationships/page.tsx",
           "description": "관계도 (React Flow 그래프)",
           "auth": "owner"
-        },
-        "/settings": {
-          "file": "settings/page.tsx",
-          "description": "설정 페이지",
+        }
+      },
+      "modals": {
+        "SettingsModal": {
+          "description": "설정 모달 (사이드바 프로필에서 열림)",
+          "trigger": "SidebarProfile 설정 버튼",
           "auth": "any"
         },
-        "/settings/shares": {
-          "file": "settings/shares/page.tsx",
-          "description": "공유 링크 관리",
+        "ShareLinksModal": {
+          "description": "공유 링크 관리 모달",
+          "trigger": "SettingsModal 내 버튼",
           "auth": "member-only"
         }
       }

@@ -101,8 +101,9 @@
     "features/pwa/InstallPrompt": {
       "path": "src/components/features/pwa/InstallPrompt.tsx",
       "description": "PWA 설치 유도 배너",
+      "hooks": ["usePWAInstall"],
       "shows": "브라우저에서 설치 가능할 때",
-      "location": "layout.tsx"
+      "location": "page.tsx (랜딩 페이지)"
     },
     "features/pwa/UpdatePrompt": {
       "path": "src/components/features/pwa/UpdatePrompt.tsx",
@@ -127,6 +128,20 @@
       "description": "공유 링크 생성 다이얼로그",
       "hooks": ["useAuth"],
       "features": ["password", "expiration", "copyLink"]
+    },
+    "features/settings/SettingsModal": {
+      "path": "src/components/features/settings/SettingsModal.tsx",
+      "description": "설정 모달 (테마, 폰트, 백업, 계정)",
+      "hooks": ["useAuth", "useProjects", "useUserSettings"],
+      "trigger": "SidebarProfile 설정 버튼",
+      "features": ["theme", "font", "backup", "shareLinks", "account"]
+    },
+    "features/workspace/NovelsListSidebar": {
+      "path": "src/components/features/workspace/NovelsListSidebar.tsx",
+      "description": "소설 목록 사이드바 (로고, 메뉴, 프로필)",
+      "hooks": ["useAuth", "usePWAInstall"],
+      "components": ["SidebarProfile", "SettingsModal"],
+      "features": ["가이드북 링크", "디스코드 링크", "앱 다운로드 버튼"]
     }
   },
   "hooks": {
@@ -221,6 +236,13 @@
       "path": "src/hooks/useUserSettings.ts",
       "description": "사용자 설정 관리 (폰트, 테마 등)",
       "storage": "localStorage"
+    },
+    "usePWAInstall": {
+      "path": "src/hooks/usePWAInstall.tsx",
+      "description": "PWA 설치 프롬프트 전역 공유",
+      "provider": "PWAInstallProvider",
+      "returns": ["canInstall", "install", "isPwaMode", "showInstallButton"],
+      "note": "beforeinstallprompt 이벤트 공유"
     }
   },
   "providers": {
@@ -238,6 +260,12 @@
       "path": "src/components/providers/SyncProvider.tsx",
       "description": "동기화 엔진 초기화 및 Realtime 구독",
       "context": "SyncContext"
+    },
+    "PWAInstallProvider": {
+      "path": "src/hooks/usePWAInstall.tsx",
+      "description": "beforeinstallprompt 이벤트 전역 공유",
+      "context": "PWAInstallContext",
+      "location": "layout.tsx"
     }
   },
   "useCases": {
