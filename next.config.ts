@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import withSerwistInit from "@serwist/next";
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -7,22 +8,20 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Serwist (PWA) 설정
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
 // Sentry 설정
 const sentryConfig = {
-  // 빌드 시 소스맵 업로드 (CI/CD에서 사용)
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-
-  // 빌드 로그 숨김
   silent: !process.env.CI,
-
-  // 클라이언트 번들에서 소스맵 숨김
   hideSourceMaps: true,
-
-  // Turbopack 호환성
   tunnelRoute: "/monitoring",
-
-  // 번들 크기 최적화 (새 API)
   bundleSizeOptimizations: {
     excludeDebugStatements: true,
     excludeReplayIframe: true,
@@ -30,4 +29,4 @@ const sentryConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, sentryConfig);
+export default withSentryConfig(withSerwist(nextConfig), sentryConfig);

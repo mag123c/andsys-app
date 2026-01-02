@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallPrompt, UpdatePrompt } from "@/components/features/pwa";
 import "./globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -26,6 +27,12 @@ export const metadata: Metadata = {
     "회차·시놉시스·캐릭터·관계도를 한 곳에서. 자동 저장과 클라우드 동기화로 어디서든 이어 쓰세요.",
   keywords: ["웹소설", "글쓰기", "소설 쓰기", "작가", "집필", "4ndSYS"],
   authors: [{ name: "4ndSYS" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "4ndSYS",
+  },
   openGraph: {
     title: "4ndSYS | 웹소설 작가를 위한 글쓰기 플랫폼",
     description:
@@ -64,6 +71,9 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         {GA_ID && (
           <>
             <Script
@@ -89,6 +99,8 @@ export default function RootLayout({
             <SyncProvider>
               {children}
               <Toaster />
+              <InstallPrompt />
+              <UpdatePrompt />
             </SyncProvider>
           </AuthProvider>
         </ThemeProvider>
