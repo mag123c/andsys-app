@@ -74,25 +74,30 @@
   },
   "autosave": {
     "enabled": true,
-    "delay": 2000,
+    "delay": 500,
     "unit": "ms",
+    "note": "에디터 자동저장은 500ms, 동기화 debounce는 2초",
     "implementation": "src/hooks/useEditor.ts",
     "ui": "src/components/features/editor/SaveStatus.tsx"
   },
   "spellCheck": {
-    "enabled": true,
+    "enabled": false,
+    "status": "점검 중 (의도적 비활성화)",
+    "reason": "맞춤법 검사 서비스 점검 중. spellcheck.ts에서 항상 점검 메시지 반환",
     "api": "/api/spellcheck",
-    "provider": "부산대 맞춤법 검사기",
+    "provider": "바른한글 (nara-speller)",
     "implementation": "src/lib/spellcheck.ts",
     "ui": "src/components/features/editor/SpellCheckSheet.tsx",
-    "hook": "src/hooks/useSpellCheck.ts"
+    "hook": "src/hooks/useSpellCheck.ts",
+    "note": "API 구현 완료, 클라이언트에서 의도적 비활성화"
   },
   "toolbar": {
     "features": [
-      "bold", "italic", "underline", "strikethrough",
+      "bold", "italic", "underline",
       "fontFamily", "fontSize",
-      "textAlign (left, center, right, justify)"
+      "textAlign (left, center only)"
     ],
+    "note": "strikethrough, right/justify 정렬은 미지원",
     "implementation": "src/components/features/editor/EditorToolbar.tsx"
   },
   "layout": {

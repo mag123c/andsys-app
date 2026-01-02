@@ -42,6 +42,7 @@ export default defineConfig({
         items: [
           { text: '4ndSYS란?', link: '/getting-started/what-is-4ndsys' },
           { text: '게스트 vs 회원', link: '/getting-started/guest-vs-member' },
+          { text: '앱처럼 사용하기 (PWA)', link: '/getting-started/pwa' },
           { text: 'FAQ', link: '/getting-started/faq' },
         ],
       },
@@ -70,6 +71,8 @@ export default defineConfig({
           { text: '자동 저장', link: '/editor/auto-save' },
           { text: '키보드 단축키', link: '/editor/shortcuts' },
           { text: '우측 패널 활용', link: '/editor/right-panel' },
+          { text: '플롯 메모', link: '/editor/plot-memo' },
+          { text: '맞춤법 검사', link: '/editor/spell-check' },
         ],
       },
       {
@@ -94,6 +97,13 @@ export default defineConfig({
           { text: '관계도 보기', link: '/relationship/view' },
           { text: '관계 만들기', link: '/relationship/create' },
           { text: '필터링 & 조작', link: '/relationship/filter' },
+        ],
+      },
+      {
+        text: '공유',
+        items: [
+          { text: '공유 링크 만들기', link: '/share/create' },
+          { text: '공유 링크 관리', link: '/share/manage' },
         ],
       },
       {

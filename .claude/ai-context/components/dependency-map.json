@@ -206,7 +206,16 @@
     "useSpellCheck": {
       "path": "src/hooks/useSpellCheck.ts",
       "description": "맞춤법 검사 상태 및 교정",
-      "api": "/api/spellcheck"
+      "api": "/api/spellcheck",
+      "status": "점검 중 (의도적 비활성화)",
+      "note": "API 구현 완료, spellcheck.ts에서 점검 메시지 반환"
+    },
+    "useUserStats": {
+      "path": "src/hooks/useUserStats.ts",
+      "description": "사용자 통계 (프로젝트 수, 챕터 수, 총 글자수)",
+      "returns": ["totalProjects", "totalChapters", "totalWords"],
+      "reactivity": "dexie-react-hooks/useLiveQuery",
+      "usedBy": ["SettingsModal"]
     },
     "useSyncEngine": {
       "path": "src/hooks/useSyncEngine.ts",

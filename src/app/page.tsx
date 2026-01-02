@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
-import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
+import { BookOpen, FilePenLine, FileText, Loader2, Network, PanelRight, Save, Users } from "lucide-react";
 import { InstallPrompt } from "@/components/features/pwa";
 
 const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
@@ -63,6 +63,20 @@ const features = [
     description: "시놉시스와 등장인물을 참조하며 집필. 오른쪽 패널에서 필요한 정보를 바로 확인하세요.",
     image: "/images/landing/screenshot-workspace.png",
     imageAlt: "워크스페이스 화면",
+  },
+  {
+    icon: FileText,
+    title: "시놉시스",
+    description: "전체 스토리의 흐름을 정리하세요. 집필 중에도 우측 패널에서 바로 확인할 수 있습니다.",
+    image: "/images/landing/screenshot-synopsis.png",
+    imageAlt: "시놉시스 에디터 화면",
+  },
+  {
+    icon: Save,
+    title: "자동 저장",
+    description: "저장 버튼 없이도 안심하세요. 0.5초마다 자동으로 저장되어 데이터 손실 걱정이 없습니다.",
+    image: "/images/landing/screenshot-editor-full.png",
+    imageAlt: "자동 저장 상태 표시",
   },
   {
     icon: Users,
@@ -110,6 +124,16 @@ const faqs = [
     question: "다른 사람에게 특정 회차만 보여줄 수 있나요?",
     answer:
       "네, 회원이라면 공유 링크를 만들 수 있습니다. 만료 시간과 비밀번호를 설정하여 원하는 회차만 임시로 공유할 수 있어요.",
+  },
+  {
+    question: "앱으로 설치할 수 있나요?",
+    answer:
+      "네, Chrome이나 Edge에서 앱으로 설치할 수 있습니다. 주소창의 설치 버튼을 클릭하세요. 오프라인에서도 사용 가능합니다.",
+  },
+  {
+    question: "맞춤법 검사 기능이 있나요?",
+    answer:
+      "네, 맞춤법 검사 기능이 있습니다. 현재 서비스 점검 중이며, 빠른 시일 내에 복구될 예정입니다.",
   },
 ];
 

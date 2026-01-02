@@ -93,6 +93,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
       word_count: countCharacters(contentText),
       order: maxOrder + 1,
       status: "draft",
+      plot: data.plot ?? null,
     };
 
     const { data: created, error } = await this.supabase
@@ -119,6 +120,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
 
     if (data.title !== undefined) updateData.title = data.title;
     if (data.status !== undefined) updateData.status = data.status;
+    if (data.plot !== undefined) updateData.plot = data.plot;
     if (data.content !== undefined) {
       updateData.content = data.content;
       updateData.content_text = extractText(data.content);

@@ -1,11 +1,39 @@
 {
   "$schema": "ai-context/technical/pwa-config",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "PWA 구성 및 환경별 동작 정의",
   "terminology": {
     "오프라인": "인터넷 연결 없음",
     "로컬 환경": "PWA 앱 (standalone 모드)",
     "클라우드 환경": "웹 브라우저"
+  },
+  "browserSupport": {
+    "chrome": {
+      "desktop": "완전 지원",
+      "android": "완전 지원",
+      "features": ["beforeinstallprompt", "ServiceWorker", "standalone"]
+    },
+    "edge": {
+      "desktop": "완전 지원",
+      "features": ["beforeinstallprompt", "ServiceWorker", "standalone"]
+    },
+    "safari": {
+      "desktop": "미지원",
+      "ios": "제한적",
+      "features": [],
+      "limitations": [
+        "beforeinstallprompt 이벤트 미지원 → InstallPrompt 표시 안됨",
+        "사용자가 직접 '홈 화면에 추가' 선택 필요",
+        "iOS Safari에서 Home Screen 추가 시 ServiceWorker 미지원",
+        "오프라인 저장 및 수동 동기화 불가"
+      ],
+      "note": "macOS Safari에서는 PWA 기능 전혀 없음"
+    },
+    "firefox": {
+      "desktop": "제한적",
+      "features": ["ServiceWorker"],
+      "limitations": ["beforeinstallprompt 미지원"]
+    }
   },
   "implementation": {
     "serviceWorker": {
