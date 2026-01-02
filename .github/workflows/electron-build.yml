@@ -20,13 +20,13 @@ jobs:
         include:
           - os: macos-latest
             platform: mac
-            arch: universal
+            args: "--x64 --arm64"
           - os: windows-latest
             platform: win
-            arch: x64
+            args: "--x64"
           - os: ubuntu-latest
             platform: linux
-            arch: x64
+            args: "--x64"
 
     runs-on: ${{ matrix.os }}
 
@@ -82,19 +82,21 @@ jobs:
       - name: Build Electron app
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # macOS signing
+          # 코드 서명 비활성화 (인증서 없을 때)
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERTS != '' }}
+          # macOS signing (선택)
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           CSC_LINK: ${{ secrets.MAC_CERTS }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
-          # Windows signing
+          # Windows signing (선택)
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: |
           pnpm build:web
           pnpm electron:compile
-          pnpm exec electron-builder --${{ matrix.platform }} --publish never
+          pnpm exec electron-builder --${{ matrix.platform }} ${{ matrix.args }} --publish never
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
