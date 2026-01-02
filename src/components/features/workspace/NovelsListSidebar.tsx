@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Book, MessageCircle, Download } from "lucide-react";
+import { Book, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "./SidebarProfile";
@@ -35,13 +35,6 @@ const MENU_ITEMS: MenuItem[] = [
     label: "디스코드",
     icon: MessageCircle,
     href: "https://discord.gg/Rb8D4JhMhA",
-    external: true,
-  },
-  {
-    id: "desktop",
-    label: "데스크톱 앱",
-    icon: Download,
-    href: "https://github.com/mag123c/andsys-app/releases/latest",
     external: true,
   },
 ];

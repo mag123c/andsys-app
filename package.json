@@ -4,25 +4,13 @@
   "description": "웹소설 작가를 위한 로컬 우선 글쓰기 플랫폼",
   "author": "4ndSYS <support@4ndsys.net>",
   "private": true,
-  "main": "dist-electron/main.js",
-  "pnpm": {
-    "onlyBuiltDependencies": ["electron"]
-  },
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:electron": "concurrently -k \"pnpm dev\" \"pnpm electron:compile && wait-on http://localhost:3000 && electron .\"",
     "build": "next build",
-    "build:web": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
-    "electron:compile": "tsc -p tsconfig.electron.json",
-    "electron:dev": "pnpm electron:compile && ELECTRON_RENDERER_URL=http://localhost:3000 electron .",
-    "build:electron": "pnpm build:web && pnpm electron:compile && electron-builder",
-    "build:electron:win": "pnpm build:web && pnpm electron:compile && electron-builder --win",
-    "build:electron:mac": "pnpm build:web && pnpm electron:compile && electron-builder --mac",
-    "build:electron:linux": "pnpm build:web && pnpm electron:compile && electron-builder --linux",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
@@ -84,8 +72,6 @@
     "use-debounce": "^10.0.6"
   },
   "devDependencies": {
-    "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -95,10 +81,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
-    "concurrently": "^9.2.1",
-    "electron": "^39.2.7",
-    "electron-builder": "^26.0.12",
-    "electron-updater": "^6.6.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.0",
     "fake-indexeddb": "^6.2.5",
@@ -107,7 +89,6 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "^5",
     "vitepress": "^1.6.4",
-    "vitest": "^4.0.16",
-    "wait-on": "^9.0.3"
+    "vitest": "^4.0.16"
   }
 }

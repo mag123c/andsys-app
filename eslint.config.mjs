@@ -12,9 +12,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Electron build output
-    "dist-electron/**",
-    "release/**",
     // VitePress cache and dist
     "guide/.vitepress/cache/**",
     "guide/.vitepress/dist/**",

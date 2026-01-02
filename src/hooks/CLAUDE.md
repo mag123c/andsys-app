@@ -21,7 +21,6 @@
 | useLocalStorage.ts | localStorage 동기화 |
 | useUserSettings.ts | 사용자 설정 관리 |
 | useAdmin.ts | 관리자 권한 확인 |
-| useElectron.ts | Electron 환경 감지 및 API 접근 (useElectron, useAutoUpdate, useElectronAuthCallback) |
 
 ## 핵심 패턴
 - **useLiveQuery**: Dexie 실시간 반응형 구독 (IndexedDB 변경 자동 감지)
