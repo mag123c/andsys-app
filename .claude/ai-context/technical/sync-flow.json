@@ -1,32 +1,73 @@
 {
   "$schema": "ai-context/technical/sync-flow",
-  "version": "1.0.0",
-  "description": "로컬-서버 동기화 상세 흐름",
+  "version": "2.0.0",
+  "description": "환경별 동기화 상세 흐름",
+  "terminology": {
+    "오프라인": "인터넷 연결 없음",
+    "로컬 환경": "PWA 앱으로 사용 (standalone 모드)",
+    "클라우드 환경": "웹 브라우저에서 사용"
+  },
   "overview": {
-    "strategy": "Local-First",
+    "strategy": "Environment-Based Sync",
+    "local": "수동 동기화만 (버튼 클릭)",
+    "cloud": "자동 동기화 (회원만, debounce 2초)",
     "conflictResolution": "Latest-Wins (updatedAt 비교)",
-    "debounce": 2000,
     "implementation": "src/sync/sync-engine.ts"
   },
   "saveFlow": {
-    "description": "데이터 저장 흐름",
+    "description": "데이터 저장 흐름 (환경 공통)",
     "steps": [
       { "step": 1, "action": "사용자 입력 발생 (에디터, 폼 등)" },
-      { "step": 2, "action": "즉시 IndexedDB 저장 (optimistic)", "syncStatus": "pending" },
-      { "step": 3, "action": "UI에 '저장됨' 표시 (SaveStatus 컴포넌트)" },
-      { "step": 4, "action": "debounce 타이머 시작 (2초)", "condition": "온라인 & 회원" },
-      { "step": 5, "action": "Supabase 동기화 요청", "condition": "타이머 완료" },
-      { "step": 6, "action": "syncStatus: 'synced' 업데이트", "condition": "성공" },
-      { "step": 6, "action": "재시도 큐에 추가", "condition": "실패" }
+      { "step": 2, "action": "즉시 IndexedDB 저장", "syncStatus": "pending" },
+      { "step": 3, "action": "UI에 '저장됨' 표시" }
     ],
-    "offlineCase": {
-      "action": "로컬만 저장, pendingSync 플래그 유지",
-      "recovery": "온라인 복귀 시 syncAll() 자동 호출"
+    "afterSave": {
+      "local": {
+        "description": "로컬 환경 (PWA)",
+        "action": "저장 완료, 동기화 대기",
+        "autoSync": false,
+        "userAction": "수동 동기화 버튼 클릭 시 서버 동기화"
+      },
+      "cloud_member": {
+        "description": "클라우드 환경 (브라우저) - 회원",
+        "action": "debounce 후 자동 동기화",
+        "debounce": 2000,
+        "steps": [
+          { "step": 4, "action": "debounce 타이머 시작 (2초)" },
+          { "step": 5, "action": "Supabase 동기화 요청" },
+          { "step": 6, "action": "syncStatus: 'synced' 업데이트", "condition": "성공" },
+          { "step": 6, "action": "재시도 큐에 추가", "condition": "실패" }
+        ]
+      },
+      "cloud_nonMember": {
+        "description": "클라우드 환경 (브라우저) - 비회원",
+        "action": "저장 완료, 동기화 없음",
+        "autoSync": false,
+        "note": "로컬 환경과 동일하게 IndexedDB만 사용"
+      }
     }
+  },
+  "manualSyncFlow": {
+    "description": "수동 동기화 (로컬 환경 전용)",
+    "trigger": "수동 동기화 버튼 클릭",
+    "precondition": ["로그인 필요", "온라인 상태"],
+    "steps": [
+      { "step": 1, "action": "로그인 상태 확인", "ifNotLoggedIn": "로그인 화면으로 이동" },
+      { "step": 2, "action": "온라인 상태 확인", "ifOffline": "오프라인 알림" },
+      { "step": 3, "action": "pending 상태인 모든 데이터 조회" },
+      { "step": 4, "action": "Supabase 동기화 요청 (bulk)" },
+      { "step": 5, "action": "서버 데이터 pull (최신 데이터 가져오기)" },
+      { "step": 6, "action": "syncStatus: 'synced' 업데이트" },
+      { "step": 7, "action": "완료 알림" }
+    ],
+    "ui": "PWASyncButton 또는 설정 페이지"
   },
   "pullFlow": {
     "description": "서버 → 로컬 데이터 가져오기",
-    "trigger": ["앱 시작 시", "수동 새로고침", "Realtime 이벤트"],
+    "trigger": {
+      "local": "수동 동기화 시",
+      "cloud": ["앱 시작 시", "수동 새로고침", "Realtime 이벤트"]
+    },
     "steps": [
       { "step": 1, "action": "서버에서 최신 데이터 조회", "filter": "updatedAt > lastSyncedAt" },
       { "step": 2, "action": "로컬 데이터와 비교" },
@@ -40,33 +81,38 @@
     }
   },
   "realtimeFlow": {
-    "description": "Supabase Realtime 구독",
+    "description": "Supabase Realtime 구독 (클라우드 환경 회원만)",
+    "environment": "cloud_member",
     "subscription": {
       "channel": "db-changes",
       "tables": ["projects", "chapters", "synopses", "characters", "relationships"],
       "filter": "user_id=eq.{currentUserId}"
     },
     "events": {
-      "INSERT": {
-        "action": "새 데이터 로컬에 추가",
-        "syncStatus": "synced"
-      },
-      "UPDATE": {
-        "action": "로컬 데이터 업데이트 (충돌 해결 적용)",
-        "syncStatus": "synced"
-      },
-      "DELETE": {
-        "action": "로컬 데이터 삭제"
-      }
+      "INSERT": { "action": "새 데이터 로컬에 추가", "syncStatus": "synced" },
+      "UPDATE": { "action": "로컬 데이터 업데이트 (충돌 해결 적용)", "syncStatus": "synced" },
+      "DELETE": { "action": "로컬 데이터 삭제" }
+    }
+  },
+  "offlineSupport": {
+    "description": "오프라인 (인터넷 없음) 지원",
+    "behavior": {
+      "save": "IndexedDB에 저장, syncStatus: 'pending'",
+      "read": "IndexedDB에서 읽기",
+      "sync": "불가능 (온라인 복귀 대기)"
+    },
+    "onlineRecovery": {
+      "local": "수동 동기화 버튼 활성화",
+      "cloud_member": "자동 동기화 재개"
     }
   },
   "imageSync": {
     "description": "이미지 동기화 (Base64 ↔ Storage URL)",
     "uploadFlow": [
       { "step": 1, "action": "이미지 선택" },
-      { "step": 2, "action": "100x150 리사이즈 (lib/image-utils.ts)" },
+      { "step": 2, "action": "100x150 리사이즈" },
       { "step": 3, "action": "Base64 변환 → IndexedDB 저장 (xxxBase64 필드)" },
-      { "step": 4, "action": "동기화 시: Base64 → Supabase Storage 업로드", "condition": "온라인 & 회원" },
+      { "step": 4, "action": "동기화 시: Base64 → Supabase Storage 업로드", "condition": "동기화 실행 시" },
       { "step": 5, "action": "Signed URL 생성 → Supabase DB 저장 (xxxUrl 필드)" }
     ],
     "downloadFlow": [

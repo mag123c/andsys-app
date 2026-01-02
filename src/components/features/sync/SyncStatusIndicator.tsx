@@ -14,7 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 /**
- * 동기화 상태 인디케이터
+ * 동기화 상태 인디케이터 (클라우드 환경 전용)
+ *
+ * - 클라우드 환경(브라우저)에서만 표시
+ * - 로컬 환경(PWA)에서는 PWASyncButton 사용
+ *
+ * 상태:
  * - 동기화 중: 회전 아이콘
  * - pending 있음: 클라우드 + 숫자 뱃지
  * - 에러: 빨간색 경고
@@ -23,7 +28,7 @@ import { Button } from "@/components/ui/button";
  */
 export function SyncStatusIndicator() {
   const { auth } = useAuth();
-  const { status, isOnline, pendingCount, lastError, syncNow } = useSyncEngine();
+  const { status, isOnline, pendingCount, lastError, isPwaMode, syncNow } = useSyncEngine();
   const prevStatusRef = useRef(status);
   const prevPendingRef = useRef(pendingCount);
   const isAuthenticated = auth.status === "authenticated";
@@ -59,6 +64,11 @@ export function SyncStatusIndicator() {
     prevStatusRef.current = status;
     prevPendingRef.current = pendingCount;
   }, [isAuthenticated, status, pendingCount, lastError, syncNow]);
+
+  // 로컬 환경(PWA)에서는 PWASyncButton 사용
+  if (isPwaMode) {
+    return null;
+  }
 
   // 게스트는 동기화 표시 안함
   if (!isAuthenticated) {

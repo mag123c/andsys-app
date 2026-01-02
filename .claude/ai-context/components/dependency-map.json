@@ -93,9 +93,34 @@
     },
     "features/sync/SyncStatusIndicator": {
       "path": "src/components/features/sync/SyncStatusIndicator.tsx",
-      "description": "동기화 상태 표시",
-      "hooks": ["useSyncEngine", "useOnline"],
+      "description": "동기화 상태 표시 (클라우드 환경 전용)",
+      "hooks": ["useSyncEngine", "useAuth"],
+      "shows": "클라우드 환경(브라우저)에서만, PWA에서는 숨김",
       "features": ["pendingCount", "lastSyncTime", "manualSync"]
+    },
+    "features/pwa/InstallPrompt": {
+      "path": "src/components/features/pwa/InstallPrompt.tsx",
+      "description": "PWA 설치 유도 배너",
+      "shows": "브라우저에서 설치 가능할 때",
+      "location": "layout.tsx"
+    },
+    "features/pwa/UpdatePrompt": {
+      "path": "src/components/features/pwa/UpdatePrompt.tsx",
+      "description": "SW 업데이트 알림",
+      "shows": "새 버전 감지 시",
+      "location": "layout.tsx"
+    },
+    "features/pwa/PWASyncButton": {
+      "path": "src/components/features/pwa/PWASyncButton.tsx",
+      "description": "수동 동기화 버튼 (로컬 환경 전용)",
+      "hooks": ["useSyncEngine", "useAuth"],
+      "shows": "로컬 환경(PWA)에서만",
+      "location": "DashboardHeader.tsx",
+      "behavior": {
+        "guest": "클릭 시 /login으로 이동",
+        "member_offline": "비활성화",
+        "member_online": "수동 동기화 실행"
+      }
     },
     "features/share/ShareDialog": {
       "path": "src/components/features/share/ShareDialog.tsx",
@@ -170,9 +195,22 @@
     },
     "useSyncEngine": {
       "path": "src/hooks/useSyncEngine.ts",
-      "description": "동기화 엔진 상태 및 Realtime 구독",
-      "dependencies": ["useAuth", "useOnline"],
+      "description": "환경별 동기화 엔진 (로컬=수동, 클라우드=자동)",
+      "dependencies": ["useAuth", "useOnline", "usePWAMode"],
+      "returns": ["status", "isOnline", "pendingCount", "lastError", "isPwaMode", "syncNow"],
+      "behavior": {
+        "pwa": "자동 동기화 비활성화, 수동만",
+        "browser_member": "debounce 2초 후 자동 동기화",
+        "browser_guest": "동기화 없음"
+      },
       "realtime": "Supabase Realtime"
+    },
+    "usePWAMode": {
+      "path": "src/hooks/usePWAMode.ts",
+      "description": "PWA 모드 감지 (standalone 여부)",
+      "lib": "src/lib/pwa.ts",
+      "returns": "boolean",
+      "pattern": "useSyncExternalStore"
     },
     "useOnline": {
       "path": "src/hooks/useOnline.ts",

@@ -25,8 +25,9 @@
 | useVersionHistory.ts | 버전 히스토리 조회 | - |
 | useEditor.ts | Tiptap 에디터 상태 관리 | - |
 | useSpellCheck.ts | 맞춤법 검사 상태 및 교정 | - |
-| useSyncEngine.ts | 동기화 엔진 상태 및 Realtime 구독 | - |
+| useSyncEngine.ts | 환경별 동기화 엔진 (isPwaMode 분기) | - |
 | useOnline.ts | 온라인/오프라인 상태 감지 | - |
+| usePWAMode.ts | PWA 모드 감지 (standalone 여부) | - |
 | useLocalStorage.ts | localStorage 동기화 | - |
 | useUserSettings.ts | 사용자 설정 관리 | - |
 | useAdmin.ts | 관리자 권한 확인 | - |
@@ -36,6 +37,14 @@
 - **useLiveQuery**: Dexie 실시간 반응형 구독 (IndexedDB 변경 자동 감지)
 - **로컬 우선**: 모든 CRUD는 로컬 저장소(storage/local) 먼저 호출
 - **UseCase 위임**: 비즈니스 규칙이 필요한 작업은 `application/` UseCase 호출
+- **useSyncExternalStore**: 외부 상태 구독 (usePWAMode, useOnline)
+
+## 환경별 동기화 (useSyncEngine + usePWAMode)
+
+| 환경 | isPwaMode | 동기화 동작 |
+|------|-----------|------------|
+| 로컬 (PWA) | `true` | 자동 동기화 OFF, 수동만 |
+| 클라우드 (브라우저) | `false` | 회원: 자동, 비회원: 없음 |
 
 ## 의존성
 

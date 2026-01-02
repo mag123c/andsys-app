@@ -1,7 +1,28 @@
 {
   "$schema": "ai-context/domain/glossary",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "웹소설 도메인 용어 정의",
+  "environments": {
+    "오프라인": {
+      "en": "offline",
+      "description": "인터넷 연결이 없는 상태. 네트워크 끊김",
+      "behavior": "IndexedDB만 사용, 서버 통신 불가"
+    },
+    "로컬 환경": {
+      "en": "local environment",
+      "description": "PWA 앱으로 사용하는 환경 (standalone 모드)",
+      "behavior": "IndexedDB 사용, 동기화는 수동 버튼으로만",
+      "sync": "수동",
+      "login": "동기화 시에만 필요"
+    },
+    "클라우드 환경": {
+      "en": "cloud environment",
+      "description": "웹 브라우저에서 사용하는 환경",
+      "behavior": "IndexedDB + Supabase 자동 동기화 (회원만)",
+      "sync": "자동 (debounce 2초)",
+      "login": "동기화 기능 사용 시 필요"
+    }
+  },
   "terms": {
     "회차": {
       "en": "chapter",
@@ -47,18 +68,18 @@
       "description": "로컬-서버 동기화 상태",
       "values": {
         "synced": "서버와 동기화 완료",
-        "pending": "동기화 대기 중",
+        "pending": "동기화 대기 중 (로컬에만 저장됨)",
         "conflict": "충돌 발생"
       }
     },
-    "게스트": {
-      "en": "guest",
-      "description": "비로그인 사용자. IndexedDB만 사용, 서버 동기화 없음",
-      "identifier": "guestId"
+    "비회원": {
+      "en": "non-member",
+      "description": "로그인하지 않은 사용자. 로컬 환경에서는 정상 사용, 동기화 시 가입 필요",
+      "note": "로컬 환경에서는 가입 강요 없음"
     },
     "회원": {
       "en": "member",
-      "description": "로그인 사용자. IndexedDB + Supabase 동기화",
+      "description": "로그인 사용자. 클라우드 환경에서 자동 동기화, 로컬 환경에서 수동 동기화 가능",
       "identifier": "userId"
     }
   }

@@ -1,6 +1,6 @@
 {
   "$schema": "ai-context/domain/rules",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "비즈니스 규칙 정의",
   "rules": {
     "CASCADE_DELETE": {
@@ -8,18 +8,28 @@
       "entities": ["chapters", "synopses", "characters", "relationships", "versions"],
       "implementation": "hooks/useProject.ts → deleteProject()"
     },
-    "GUEST_LOCAL_ONLY": {
-      "description": "게스트는 IndexedDB만 사용, 서버 동기화 없음",
-      "reason": "guestId가 IndexedDB에 저장되어 브라우저 삭제 시 유실 → 서버 데이터 복구 불가",
-      "implementation": "sync/sync-engine.ts → shouldSync()"
+    "ENVIRONMENT_BASED_SYNC": {
+      "description": "환경에 따른 동기화 방식 분리",
+      "local": {
+        "description": "로컬 환경 (PWA): 수동 동기화만",
+        "autoSync": false,
+        "syncTrigger": "수동 버튼 클릭",
+        "loginRequired": "동기화 시에만"
+      },
+      "cloud": {
+        "description": "클라우드 환경 (브라우저): 자동 동기화",
+        "autoSync": true,
+        "syncTrigger": "저장 후 debounce 2초",
+        "loginRequired": "동기화 사용 시"
+      },
+      "implementation": "sync/sync-engine.ts, hooks/usePWAMode.ts"
     },
     "ONE_SYNOPSIS_PER_PROJECT": {
       "description": "프로젝트당 시놉시스 1개만 존재",
       "implementation": "hooks/useSynopsis.ts → getOrCreate()"
     },
     "LOCAL_FIRST_SAVE": {
-      "description": "모든 저장은 IndexedDB 먼저, 온라인이면 debounce 후 서버 동기화",
-      "debounce": 2000,
+      "description": "모든 저장은 IndexedDB 먼저 (환경 무관)",
       "implementation": "storage/local/*.ts"
     },
     "LATEST_WINS_CONFLICT": {
@@ -54,29 +64,37 @@
       "description": "버전 히스토리는 로컬 전용, 서버 동기화 없음",
       "reason": "히스토리 데이터가 방대해질 수 있어 로컬에서만 관리",
       "entities": ["synopsis", "character"]
-    },
-    "GUEST_MIGRATION": {
-      "description": "회원 가입 시 게스트 데이터를 회원 데이터로 마이그레이션",
-      "implementation": "lib/guest.ts → migrateGuestDataToUser()"
     }
   },
   "policies": {
-    "guest": {
-      "canSync": false,
+    "local": {
+      "description": "로컬 환경 (PWA 앱) 정책",
+      "autoSync": false,
       "storage": "IndexedDB only",
-      "migration": "회원 가입 시 migrateGuestDataToUser() 호출",
-      "warning": "브라우저 데이터 삭제 시 모든 데이터 유실"
+      "loginRequired": false,
+      "syncButton": "설정 또는 헤더에 수동 동기화 버튼",
+      "syncRequiresLogin": true,
+      "limitations": ["공유 기능 제한 (향후 개선 가능)"]
     },
-    "member": {
-      "canSync": true,
-      "storage": "IndexedDB + Supabase",
-      "realtime": "Supabase Realtime 구독",
-      "multiDevice": "여러 기기에서 동기화"
+    "cloud": {
+      "description": "클라우드 환경 (브라우저) 정책",
+      "member": {
+        "autoSync": true,
+        "storage": "IndexedDB + Supabase",
+        "realtime": "Supabase Realtime 구독",
+        "multiDevice": true
+      },
+      "nonMember": {
+        "autoSync": false,
+        "storage": "IndexedDB only",
+        "note": "비로그인 시 로컬 환경과 동일하게 IndexedDB만 사용"
+      }
     }
   },
   "autosave": {
     "delay": 2000,
     "unit": "ms",
-    "trigger": "content 변경 시"
+    "trigger": "content 변경 시",
+    "target": "IndexedDB (환경 무관)"
   }
 }

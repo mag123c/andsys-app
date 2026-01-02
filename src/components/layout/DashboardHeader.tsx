@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SyncStatusIndicator } from "@/components/features/sync/SyncStatusIndicator";
+import { PWASyncButton } from "@/components/features/pwa";
 
 export function DashboardHeader() {
   const { auth, signOut } = useAuth();
@@ -32,6 +33,8 @@ export function DashboardHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            {/* PWA 환경: 수동 동기화 버튼, 브라우저 환경: 자동 동기화 인디케이터 */}
+            <PWASyncButton />
             <SyncStatusIndicator />
             {isAuthenticated ? (
               <DropdownMenu>

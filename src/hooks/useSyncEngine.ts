@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { syncEngine, type SyncStatus, type SyncResult, type SyncEventPayload } from "@/sync/sync-engine";
 import { useRealOnline } from "./useOnline";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { usePWAMode } from "./usePWAMode";
 import { createClient } from "@/storage/remote/client";
 import { db } from "@/storage/local/db";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -32,18 +33,25 @@ interface UseSyncEngineReturn {
   isOnline: boolean;
   pendingCount: number;
   lastError: string | null;
+  isPwaMode: boolean;
   syncNow: () => Promise<SyncResult>;
 }
 
 /**
  * 동기화 엔진 훅
- * - 온라인 복귀 시 자동 동기화
+ *
+ * 환경별 동기화 정책:
+ * - 로컬 환경 (PWA): 수동 동기화만 (버튼 클릭)
+ * - 클라우드 환경 (브라우저): 자동 동기화 (회원만, debounce 2초)
+ *
+ * 공통:
  * - 회원만 동기화 (게스트는 로컬만)
  * - Supabase Realtime 구독으로 실시간 동기화
  */
 export function useSyncEngine(): UseSyncEngineReturn {
   const { isOnline } = useRealOnline();
   const { auth } = useAuth();
+  const isPwaMode = usePWAMode();
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   // syncEngine 상태 구독
@@ -77,8 +85,10 @@ export function useSyncEngine(): UseSyncEngineReturn {
     return syncEngine.syncAll();
   }, [isOnline, auth.status]);
 
-  // 온라인 복귀 시 자동 동기화
+  // 온라인 복귀 시 자동 동기화 (클라우드 환경에서만)
   useEffect(() => {
+    // 로컬 환경(PWA)에서는 자동 동기화 비활성화
+    if (isPwaMode) return;
     if (!isOnline) return;
     if (auth.status !== "authenticated") return;
 
@@ -88,11 +98,13 @@ export function useSyncEngine(): UseSyncEngineReturn {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isOnline, auth.status]);
+  }, [isOnline, auth.status, isPwaMode]);
 
-  // pending 항목 변경 감지 + debounce 자동 동기화
+  // pending 항목 변경 감지 + debounce 자동 동기화 (클라우드 환경에서만)
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
+    // 로컬 환경(PWA)에서는 자동 동기화 비활성화
+    if (isPwaMode) return;
     if (!isOnline) return;
     if (auth.status !== "authenticated") return;
 
@@ -127,7 +139,7 @@ export function useSyncEngine(): UseSyncEngineReturn {
         clearTimeout(syncTimerRef.current);
       }
     };
-  }, [isOnline, auth.status]);
+  }, [isOnline, auth.status, isPwaMode]);
 
   // 로그인 시 서버 데이터 pull
   const userId = auth.status === "authenticated" ? auth.user.id : null;
@@ -309,6 +321,7 @@ export function useSyncEngine(): UseSyncEngineReturn {
     isOnline,
     pendingCount,
     lastError,
+    isPwaMode,
     syncNow,
   };
 }

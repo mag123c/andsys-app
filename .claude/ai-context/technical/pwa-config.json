@@ -1,0 +1,103 @@
+{
+  "$schema": "ai-context/technical/pwa-config",
+  "version": "1.0.0",
+  "description": "PWA 구성 및 환경별 동작 정의",
+  "terminology": {
+    "오프라인": "인터넷 연결 없음",
+    "로컬 환경": "PWA 앱 (standalone 모드)",
+    "클라우드 환경": "웹 브라우저"
+  },
+  "implementation": {
+    "serviceWorker": {
+      "file": "src/app/sw.ts",
+      "library": "Serwist (@serwist/next)",
+      "config": "next.config.ts (withSerwist)"
+    },
+    "manifest": "public/manifest.json",
+    "icons": {
+      "path": "public/icons/",
+      "sizes": ["192x192", "512x512", "maskable-512", "apple-touch"]
+    },
+    "detection": {
+      "isPWA": "src/lib/pwa.ts",
+      "usePWAMode": "src/hooks/usePWAMode.ts"
+    }
+  },
+  "components": {
+    "InstallPrompt": {
+      "path": "src/components/features/pwa/InstallPrompt.tsx",
+      "location": "layout.tsx",
+      "shows": "브라우저에서 설치 가능할 때"
+    },
+    "UpdatePrompt": {
+      "path": "src/components/features/pwa/UpdatePrompt.tsx",
+      "location": "layout.tsx",
+      "shows": "SW 업데이트 감지 시"
+    },
+    "PWASyncButton": {
+      "path": "src/components/features/pwa/PWASyncButton.tsx",
+      "location": "DashboardHeader.tsx",
+      "shows": "로컬 환경(PWA)에서만"
+    },
+    "SyncStatusIndicator": {
+      "path": "src/components/features/sync/SyncStatusIndicator.tsx",
+      "location": "DashboardHeader.tsx",
+      "shows": "클라우드 환경(브라우저)에서만"
+    }
+  },
+  "syncBehavior": {
+    "local": {
+      "environment": "PWA (standalone)",
+      "detection": "usePWAMode() === true",
+      "autoSync": false,
+      "syncTrigger": "PWASyncButton 클릭",
+      "loginRequired": "동기화 시에만",
+      "implementation": "useSyncEngine.ts (isPwaMode 분기)"
+    },
+    "cloud_member": {
+      "environment": "브라우저 + 로그인",
+      "detection": "usePWAMode() === false && auth.status === 'authenticated'",
+      "autoSync": true,
+      "debounce": 2000,
+      "realtime": "Supabase Realtime 구독"
+    },
+    "cloud_nonMember": {
+      "environment": "브라우저 + 비로그인",
+      "detection": "usePWAMode() === false && auth.status === 'guest'",
+      "autoSync": false,
+      "storage": "IndexedDB only"
+    }
+  },
+  "phases": {
+    "phase1": {
+      "name": "기본 PWA 설정",
+      "status": "completed",
+      "items": ["manifest.json", "sw.ts", "icons", "메타데이터", "pwa.ts", "usePWAMode"]
+    },
+    "phase2": {
+      "name": "PWA 전용 UI",
+      "status": "completed",
+      "items": ["InstallPrompt", "UpdatePrompt", "PWASyncButton"]
+    },
+    "phase3": {
+      "name": "환경별 동기화 로직",
+      "status": "completed",
+      "items": ["useSyncEngine isPwaMode 분기", "SyncStatusIndicator PWA 숨김", "비회원 로그인 유도"]
+    },
+    "phase4": {
+      "name": "최적화",
+      "status": "optional",
+      "items": ["Cache API 최적화", "캐시 용량 관리"]
+    }
+  },
+  "keyFiles": [
+    "src/app/sw.ts",
+    "src/lib/pwa.ts",
+    "src/hooks/usePWAMode.ts",
+    "src/hooks/useSyncEngine.ts",
+    "src/components/features/pwa/PWASyncButton.tsx",
+    "src/components/features/sync/SyncStatusIndicator.tsx",
+    "public/manifest.json",
+    "next.config.ts"
+  ]
+}
