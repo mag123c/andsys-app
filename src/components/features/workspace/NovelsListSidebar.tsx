@@ -66,7 +66,7 @@ export function NovelsListSidebar({
 }: NovelsListSidebarProps) {
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { canInstall, install } = usePWAInstall();
+  const { canInstall, install, showInstallButton } = usePWAInstall();
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -126,13 +126,19 @@ export function NovelsListSidebar({
               </a>
             );
           })}
-          {canInstall && (
+          {showInstallButton && (
             <button
-              onClick={install}
-              className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent/50 transition-colors text-muted-foreground hover:text-foreground"
-              title="앱 다운로드"
+              onClick={canInstall ? install : undefined}
+              disabled={!canInstall}
+              className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
+                canInstall
+                  ? "hover:bg-accent/50 cursor-pointer"
+                  : "opacity-50 cursor-not-allowed"
+              )}
+              title={canInstall ? "앱 다운로드" : "이 브라우저에서는 앱 설치를 지원하지 않습니다"}
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 text-sky-500" />
             </button>
           )}
         </nav>
@@ -213,13 +219,20 @@ export function NovelsListSidebar({
               </li>
             );
           })}
-          {canInstall && (
+          {showInstallButton && (
             <li>
               <button
-                onClick={install}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors w-full"
+                onClick={canInstall ? install : undefined}
+                disabled={!canInstall}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm w-full transition-colors",
+                  canInstall
+                    ? "text-muted-foreground hover:bg-accent/50 hover:text-foreground cursor-pointer"
+                    : "text-muted-foreground/50 cursor-not-allowed"
+                )}
+                title={!canInstall ? "이 브라우저에서는 앱 설치를 지원하지 않습니다" : undefined}
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 text-sky-500" />
                 <span>앱 다운로드</span>
               </button>
             </li>

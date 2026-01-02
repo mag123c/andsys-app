@@ -20,8 +20,12 @@ interface PWAInstallContextValue {
   installPrompt: BeforeInstallPromptEvent | null;
   /** 설치 실행 */
   install: () => Promise<boolean>;
-  /** 설치 가능 여부 */
+  /** 브라우저 설치 프롬프트 지원 여부 */
   canInstall: boolean;
+  /** PWA 모드 여부 (true면 이미 PWA로 실행 중) */
+  isPwaMode: boolean;
+  /** 버튼 표시 여부 (브라우저 모드일 때만 true) */
+  showInstallButton: boolean;
 }
 
 const PWAInstallContext = createContext<PWAInstallContextValue | null>(null);
@@ -29,10 +33,15 @@ const PWAInstallContext = createContext<PWAInstallContextValue | null>(null);
 export function PWAInstallProvider({ children }: { children: ReactNode }) {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const [isPwaMode, setIsPwaMode] = useState(true); // 초기값 true로 설정하여 SSR에서 버튼 숨김
 
   useEffect(() => {
-    // 이미 PWA로 실행 중이면 캡처 안 함
-    if (isPWA()) return;
+    // 클라이언트에서 PWA 모드 확인
+    const pwaMode = isPWA();
+    setIsPwaMode(pwaMode);
+
+    // PWA 모드면 이벤트 캡처 불필요
+    if (pwaMode) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -62,6 +71,8 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
         installPrompt,
         install,
         canInstall: !!installPrompt,
+        isPwaMode,
+        showInstallButton: !isPwaMode, // 브라우저 모드일 때만 true
       }}
     >
       {children}

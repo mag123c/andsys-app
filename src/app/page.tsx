@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 import { BookOpen, FilePenLine, Loader2, Network, PanelRight, Users } from "lucide-react";
+import { InstallPrompt } from "@/components/features/pwa";
 
 const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
 
@@ -371,6 +372,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
 
       {/* Guest Notice Dialog */}
       <AlertDialog open={showGuestNotice} onOpenChange={setShowGuestNotice}>

@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { InstallPrompt, UpdatePrompt } from "@/components/features/pwa";
+import { UpdatePrompt } from "@/components/features/pwa";
 import { PWAInstallProvider } from "@/hooks/usePWAInstall";
 import "./globals.css";
 
@@ -101,7 +101,6 @@ export default function RootLayout({
               <PWAInstallProvider>
                 {children}
                 <Toaster />
-                <InstallPrompt />
                 <UpdatePrompt />
               </PWAInstallProvider>
             </SyncProvider>
