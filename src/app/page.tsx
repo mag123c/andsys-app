@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
-import { BookOpen, FilePenLine, FileText, Loader2, Network, PanelRight, Save, Users } from "lucide-react";
+import { BookOpen, ClipboardList, FilePenLine, FileText, Loader2, Network, PanelRight, Save, Users } from "lucide-react";
 import { InstallPrompt } from "@/components/features/pwa";
 
 const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
@@ -70,6 +70,13 @@ const features = [
     description: "전체 스토리의 흐름을 정리하세요. 집필 중에도 우측 패널에서 바로 확인할 수 있습니다.",
     image: "/images/landing/screenshot-synopsis.png",
     imageAlt: "시놉시스 에디터 화면",
+  },
+  {
+    icon: ClipboardList,
+    title: "플롯 메모",
+    description: "회차별로 주요 사건과 복선을 메모하세요. 글을 쓰기 전 계획을 세우는 데 유용합니다.",
+    image: "/images/landing/screenshot-plot.png",
+    imageAlt: "플롯 메모 화면",
   },
   {
     icon: Save,
