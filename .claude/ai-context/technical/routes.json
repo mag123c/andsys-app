@@ -42,13 +42,9 @@
         },
         "/novels/[id]/characters": {
           "file": "novels/[id]/characters/page.tsx",
-          "description": "캐릭터 관리 (카드 그리드)",
-          "auth": "owner"
-        },
-        "/novels/[id]/relationships": {
-          "file": "novels/[id]/relationships/page.tsx",
-          "description": "관계도 (React Flow 그래프)",
-          "auth": "owner"
+          "description": "캐릭터 관리 (카드 그리드 + 관계도 모달)",
+          "auth": "owner",
+          "features": ["characterCard", "relationshipGraphModal"]
         }
       },
       "modals": {

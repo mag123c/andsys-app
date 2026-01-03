@@ -1,6 +1,6 @@
 {
   "$schema": "ai-context/components/dependency-map",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "컴포넌트-훅-UseCase 의존성 맵",
   "components": {
     "features/editor/EditorLayout": {
@@ -74,8 +74,8 @@
       "description": "관계도 그래프 (React Flow)",
       "hooks": ["useCharacters", "useRelationships"],
       "libs": ["@xyflow/react"],
-      "components": ["CharacterNode", "RelationshipEdge", "RelationshipDialog"],
-      "features": ["dragDrop", "zoom", "filter", "addRelationship"]
+      "components": ["CharacterNode", "RelationshipEdge", "RelationshipDialog", "CharacterPanel", "GraphLegend"],
+      "features": ["dragDrop", "zoom", "filter", "addRelationship", "readonly mode"]
     },
     "features/synopsis/SynopsisEditor": {
       "path": "src/components/features/synopsis/SynopsisEditor.tsx",
@@ -84,12 +84,75 @@
       "components": ["Editor"],
       "features": ["autosave", "history"]
     },
-    "features/workspace/WorkspaceSidebar": {
-      "path": "src/components/features/workspace/WorkspaceSidebar.tsx",
-      "description": "대시보드 사이드바",
-      "hooks": ["useProjects", "useChapters", "useAuth"],
-      "components": ["ProjectList", "ChapterList", "SyncStatusIndicator"],
-      "features": ["projectSwitch", "chapterNavigation", "syncStatus"]
+    "features/workspace/NovelsListSidebar": {
+      "path": "src/components/features/workspace/NovelsListSidebar.tsx",
+      "description": "소설 목록 사이드바 (로고, 메뉴, 프로필)",
+      "hooks": ["useAuth", "usePWAInstall"],
+      "components": ["SidebarProfile", "SettingsModal"],
+      "features": ["가이드북 링크", "디스코드 링크", "앱 다운로드 버튼"]
+    },
+    "features/workspace/NovelsListLayout": {
+      "path": "src/components/features/workspace/NovelsListLayout.tsx",
+      "description": "소설 목록 페이지 레이아웃",
+      "hooks": ["useLocalStorageBoolean"],
+      "components": ["NovelsListSidebar"]
+    },
+    "features/workspace/NovelSidebar": {
+      "path": "src/components/features/workspace/NovelSidebar.tsx",
+      "description": "소설 상세 좌측 사이드바 (회차/시놉시스/등장인물 메뉴)",
+      "hooks": ["useAuth"],
+      "components": ["SidebarProfile"],
+      "features": ["챕터 목록 펼침", "캐릭터 목록 펼침", "관계도 모달 트리거"]
+    },
+    "features/workspace/NovelDetailLayout": {
+      "path": "src/components/features/workspace/NovelDetailLayout.tsx",
+      "description": "소설 상세 페이지 레이아웃 (사이드바 + 관계도 모달)",
+      "hooks": ["useProject", "useChapters", "useCharacters", "useRelationships", "useLocalStorageBoolean"],
+      "components": ["NovelSidebar", "RelationshipGraph"],
+      "features": ["사이드바 접힘/펼침", "관계도 모달"]
+    },
+    "features/workspace/RightSidebar": {
+      "path": "src/components/features/workspace/RightSidebar.tsx",
+      "description": "에디터 우측 사이드바 (3탭: 시놉시스/등장인물/회차)",
+      "components": ["RightSidebarSynopsis", "RightSidebarCharacters", "RightSidebarChapters"],
+      "features": ["탭 전환", "접힘/펼침"]
+    },
+    "features/workspace/RightSidebarSynopsis": {
+      "path": "src/components/features/workspace/RightSidebarSynopsis.tsx",
+      "description": "우측 사이드바 시놉시스 탭",
+      "components": ["Editor"],
+      "features": ["시놉시스 미리보기/편집"]
+    },
+    "features/workspace/RightSidebarCharacters": {
+      "path": "src/components/features/workspace/RightSidebarCharacters.tsx",
+      "description": "우측 사이드바 등장인물 탭",
+      "components": ["CharacterWikiCard", "RelationshipGraph"],
+      "features": ["캐릭터 검색", "위키 스타일 카드", "관계도 모달"]
+    },
+    "features/workspace/RightSidebarChapters": {
+      "path": "src/components/features/workspace/RightSidebarChapters.tsx",
+      "description": "우측 사이드바 회차 탭",
+      "features": ["회차 목록", "현재 회차 하이라이트"]
+    },
+    "features/workspace/CharacterWikiCard": {
+      "path": "src/components/features/workspace/CharacterWikiCard.tsx",
+      "description": "캐릭터 위키 스타일 카드 (접힘/펼침)",
+      "features": ["인라인 편집", "관계 표시", "커스텀 필드"]
+    },
+    "features/workspace/CharacterPreviewCard": {
+      "path": "src/components/features/workspace/CharacterPreviewCard.tsx",
+      "description": "캐릭터 미리보기 카드 (툴팁용)",
+      "features": ["호버 시 상세 정보 표시"]
+    },
+    "features/workspace/SidebarProfile": {
+      "path": "src/components/features/workspace/SidebarProfile.tsx",
+      "description": "사이드바 하단 프로필 영역",
+      "hooks": ["useAuth"],
+      "features": ["아바타", "설정 버튼", "접힘 토글"]
+    },
+    "features/workspace/SidebarToggle": {
+      "path": "src/components/features/workspace/SidebarToggle.tsx",
+      "description": "사이드바 접힘/펼침 토글 버튼"
     },
     "features/sync/SyncStatusIndicator": {
       "path": "src/components/features/sync/SyncStatusIndicator.tsx",
@@ -132,16 +195,9 @@
     "features/settings/SettingsModal": {
       "path": "src/components/features/settings/SettingsModal.tsx",
       "description": "설정 모달 (테마, 폰트, 백업, 계정)",
-      "hooks": ["useAuth", "useProjects", "useUserSettings"],
+      "hooks": ["useAuth", "useProjects", "useUserSettings", "useUserStats"],
       "trigger": "SidebarProfile 설정 버튼",
-      "features": ["theme", "font", "backup", "shareLinks", "account"]
-    },
-    "features/workspace/NovelsListSidebar": {
-      "path": "src/components/features/workspace/NovelsListSidebar.tsx",
-      "description": "소설 목록 사이드바 (로고, 메뉴, 프로필)",
-      "hooks": ["useAuth", "usePWAInstall"],
-      "components": ["SidebarProfile", "SettingsModal"],
-      "features": ["가이드북 링크", "디스코드 링크", "앱 다운로드 버튼"]
+      "features": ["theme", "font", "backup", "shareLinks", "account", "statistics"]
     }
   },
   "hooks": {
@@ -245,6 +301,20 @@
       "path": "src/hooks/useUserSettings.ts",
       "description": "사용자 설정 관리 (폰트, 테마 등)",
       "storage": "localStorage"
+    },
+    "useLocalStorage": {
+      "path": "src/hooks/useLocalStorage.ts",
+      "description": "localStorage 동기화 (SSR 안전)",
+      "pattern": "useSyncExternalStore",
+      "exports": ["useLocalStorage", "useLocalStorageBoolean"],
+      "note": "SSR/hydration 안전하게 localStorage 값 읽기/쓰기"
+    },
+    "useAdmin": {
+      "path": "src/hooks/useAdmin.ts",
+      "description": "관리자 권한 확인",
+      "api": "/api/admin/check",
+      "returns": ["isAdmin", "isChecking"],
+      "dependencies": ["useAuth"]
     },
     "usePWAInstall": {
       "path": "src/hooks/usePWAInstall.tsx",

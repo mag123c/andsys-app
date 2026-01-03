@@ -48,3 +48,6 @@ next-env.d.ts
 supabase/.branches/
 .playwright/
 
+
+# Playwright MCP temp files
+.playwright-mcp/

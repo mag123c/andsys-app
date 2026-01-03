@@ -84,7 +84,7 @@
     },
     {
       "version": 8,
-      "date": "2024-12-XX",
+      "date": "2024-12-28",
       "description": "플롯 메모 필드 추가",
       "changes": [
         "chapters: plot 필드 추가"
