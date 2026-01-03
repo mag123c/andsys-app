@@ -18,7 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
-import { BookOpen, ClipboardList, FilePenLine, FileText, Loader2, Network, PanelRight, Save, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, FilePenLine, Loader2, PanelRight, Smartphone, Users } from "lucide-react";
 import { InstallPrompt } from "@/components/features/pwa";
 
 const GUEST_NOTICE_KEY = "4ndsys:guest-notice-shown";
@@ -52,52 +53,35 @@ const animations = {
 const features = [
   {
     icon: BookOpen,
-    title: "회차 관리",
-    description: "웹소설 연재 구조에 맞춘 회차별 원고 관리. 각 회차의 글자수를 실시간으로 확인하세요.",
-    image: "/images/landing/screenshot-project-dashboard.png",
-    imageAlt: "회차 관리 화면",
-  },
-  {
-    icon: PanelRight,
-    title: "집필 워크스페이스",
-    description: "시놉시스와 등장인물을 참조하며 집필. 오른쪽 패널에서 필요한 정보를 바로 확인하세요.",
-    image: "/images/landing/screenshot-workspace.png",
-    imageAlt: "워크스페이스 화면",
-  },
-  {
-    icon: FileText,
-    title: "시놉시스",
-    description: "전체 스토리의 흐름을 정리하세요. 집필 중에도 우측 패널에서 바로 확인할 수 있습니다.",
-    image: "/images/landing/screenshot-synopsis.png",
-    imageAlt: "시놉시스 에디터 화면",
-  },
-  {
-    icon: ClipboardList,
-    title: "플롯 메모",
-    description: "회차별로 주요 사건과 복선을 메모하세요. 글을 쓰기 전 계획을 세우는 데 유용합니다.",
-    image: "/images/landing/screenshot-plot.png",
-    imageAlt: "플롯 메모 화면",
-  },
-  {
-    icon: Save,
-    title: "자동 저장",
-    description: "저장 버튼 없이도 안심하세요. 0.5초마다 자동으로 저장되어 데이터 손실 걱정이 없습니다.",
+    title: "집필에 집중하세요",
+    description: "회차별 원고 관리와 자동 저장으로 안심하고 집필하세요. 각 회차마다 플롯 메모로 전개를 계획할 수 있습니다.",
     image: "/images/landing/screenshot-editor-full.png",
-    imageAlt: "자동 저장 상태 표시",
+    imageAlt: "에디터 화면",
+    highlights: ["실시간 글자수", "0.5초 자동저장", "회차별 플롯 메모"],
   },
   {
     icon: Users,
-    title: "등장인물 관리",
-    description: "캐릭터 설정과 커스텀 필드로 인물 정보를 체계적으로 정리하세요.",
+    title: "세계관을 정리하세요",
+    description: "캐릭터 설정과 인터랙티브 관계도로 복잡한 세계관도 한눈에 파악하세요.",
     image: "/images/landing/screenshot-characters.png",
     imageAlt: "등장인물 관리 화면",
+    highlights: ["커스텀 필드", "관계 유형별 색상", "드래그앤드롭 관계도"],
   },
   {
-    icon: Network,
-    title: "관계도 시각화",
-    description: "복잡한 인물 관계를 한눈에 파악할 수 있는 인터랙티브 그래프.",
-    image: "/images/landing/screenshot-relationships.png",
-    imageAlt: "관계도 화면",
+    icon: PanelRight,
+    title: "참조하며 집필하세요",
+    description: "시놉시스와 캐릭터 정보를 옆에 두고 집필하세요. 다른 회차 내용도 바로 확인할 수 있습니다.",
+    image: "/images/landing/screenshot-workspace.png",
+    imageAlt: "워크스페이스 화면",
+    highlights: ["시놉시스 참조", "캐릭터 정보", "다른 회차 참조"],
+  },
+  {
+    icon: Smartphone,
+    title: "어디서나 작업하세요",
+    description: "앱처럼 설치하고, 인터넷 없이도 작업하세요. 회원가입하면 어떤 기기에서든 이어쓸 수 있습니다.",
+    image: "/images/landing/screenshot-project-dashboard.png",
+    imageAlt: "프로젝트 대시보드",
+    highlights: ["PWA 설치 지원", "오프라인 작업", "클라우드 동기화"],
   },
 ];
 
@@ -111,11 +95,6 @@ const faqs = [
     question: "다른 사람이 내 소설을 볼 수 있나요?",
     answer:
       "아니요, 본인만 접근할 수 있습니다. 다른 사용자의 소설에 접근하는 기능은 제공하지 않으며, 모든 데이터는 개인별로 안전하게 관리됩니다.",
-  },
-  {
-    question: "무료인가요?",
-    answer:
-      "네, 모든 기능을 무료로 사용할 수 있습니다. 4ndSYS는 무료 서비스로 계속 운영될 예정입니다.",
   },
   {
     question: "브라우저 데이터를 삭제하면 어떻게 되나요?",
@@ -133,14 +112,9 @@ const faqs = [
       "네, 회원이라면 공유 링크를 만들 수 있습니다. 만료 시간과 비밀번호를 설정하여 원하는 회차만 임시로 공유할 수 있어요.",
   },
   {
-    question: "앱으로 설치할 수 있나요?",
+    question: "다른 기기에서도 이어쓸 수 있나요?",
     answer:
-      "네, Chrome이나 Edge에서 앱으로 설치할 수 있습니다. 주소창의 설치 버튼을 클릭하세요. 오프라인에서도 사용 가능합니다.",
-  },
-  {
-    question: "맞춤법 검사 기능이 있나요?",
-    answer:
-      "네, 맞춤법 검사 기능이 있습니다. 현재 서비스 점검 중이며, 빠른 시일 내에 복구될 예정입니다.",
+      "회원가입을 하시면 클라우드에 자동 백업되어 어떤 기기에서든 로그인만 하면 이어서 작업할 수 있습니다. 게스트 모드에서는 현재 기기에만 저장됩니다.",
   },
 ];
 
@@ -219,11 +193,16 @@ export default function LandingPage() {
                 <p className="mt-6 text-lg text-muted-foreground md:text-xl">
                   웹소설 작가를 위한 무료 글쓰기 플랫폼.
                   <br />
-                  회차, 등장인물, 관계도까지 한 곳에서 관리하세요.
+                  회차 관리부터 관계도까지, 오프라인에서도.
                 </p>
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-sm px-3 py-1">완전 무료</Badge>
+                  <Badge variant="secondary" className="text-sm px-3 py-1">회원가입 불필요</Badge>
+                  <Badge variant="secondary" className="text-sm px-3 py-1">오프라인 지원</Badge>
+                </div>
+                <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Button size="lg" className="w-full sm:w-auto" onClick={handleStartClick}>
-                    지금 시작하기
+                    무료로 시작하기
                   </Button>
                   <Link href="/login">
                     <Button variant="outline" size="lg" className="w-full sm:w-auto">
@@ -237,7 +216,7 @@ export default function LandingPage() {
               <motion.div {...animations.fadeInRight} className="relative">
                 <div className="relative rounded-xl border bg-muted/30 shadow-2xl overflow-hidden">
                   <Image
-                    src="/images/landing/screenshot-editor.png"
+                    src="/images/landing/screenshot-editor-full.png"
                     alt="4ndSYS 에디터 화면"
                     width={800}
                     height={500}
@@ -293,6 +272,15 @@ export default function LandingPage() {
                     <p className="text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
+                    {feature.highlights && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {feature.highlights.map((highlight) => (
+                          <Badge key={highlight} variant="outline" className="text-xs">
+                            {highlight}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Image */}
