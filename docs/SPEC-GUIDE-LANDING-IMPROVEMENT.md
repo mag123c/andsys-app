@@ -1,7 +1,13 @@
 # 가이드 문서 & 랜딩 페이지 개선 작업 스펙
 
 > 작성일: 2026-01-02
-> 상태: 초안
+> 상태: **완료** (2026-01-03)
+>
+> ### 작업 결과 요약
+> - ✅ 가이드 문서 업데이트 완료 (config.mts, auto-save.md, 신규 3개)
+> - ✅ 랜딩 페이지 업데이트 완료 (Features 2개, FAQ 2개 추가)
+> - ✅ 스크린샷 추가 완료 (synopsis, editor-full)
+> - ⏸️ 관계도 스크린샷 - 기존 유지 (비회원 관계 저장 이슈로 보류)
 
 ---
 
@@ -364,55 +370,60 @@ sidebar: [
 
 ## 5. 작업 순서
 
-### Phase 1: 사전 조사 (Playwright MCP)
-1. [ ] 로컬 개발 서버 실행 (`pnpm dev`)
-2. [ ] Playwright로 현재 UI 상태 캡처
-3. [ ] 기존 스크린샷 파일 확인 및 최신화 필요 여부 판단
-4. [ ] 신규 스크린샷 목록 확정
+### Phase 1: 사전 조사 (Playwright MCP) ✅
+1. [x] 로컬 개발 서버 실행 (`pnpm dev`)
+2. [x] Playwright로 현재 UI 상태 캡처
+3. [x] 기존 스크린샷 파일 확인 및 최신화 필요 여부 판단
+4. [x] 신규 스크린샷 목록 확정
 
-### Phase 2: 가이드 문서 수정
-1. [ ] config.mts에 공유 섹션 추가
-2. [ ] auto-save.md 시간 수정 (2초 → 0.5초)
-3. [ ] plot-memo.md 신규 작성
-4. [ ] pwa.md 신규 작성
-5. [ ] spell-check.md 신규 작성
-6. [ ] 가이드 빌드 테스트
+### Phase 2: 가이드 문서 수정 ✅
+1. [x] config.mts에 공유 섹션 추가
+2. [x] auto-save.md 시간 수정 (2초 → 0.5초)
+3. [x] plot-memo.md 신규 작성
+4. [x] pwa.md 신규 작성
+5. [x] spell-check.md 신규 작성
+6. [x] 가이드 빌드 테스트
 
-### Phase 3: 스크린샷 촬영
-1. [ ] Playwright로 필요한 화면 캡처
-2. [ ] 이미지 최적화 (크기, 용량)
-3. [ ] 가이드 문서에 이미지 삽입
-4. [ ] 랜딩 페이지 이미지 배치
+### Phase 3: 스크린샷 촬영 ✅ (부분)
+1. [x] Playwright로 필요한 화면 캡처 (프로덕션 사용)
+2. [x] screenshot-synopsis.png 추가
+3. [x] screenshot-editor-full.png 추가
+4. [ ] 관계도 스크린샷 - 기존 유지 (비회원 관계 저장 이슈)
 
-### Phase 4: 랜딩 페이지 수정
-1. [ ] features 배열에 시놉시스/자동저장 추가
-2. [ ] 필요시 FAQ 항목 추가
-3. [ ] 스크린샷 연결 확인
-4. [ ] 반응형 테스트
+### Phase 4: 랜딩 페이지 수정 ✅
+1. [x] features 배열에 시놉시스/자동저장 추가 (총 6개)
+2. [x] FAQ 항목 추가 (PWA 설치, 맞춤법 검사 - 총 8개)
+3. [x] 스크린샷 연결 확인
+4. [x] 반응형 테스트
 
-### Phase 5: 검증
-1. [ ] 가이드 사이트 전체 확인
-2. [ ] 랜딩 페이지 전체 확인
-3. [ ] 모바일 뷰포트 확인
-4. [ ] 라이트/다크 모드 확인
+### Phase 5: 검증 ✅
+1. [x] 가이드 사이트 전체 확인 (guide.4ndsys.net)
+2. [x] 랜딩 페이지 전체 확인 (4ndsys.net)
+3. [x] 모바일 뷰포트 확인 (375x812)
+4. [x] 라이트/다크 모드 확인
+
+### 추가 수정
+- [x] what-is-4ndsys.md 자동저장 시간 수정 (2초 → 0.5초)
 
 ---
 
-## 6. 파일 변경 목록
+## 6. 파일 변경 목록 (실제 변경)
 
-### 수정
-- `guide/.vitepress/config.mts` - 사이드바 구조
-- `guide/editor/auto-save.md` - 저장 시간
+### 수정 완료 ✅
+- `guide/.vitepress/config.mts` - 사이드바 구조 (공유/PWA/플롯메모/맞춤법 추가)
+- `guide/editor/auto-save.md` - 저장 시간 (2초 → 0.5초)
+- `guide/getting-started/what-is-4ndsys.md` - 자동저장 시간 수정 (2초 → 0.5초)
+- `src/app/page.tsx` - features 2개 추가, FAQ 2개 추가
 
-### 신규 생성
+### 신규 생성 완료 ✅
 - `guide/editor/plot-memo.md`
 - `guide/editor/spell-check.md`
 - `guide/getting-started/pwa.md`
-- `public/images/landing/screenshot-synopsis.png` (스크린샷)
-- `public/images/landing/screenshot-autosave.png` (스크린샷)
+- `public/images/landing/screenshot-synopsis.png`
+- `public/images/landing/screenshot-editor-full.png`
 
-### 선택적 수정
-- `src/app/page.tsx` - features/FAQ 확장
+### 미완료/보류
+- `public/images/landing/screenshot-relationships.png` - 기존 유지 (비회원 관계 저장 이슈)
 
 ---
 

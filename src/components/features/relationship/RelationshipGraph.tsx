@@ -451,7 +451,7 @@ function RelationshipGraphInner({
   const nodesOnGraph = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
 
   return (
-    <div className="flex h-[600px] border rounded-lg overflow-hidden">
+    <div className="flex h-full min-h-[400px] border rounded-lg overflow-hidden">
       {/* 그래프 영역 */}
       <div className="flex-1 flex flex-col">
         <GraphLegend

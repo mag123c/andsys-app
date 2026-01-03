@@ -2,17 +2,24 @@
 
 import { use, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Network } from "lucide-react";
 import { useCharacters } from "@/hooks/useCharacters";
 import { useRelationships } from "@/hooks/useRelationships";
 import type { Character, UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   CharacterDialog,
   SortableCharacterGrid,
   EmptyCharacters,
   RelationshipEditorDialog,
 } from "@/components/features/character";
+import { RelationshipGraph } from "@/components/features/relationship";
 
 interface CharactersPageProps {
   params: Promise<{ id: string }>;
@@ -44,6 +51,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
   );
   const [relationshipEditingCharacter, setRelationshipEditingCharacter] =
     useState<Character | null>(null);
+  const [showRelationshipGraph, setShowRelationshipGraph] = useState(false);
 
   const handleCreate = useCallback(
     async (data: Parameters<typeof createCharacter>[0]) => {
@@ -162,10 +170,21 @@ export default function CharactersPage({ params }: CharactersPageProps) {
     <>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold">등장인물</h2>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          추가
-        </Button>
+        <div className="flex items-center gap-2">
+          {characters.length >= 2 && (
+            <Button
+              variant="outline"
+              onClick={() => setShowRelationshipGraph(true)}
+            >
+              <Network className="mr-2 h-4 w-4" />
+              관계도
+            </Button>
+          )}
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            추가
+          </Button>
+        </div>
       </div>
 
       {characters.length === 0 ? (
@@ -192,6 +211,10 @@ export default function CharactersPage({ params }: CharactersPageProps) {
         character={editingCharacter ?? undefined}
         onUpdate={handleUpdate}
         onRestore={handleRestore}
+        relationships={relationships}
+        allCharacters={characters}
+        onRelationshipCreate={handleRelationshipCreate}
+        onRelationshipDelete={handleRelationshipDelete}
       />
 
       {relationshipEditingCharacter && (
@@ -205,6 +228,32 @@ export default function CharactersPage({ params }: CharactersPageProps) {
           onRelationshipDelete={handleRelationshipDelete}
         />
       )}
+
+      {/* 관계도 모달 */}
+      <Dialog open={showRelationshipGraph} onOpenChange={setShowRelationshipGraph}>
+        <DialogContent className="max-w-6xl h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
+            <DialogTitle>관계도</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 px-6 pb-6">
+            <RelationshipGraph
+              characters={characters}
+              relationships={relationships}
+              onDelete={handleRelationshipDelete}
+              onCreate={(fromId, toId) => {
+                handleRelationshipCreate({
+                  projectId,
+                  fromCharacterId: fromId,
+                  toCharacterId: toId,
+                  type: "custom",
+                  bidirectional: true,
+                  description: null,
+                });
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -171,11 +171,11 @@ export function RightSidebarCharacters({
 
       {/* Relationship Graph Dialog */}
       <Dialog open={relationshipDialogOpen} onOpenChange={setRelationshipDialogOpen}>
-        <DialogContent className="max-w-6xl h-[80vh]">
-          <DialogHeader>
+        <DialogContent className="max-w-6xl h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <DialogTitle>관계도</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 px-6 pb-6">
             <RelationshipGraph
               characters={characters}
               relationships={relationships}
