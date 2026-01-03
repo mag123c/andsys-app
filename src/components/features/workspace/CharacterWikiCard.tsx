@@ -38,8 +38,11 @@ interface FieldConfig {
   type: "text" | "number" | "textarea" | "select";
   options?: readonly string[];
   suffix?: string;
-  grid?: boolean; // true면 2열 그리드 왼쪽
+  grid?: boolean; // true면 2열 그리드
 }
+
+// 라벨 너비 상수 (일관성 유지)
+const LABEL_WIDTH = "w-20";
 
 // 기본 정보 (이름 제외 - 별도 처리)
 const BASIC_FIELDS: FieldConfig[] = [
@@ -204,7 +207,7 @@ export function CharacterWikiCard({
                 <div className="border rounded overflow-hidden divide-y">
                   {character.customFields.map((field, index) => (
                     <div key={index} className="flex text-sm">
-                      <div className="w-24 shrink-0 bg-muted px-2 py-1.5 text-muted-foreground truncate">
+                      <div className={cn("shrink-0 bg-muted px-2 py-1.5 text-muted-foreground truncate", LABEL_WIDTH)}>
                         {field.key}
                       </div>
                       <div className="flex-1 px-2 py-1.5 truncate">
@@ -300,7 +303,6 @@ function WikiTable({
                 onSave={(newValue) =>
                   onUpdate(character.id, { [field.key]: newValue } as UpdateCharacterInput)
                 }
-                compact
               />
             );
           })}
@@ -345,7 +347,6 @@ function EditableField({
   options,
   onSave,
   required,
-  compact,
 }: {
   label: string;
   value: string | number | null | undefined;
@@ -354,7 +355,6 @@ function EditableField({
   options?: readonly string[];
   onSave: (value: string | number | null) => Promise<void>;
   required?: boolean;
-  compact?: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -417,7 +417,7 @@ function EditableField({
   if (type === "select" && options) {
     return (
       <div className="flex text-sm">
-        <div className={cn("shrink-0 bg-muted px-2 py-1.5 text-muted-foreground", compact ? "w-16" : "w-24")}>
+        <div className={cn("shrink-0 bg-muted px-2 py-1.5 text-muted-foreground", LABEL_WIDTH)}>
           {label}
         </div>
         <div className="flex-1 px-2 py-1.5 min-w-0">
@@ -450,7 +450,7 @@ function EditableField({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* 라벨 */}
-      <div className={cn("shrink-0 bg-muted px-2 py-1.5 text-muted-foreground", compact ? "w-16" : "w-24")}>
+      <div className={cn("shrink-0 bg-muted px-2 py-1.5 text-muted-foreground", LABEL_WIDTH)}>
         {label}
       </div>
 
@@ -572,7 +572,7 @@ function RelationshipEditor({
 
             return (
               <div key={rel.id} className="flex items-center text-sm group">
-                <div className="w-20 shrink-0 bg-muted px-2 py-1.5 truncate">
+                <div className={cn("shrink-0 bg-muted px-2 py-1.5 truncate", LABEL_WIDTH)}>
                   {other.name}
                 </div>
                 <div className="flex-1 px-2 py-1.5 text-muted-foreground truncate">
