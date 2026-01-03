@@ -231,7 +231,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
 
       {/* 관계도 모달 */}
       <Dialog open={showRelationshipGraph} onOpenChange={setShowRelationshipGraph}>
-        <DialogContent className="max-w-6xl h-[80vh] flex flex-col p-0">
+        <DialogContent className="max-w-[1270px] h-[80vh] flex flex-col p-0">
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <DialogTitle>관계도</DialogTitle>
           </DialogHeader>
@@ -239,17 +239,7 @@ export default function CharactersPage({ params }: CharactersPageProps) {
             <RelationshipGraph
               characters={characters}
               relationships={relationships}
-              onDelete={handleRelationshipDelete}
-              onCreate={(fromId, toId) => {
-                handleRelationshipCreate({
-                  projectId,
-                  fromCharacterId: fromId,
-                  toCharacterId: toId,
-                  type: "custom",
-                  bidirectional: true,
-                  description: null,
-                });
-              }}
+              readonly
             />
           </div>
         </DialogContent>

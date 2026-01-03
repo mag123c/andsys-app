@@ -99,7 +99,7 @@ function RelationshipGraphInner({
   const [selectedTypes, setSelectedTypes] = useState<string[]>(
     RELATIONSHIP_TYPES.map((t) => t.type)
   );
-  const [showMiniMap, setShowMiniMap] = useState(true);
+  const [showMiniMap, setShowMiniMap] = useState(false);
   const miniMapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 그래프에 있는 노드 ID들
@@ -128,10 +128,8 @@ function RelationshipGraphInner({
     }, 3000);
   }, []);
 
+  // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
-    miniMapTimeoutRef.current = setTimeout(() => {
-      setShowMiniMap(false);
-    }, 3000);
     return () => {
       if (miniMapTimeoutRef.current) {
         clearTimeout(miniMapTimeoutRef.current);

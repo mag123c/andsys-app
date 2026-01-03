@@ -49,6 +49,7 @@ interface NovelSidebarProps {
   characters: Character[];
   collapsed: boolean;
   onToggle: () => void;
+  onRelationshipClick?: () => void;
   className?: string;
 }
 
@@ -58,6 +59,7 @@ export function NovelSidebar({
   characters,
   collapsed,
   onToggle,
+  onRelationshipClick,
   className,
 }: NovelSidebarProps) {
   const pathname = usePathname();
@@ -281,20 +283,16 @@ export function NovelSidebar({
                 {/* 등장인물 목록 */}
                 {item.id === "characters" && expanded && (
                   <ul className="mt-1 ml-4 space-y-0.5">
-                    {/* 관계도 링크 */}
+                    {/* 관계도 버튼 */}
                     <li>
-                      <Link
-                        href={`${basePath}/relationships`}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors",
-                          pathname === `${basePath}/relationships`
-                            ? "bg-accent text-accent-foreground font-medium"
-                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                        )}
+                      <button
+                        type="button"
+                        onClick={onRelationshipClick}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground w-full text-left"
                       >
                         <Network className="h-3 w-3" />
                         <span>관계도</span>
-                      </Link>
+                      </button>
                     </li>
                     {/* 캐릭터 목록 */}
                     {displayCharacters.map((character) => (
