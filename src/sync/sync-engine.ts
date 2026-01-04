@@ -764,6 +764,9 @@ export class SyncEngine {
 
   /**
    * pending 상태의 관계 동기화
+   *
+   * 주의: relationships 테이블에는 UNIQUE(project_id, from_character_id, to_character_id) 제약이 있음
+   * 따라서 ID 기반 검색 외에 캐릭터 조합으로도 중복 확인 필요
    */
   private async syncPendingRelationships(result: SyncResult, validProjectIds: Set<string>): Promise<void> {
     const supabase = createClient();
@@ -776,9 +779,20 @@ export class SyncEngine {
       if (!validProjectIds.has(local.projectId)) continue;
 
       try {
-        const remote = await relationshipRemoteRepository.getById(local.id);
+        // 1. ID로 서버에서 검색
+        let remote = await relationshipRemoteRepository.getById(local.id);
+
+        // 2. ID로 못 찾으면 캐릭터 조합으로 검색 (UNIQUE 제약 기반)
+        if (!remote) {
+          remote = await relationshipRemoteRepository.getByCharacterPair(
+            local.projectId,
+            local.fromCharacterId,
+            local.toCharacterId
+          );
+        }
 
         if (!remote) {
+          // 서버에 없음 → 새로 생성
           const { error } = await supabase.from("relationships").upsert({
             id: local.id,
             project_id: local.projectId,
@@ -791,7 +805,8 @@ export class SyncEngine {
             updated_at: local.updatedAt.toISOString(),
           });
           if (error) throw new Error(error.message);
-        } else {
+        } else if (remote.id === local.id) {
+          // 같은 ID로 존재 → latest-wins 업데이트
           const localTime = local.updatedAt.getTime();
           const remoteTime = remote.updatedAt.getTime();
 
@@ -802,6 +817,33 @@ export class SyncEngine {
               bidirectional: local.bidirectional,
             });
           }
+        } else {
+          // 다른 ID로 같은 조합 존재 → 서버 ID로 로컬 동기화
+          // 로컬 레코드를 서버 ID로 교체 (트랜잭션으로 원자성 보장)
+          await db.transaction('rw', db.relationships, async () => {
+            await db.relationships.delete(local.id);
+            await db.relationships.put({
+              ...local,
+              id: remote.id,
+              syncStatus: "synced",
+              lastSyncedAt: new Date(),
+            });
+          });
+
+          // 서버 레코드 업데이트 (latest-wins)
+          const localTime = local.updatedAt.getTime();
+          const remoteTime = remote.updatedAt.getTime();
+
+          if (localTime > remoteTime) {
+            await relationshipRemoteRepository.update(remote.id, {
+              type: local.type,
+              description: local.description,
+              bidirectional: local.bidirectional,
+            });
+          }
+
+          result.synced++;
+          continue; // 이미 처리됨
         }
 
         await db.relationships.update(local.id, {

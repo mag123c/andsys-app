@@ -79,6 +79,30 @@ export class RelationshipRemoteRepository implements RelationshipRepository {
     return data.map(toRelationship);
   }
 
+  /**
+   * 캐릭터 조합으로 관계 조회 (UNIQUE 제약 조건 기반)
+   * 동기화 시 중복 확인용
+   */
+  async getByCharacterPair(
+    projectId: string,
+    fromCharacterId: string,
+    toCharacterId: string
+  ): Promise<Relationship | null> {
+    const { data } = await this.supabase
+      .from("relationships")
+      .select("*")
+      .eq("project_id", projectId)
+      .eq("from_character_id", fromCharacterId)
+      .eq("to_character_id", toCharacterId)
+      .maybeSingle();
+
+    if (!data) {
+      return null;
+    }
+
+    return toRelationship(data);
+  }
+
   async create(data: CreateRelationshipInput): Promise<Relationship> {
     const insertData = {
       project_id: data.projectId,
