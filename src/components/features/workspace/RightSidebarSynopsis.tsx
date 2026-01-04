@@ -87,6 +87,7 @@ export function RightSidebarSynopsis({
         editor.commands.setContent(synopsis.content);
       }
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 외부 데이터 로드 완료 시 상태 초기화
     setSaveStatus("saved");
   }, [editor, synopsis?.id, synopsis?.content]);
 

@@ -43,6 +43,7 @@ export function PlotMemo({
 
   // 외부 plot이 변경되면 draft 동기화
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 외부 prop → 내부 state 동기화 패턴
     setDraft(plot ?? "");
   }, [plot]);
 

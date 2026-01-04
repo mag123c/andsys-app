@@ -61,7 +61,6 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
         .getInstalledRelatedApps()
         .then((apps) => {
           const installed = apps.some((app) => app.platform === "webapp");
-          // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 1회성 초기화
           setIsInstalled(installed);
         })
         .catch(() => {
