@@ -4,17 +4,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { FileText, Check, Loader2 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import Placeholder from "@tiptap/extension-placeholder";
-import TextAlign from "@tiptap/extension-text-align";
-import FontFamily from "@tiptap/extension-font-family";
-import { TextStyle } from "@tiptap/extension-text-style";
 import type { Synopsis } from "@/repositories/types";
 import { cn } from "@/lib/utils";
 import { formatCharacterCount } from "@/lib/format";
 import { EditorToolbar } from "@/components/features/editor/EditorToolbar";
-import { FontSize } from "@/components/features/editor/extensions";
+import { createEditorExtensions } from "@/components/features/editor/extensions";
 
 const DEBOUNCE_MS = 500;
 
@@ -40,39 +34,9 @@ export function RightSidebarSynopsis({
   const pendingContentRef = useRef<JSONContent | null>(null);
   const synopsisIdRef = useRef<string | null>(null);
 
-  // Tiptap 확장 기능
+  // Tiptap 확장 기능 (공유 함수 사용)
   const extensions = useMemo(
-    () => [
-      StarterKit.configure({
-        heading: false,
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        blockquote: false,
-        codeBlock: false,
-        code: false,
-        strike: false,
-        horizontalRule: false,
-        gapcursor: false,
-        dropcursor: {
-          color: "#DBEAFE",
-          width: 4,
-        },
-      }),
-      Placeholder.configure({
-        placeholder: "이 소설의 전체 줄거리를 작성하세요...",
-      }),
-      Underline,
-      TextStyle,
-      FontFamily.configure({
-        types: ["textStyle"],
-      }),
-      TextAlign.configure({
-        types: ["paragraph"],
-        alignments: ["left", "center"],
-      }),
-      FontSize,
-    ],
+    () => createEditorExtensions("이 소설의 전체 줄거리를 작성하세요..."),
     []
   );
 

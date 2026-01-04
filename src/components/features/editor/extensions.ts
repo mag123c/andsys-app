@@ -1,4 +1,10 @@
 import { Extension } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Placeholder from "@tiptap/extension-placeholder";
+import TextAlign from "@tiptap/extension-text-align";
+import FontFamily from "@tiptap/extension-font-family";
+import { TextStyle } from "@tiptap/extension-text-style";
 
 /**
  * 폰트 크기 확장 (TextStyle 기반)
@@ -93,3 +99,41 @@ export const EDITOR_FONT_SIZES = [
 
 /** 기본 폰트 크기 */
 export const DEFAULT_FONT_SIZE = "12pt";
+
+/**
+ * 에디터 확장 기능 생성 (중복 등록 방지를 위한 공유 함수)
+ * @param placeholder - placeholder 텍스트 (기본: "글을 작성하세요...")
+ */
+export function createEditorExtensions(placeholder = "글을 작성하세요...") {
+  return [
+    StarterKit.configure({
+      heading: false,
+      bulletList: false,
+      orderedList: false,
+      listItem: false,
+      blockquote: false,
+      codeBlock: false,
+      code: false,
+      strike: false,
+      horizontalRule: false,
+      gapcursor: false,
+      dropcursor: {
+        color: "#DBEAFE",
+        width: 4,
+      },
+    }),
+    Placeholder.configure({
+      placeholder,
+    }),
+    Underline,
+    TextStyle,
+    FontFamily.configure({
+      types: ["textStyle"],
+    }),
+    TextAlign.configure({
+      types: ["paragraph"],
+      alignments: ["left", "center"],
+    }),
+    FontSize,
+  ];
+}
