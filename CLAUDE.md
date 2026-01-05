@@ -47,14 +47,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Behavior (`.claude/skills/`)
 
-모든 작업은 task skill을 사용합니다.
+**스킬 자동 호출 규칙** (필수 준수):
+
+| 트리거 상황 | 필수 스킬 | 이유 |
+|-------------|----------|------|
+| 코드 변경 요청 시 | `/task` 먼저 호출 | 워크플로우 일관성 |
+| Plan Mode 종료 후 구현 시작 | `/task` 호출 | 분석→구현→리뷰 체이닝 |
+| 구현 완료 시 | `/reviewer` 자동 호출 | 품질 검증 |
+| 커밋/PR 전 | `/verify` 실행 | 빌드/린트/테스트 검증 |
+
+**규칙**: 스킬 호출 없이 직접 코드를 작성하면 안 됩니다. 사용자가 명시적으로 스킬을 호출하지 않아도, Claude가 먼저 적절한 스킬을 호출해야 합니다.
 
 | 스킬 | 용도 |
 |------|------|
-| `/task` | 전체 워크플로우 (분석→구현→리뷰→커밋) |
-| `/developer` | 데이터 계층, 로직, Repository |
-| `/frontend` | RSC, SEO, UI 컴포넌트 |
-| `/reviewer` | 코드 리뷰, 버그/보안/성능 |
+| `/task` | 전체 워크플로우 오케스트레이션 (분석→구현→리뷰→검증→커밋) |
+| `/developer` | 데이터 계층, 로직, Repository, 타입 정의 |
+| `/frontend` | RSC 보안, 서버/클라이언트 분리, UI 컴포넌트 |
+| `/reviewer` | 코드 리뷰 (버그/보안/성능/가독성) |
+| `/verify` | 자체 검증 루프 (빌드/린트/테스트/E2E) |
+
+### Commands (`.claude/commands/`)
+
+워크플로우 패턴화. 자주 사용하는 명령어를 템플릿화.
+
+| 커맨드 | 용도 |
+|--------|------|
+| `pr.md` | PR 생성 워크플로우 (검증 → 푸시 → PR) |
+| `e2e.md` | E2E 테스트 워크플로우 (Playwright MCP) |
 
 ### Selective Loading Rules
 
