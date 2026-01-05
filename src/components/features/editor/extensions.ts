@@ -117,6 +117,8 @@ export function createEditorExtensions(placeholder = "글을 작성하세요..."
       strike: false,
       horizontalRule: false,
       gapcursor: false,
+      // StarterKit v3에서 Underline 기본 포함 - 별도 추가하므로 비활성화
+      underline: false,
       dropcursor: {
         color: "#DBEAFE",
         width: 4,

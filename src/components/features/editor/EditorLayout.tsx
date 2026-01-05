@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -219,6 +220,7 @@ export function EditorLayout({
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>회차 목록</SheetTitle>
+            <SheetDescription>소설의 회차 목록을 탐색합니다</SheetDescription>
           </SheetHeader>
           <EditorSidebar
             project={project}

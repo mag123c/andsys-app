@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "./SidebarProfile";
+import { SettingsModal } from "@/components/features/settings";
 
 const MAX_LIST_ITEMS = 20;
 
@@ -51,6 +52,10 @@ interface NovelSidebarProps {
   onToggle: () => void;
   onRelationshipClick?: () => void;
   className?: string;
+  /** 사이드바 토글 버튼 표시 여부 (기본값: true) */
+  showToggle?: boolean;
+  /** 사이드바 border 숨기기 (모바일 Sheet에서 사용, 기본값: false) */
+  hideBorder?: boolean;
 }
 
 export function NovelSidebar({
@@ -61,10 +66,15 @@ export function NovelSidebar({
   onToggle,
   onRelationshipClick,
   className,
+  showToggle = true,
+  hideBorder = false,
 }: NovelSidebarProps) {
   const pathname = usePathname();
   const basePath = `/novels/${project.id}`;
   const { auth } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const handleSettingsClick = useCallback(() => setSettingsOpen(true), []);
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -125,55 +135,68 @@ export function NovelSidebar({
   const displayChapters = showAllChapters ? chapters : chapters.slice(0, MAX_LIST_ITEMS);
   const displayCharacters = showAllCharacters ? characters : characters.slice(0, MAX_LIST_ITEMS);
 
+  // collapsed 상태의 사이드바 렌더링
+  const collapsedSidebar = (
+    <aside
+      className={cn(
+        "flex flex-col bg-background h-full w-12",
+        !hideBorder && "border-r",
+        className
+      )}
+    >
+      <div className="flex-1 flex flex-col items-center py-4 gap-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = getIsActive(item);
+          const colors = MENU_COLORS[item.id];
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
+                isActive
+                  ? cn(colors.active, "text-foreground")
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              )}
+              title={item.label}
+            >
+              <Icon className={cn("h-4 w-4", colors.icon)} />
+            </Link>
+          );
+        })}
+      </div>
+      <SidebarProfile
+        isLoading={isLoading}
+        isGuest={isGuest}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        collapsed={collapsed}
+        onToggle={onToggle}
+        showToggle={showToggle}
+        onSettingsClick={handleSettingsClick}
+      />
+    </aside>
+  );
+
   if (collapsed) {
     return (
-      <aside
-        className={cn(
-          "flex flex-col border-r bg-background h-full w-12",
-          className
-        )}
-      >
-        <div className="flex-1 flex flex-col items-center py-4 gap-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = getIsActive(item);
-            const colors = MENU_COLORS[item.id];
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
-                  isActive
-                    ? cn(colors.active, "text-foreground")
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                )}
-                title={item.label}
-              >
-                <Icon className={cn("h-4 w-4", colors.icon)} />
-              </Link>
-            );
-          })}
-        </div>
-        <SidebarProfile
-          isLoading={isLoading}
-          isGuest={isGuest}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          collapsed={collapsed}
-          onToggle={onToggle}
-        />
-      </aside>
+      <>
+        {collapsedSidebar}
+        <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      </>
     );
   }
 
   return (
-    <aside
-      className={cn(
-        "flex flex-col border-r bg-background h-full w-64",
-        className
-      )}
-    >
+    <>
+      <aside
+        className={cn(
+          "flex flex-col bg-background h-full w-64",
+          !hideBorder && "border-r",
+          className
+        )}
+      >
       {/* 헤더 */}
       <div className="p-4 border-b">
         <Link
@@ -328,7 +351,11 @@ export function NovelSidebar({
         avatarUrl={avatarUrl}
         collapsed={collapsed}
         onToggle={onToggle}
+        showToggle={showToggle}
+        onSettingsClick={handleSettingsClick}
       />
-    </aside>
+      </aside>
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+    </>
   );
 }
