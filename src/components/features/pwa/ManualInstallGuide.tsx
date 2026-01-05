@@ -75,8 +75,8 @@ export function ManualInstallGuide() {
         {isMacOSSafari && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              macOS Safari에서는 PWA 설치가 지원되지 않습니다. Chrome 또는
-              Edge에서 접속해주세요.
+              Safari에서는 앱 설치가 지원되지 않습니다. Chrome 또는 Edge에서
+              접속해주세요.
             </p>
           </div>
         )}

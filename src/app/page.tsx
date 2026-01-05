@@ -81,7 +81,7 @@ const features = [
     description: "앱처럼 설치하고, 인터넷 없이도 작업하세요. 회원가입하면 어떤 기기에서든 이어쓸 수 있습니다.",
     image: "/images/landing/screenshot-project-dashboard.png",
     imageAlt: "프로젝트 대시보드",
-    highlights: ["PWA 설치 지원", "오프라인 작업", "클라우드 동기화"],
+    highlights: ["앱으로 설치 가능", "오프라인 작업", "클라우드 동기화"],
   },
 ];
 
