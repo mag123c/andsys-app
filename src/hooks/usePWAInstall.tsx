@@ -8,7 +8,13 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { isPWA } from "@/lib/pwa";
+import {
+  isPWA,
+  isIOSSafari as checkIOSSafari,
+  isMacOSSafari as checkMacOSSafari,
+  isFirefox as checkFirefox,
+  needsManualInstallGuide as checkNeedsManualGuide,
+} from "@/lib/pwa";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -36,6 +42,14 @@ interface PWAInstallContextValue {
   showInstallButton: boolean;
   /** 앱에서 열기 (설치된 경우) */
   openInApp: () => void;
+  /** 수동 설치 안내가 필요한지 (Safari/Firefox) */
+  needsManualGuide: boolean;
+  /** iOS Safari인지 */
+  isIOSSafari: boolean;
+  /** macOS Safari인지 */
+  isMacOSSafari: boolean;
+  /** Firefox인지 */
+  isFirefox: boolean;
 }
 
 const PWAInstallContext = createContext<PWAInstallContextValue | null>(null);
@@ -45,12 +59,28 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     useState<BeforeInstallPromptEvent | null>(null);
   const [isPwaMode, setIsPwaMode] = useState(true); // 초기값 true로 설정하여 SSR에서 버튼 숨김
   const [isInstalled, setIsInstalled] = useState(false);
+  const [needsManualGuide, setNeedsManualGuide] = useState(false);
+  const [browserType, setBrowserType] = useState({
+    isIOSSafari: false,
+    isMacOSSafari: false,
+    isFirefox: false,
+  });
 
   useEffect(() => {
     // 클라이언트에서 PWA 모드 확인
     const pwaMode = isPWA();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 1회성 초기화
     setIsPwaMode(pwaMode);
+
+    // 브라우저 타입 감지
+    setBrowserType({
+      isIOSSafari: checkIOSSafari(),
+      isMacOSSafari: checkMacOSSafari(),
+      isFirefox: checkFirefox(),
+    });
+
+    // 수동 설치 안내 필요 여부 확인
+    setNeedsManualGuide(checkNeedsManualGuide());
 
     // PWA 모드면 이벤트 캡처 불필요
     if (pwaMode) return;
@@ -116,6 +146,10 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
         isPwaMode,
         showInstallButton: !isPwaMode, // 브라우저 모드일 때만 true
         openInApp,
+        needsManualGuide,
+        isIOSSafari: browserType.isIOSSafari,
+        isMacOSSafari: browserType.isMacOSSafari,
+        isFirefox: browserType.isFirefox,
       }}
     >
       {children}

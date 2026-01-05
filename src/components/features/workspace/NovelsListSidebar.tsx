@@ -9,6 +9,7 @@ import { usePWAMode } from "@/hooks/usePWAMode";
 import { SidebarProfile } from "./SidebarProfile";
 import { SettingsModal } from "@/components/features/settings";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { OpenInAppButton } from "@/components/features/pwa";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -155,12 +156,18 @@ export function NovelsListSidebar({
           })}
           {showInstallButton && (
             isInstalled ? (
-              <span
-                className="flex items-center justify-center w-8 h-8 rounded-md text-emerald-500"
-                title="앱 설치됨"
-              >
-                <Check className="h-4 w-4" />
-              </span>
+              <>
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-md text-emerald-500"
+                  title="앱 설치됨"
+                >
+                  <Check className="h-4 w-4" />
+                </span>
+                <OpenInAppButton
+                  collapsed
+                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-accent/50 transition-colors"
+                />
+              </>
             ) : (
               <button
                 onClick={canInstall ? install : undefined}
@@ -273,10 +280,15 @@ export function NovelsListSidebar({
           {showInstallButton && (
             <li>
               {isInstalled ? (
-                <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-600 dark:text-emerald-400">
-                  <Check className="h-4 w-4" />
-                  <span>앱 설치됨</span>
-                </span>
+                <>
+                  <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-600 dark:text-emerald-400">
+                    <Check className="h-4 w-4" />
+                    <span>앱 설치됨</span>
+                  </span>
+                  <OpenInAppButton
+                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm w-full text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
+                  />
+                </>
               ) : (
                 <button
                   onClick={canInstall ? install : undefined}

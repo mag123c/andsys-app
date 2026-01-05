@@ -1,6 +1,6 @@
 {
   "$schema": "ai-context/technical/pwa-config",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "PWA 구성 및 환경별 동작 정의",
   "terminology": {
     "오프라인": "인터넷 연결 없음",
@@ -54,8 +54,22 @@
   "components": {
     "InstallPrompt": {
       "path": "src/components/features/pwa/InstallPrompt.tsx",
-      "location": "page.tsx (랜딩 페이지)",
-      "shows": "브라우저에서 설치 가능할 때",
+      "location": "page.tsx (랜딩), NovelsListLayout.tsx (대시보드)",
+      "shows": "브라우저에서 설치 가능할 때 (24시간 dismiss 정책)",
+      "hooks": ["usePWAInstall"],
+      "dismissPolicy": "pwa-storage.ts (24시간 만료)"
+    },
+    "ManualInstallGuide": {
+      "path": "src/components/features/pwa/ManualInstallGuide.tsx",
+      "location": "layout.tsx",
+      "shows": "Safari/Firefox에서 beforeinstallprompt 미지원 시",
+      "hooks": ["usePWAInstall"],
+      "dismissPolicy": "pwa-storage.ts (24시간 만료)"
+    },
+    "OpenInAppButton": {
+      "path": "src/components/features/pwa/OpenInAppButton.tsx",
+      "location": "NovelsListSidebar.tsx",
+      "shows": "브라우저에서 앱 설치된 경우",
       "hooks": ["usePWAInstall"]
     },
     "SidebarInstallButton": {
@@ -67,7 +81,7 @@
     "UpdatePrompt": {
       "path": "src/components/features/pwa/UpdatePrompt.tsx",
       "location": "layout.tsx",
-      "shows": "SW 업데이트 감지 시"
+      "shows": "SW 업데이트 감지 시 (자동 리로드)"
     },
     "PWASyncButton": {
       "path": "src/components/features/pwa/PWASyncButton.tsx",
@@ -79,6 +93,13 @@
       "location": "DashboardHeader.tsx",
       "shows": "클라우드 환경(브라우저)에서만"
     }
+  },
+  "dismissPolicy": {
+    "storage": "src/lib/pwa-storage.ts",
+    "key": "pwa-prompt-dismissed",
+    "format": "JSON { timestamp: number }",
+    "duration": "24시간 (86400000ms)",
+    "behavior": "만료 후 자동 재표시"
   },
   "syncBehavior": {
     "local": {
@@ -128,9 +149,14 @@
   "keyFiles": [
     "src/app/sw.ts",
     "src/lib/pwa.ts",
+    "src/lib/pwa-storage.ts",
     "src/hooks/usePWAMode.ts",
     "src/hooks/usePWAInstall.tsx",
     "src/hooks/useSyncEngine.ts",
+    "src/components/features/pwa/InstallPrompt.tsx",
+    "src/components/features/pwa/ManualInstallGuide.tsx",
+    "src/components/features/pwa/UpdatePrompt.tsx",
+    "src/components/features/pwa/OpenInAppButton.tsx",
     "src/components/features/pwa/PWASyncButton.tsx",
     "src/components/features/sync/SyncStatusIndicator.tsx",
     "public/manifest.json",

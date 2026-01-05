@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { NovelsListSidebar } from "./NovelsListSidebar";
+import { InstallPrompt } from "@/components/features/pwa";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
 
 const SIDEBAR_COLLAPSED_KEY = "4ndsys:novels-list-sidebar-collapsed";
@@ -73,6 +74,9 @@ export function NovelsListLayout({ children }: NovelsListLayoutProps) {
 
         <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
       </div>
+
+      {/* 대시보드에서도 설치 유도 */}
+      <InstallPrompt />
     </div>
   );
 }
