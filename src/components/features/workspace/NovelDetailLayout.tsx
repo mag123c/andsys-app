@@ -74,7 +74,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
 
       {/* Mobile sidebar - Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-64 p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>네비게이션</SheetTitle>
             <SheetDescription>소설 메뉴를 탐색합니다</SheetDescription>
