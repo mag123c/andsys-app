@@ -68,6 +68,7 @@ export type UpdateCharacterInput = Partial<
     | "gender"
     | "race"
     | "imageUrl"
+    | "order"
     | "height"
     | "weight"
     | "appearance"
