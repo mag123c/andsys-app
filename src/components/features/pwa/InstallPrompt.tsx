@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Download } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
-
-const STORAGE_KEY = "pwa-prompt-dismissed";
+import { isPromptDismissed, setPromptDismissed } from "@/lib/pwa-storage";
 
 export function InstallPrompt() {
   const { canInstall, install } = usePWAInstall();
@@ -13,14 +12,10 @@ export function InstallPrompt() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // localStorage 확인 (시크릿 모드 등에서 실패 가능)
-    try {
-      if (localStorage.getItem(STORAGE_KEY)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 1회성 실행
-        setDismissed(true);
-      }
-    } catch {
-      // localStorage 접근 불가 시 무시
+    // 24시간 만료 정책으로 dismiss 상태 확인
+    if (isPromptDismissed()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 초기화 시 1회성 실행
+      setDismissed(true);
     }
     setInitialized(true);
   }, []);
@@ -31,11 +26,7 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setDismissed(true);
-    try {
-      localStorage.setItem(STORAGE_KEY, "true");
-    } catch {
-      // localStorage 접근 불가 시 무시 (세션 동안만 dismissed 유지)
-    }
+    setPromptDismissed(); // 24시간 타임스탬프 저장
   };
 
   if (!initialized || !canInstall || dismissed) return null;
@@ -54,7 +45,7 @@ export function InstallPrompt() {
               설치
             </Button>
             <Button size="sm" variant="ghost" onClick={handleDismiss}>
-              나중에
+              오늘 하루 보지 않기
             </Button>
           </div>
         </div>

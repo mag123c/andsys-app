@@ -121,13 +121,16 @@ refactor: 코드 정리
 
 ## Phase 4: 마무리
 
-### 최종 점검
+### 최종 점검 (/verify 스킬 호출)
 
-```bash
-pnpm build          # 빌드 확인
-pnpm lint           # 린트 확인
-pnpm test:run       # 테스트 확인 (있으면)
 ```
+/verify 실행
+    ├─ pnpm build    # 빌드 확인
+    ├─ pnpm lint     # 린트 확인
+    └─ pnpm test:run # 테스트 확인
+```
+
+**규칙**: 커밋 전에 반드시 `/verify` 스킬을 실행하여 자체 검증 루프를 거쳐야 합니다. 검증 실패 시 Claude가 스스로 수정하고 재검증합니다.
 
 ### 문서 업데이트
 
