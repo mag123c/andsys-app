@@ -5,9 +5,16 @@ import Image from "next/image";
 import { Book, Download, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { usePWAMode } from "@/hooks/usePWAMode";
 import { SidebarProfile } from "./SidebarProfile";
 import { SettingsModal } from "@/components/features/settings";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Discord 공식 로고 아이콘
 function DiscordIcon({ className }: { className?: string }) {
@@ -67,6 +74,7 @@ export function NovelsListSidebar({
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { canInstall, isInstalled, install, openInApp, showInstallButton } = usePWAInstall();
+  const isPwaMode = usePWAMode();
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -84,15 +92,30 @@ export function NovelsListSidebar({
           className
         )}
       >
-        {/* 로고 */}
+        {/* 로고 + 환경 표시 */}
         <div className="flex items-center justify-center py-4 border-b">
-          <Image
-            src="/icons/icon-192.png"
-            alt="4ndSYS"
-            width={24}
-            height={24}
-            className="rounded"
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="relative">
+                <Image
+                  src="/icons/icon-192.png"
+                  alt="4ndSYS"
+                  width={24}
+                  height={24}
+                  className="rounded"
+                />
+                <span
+                  className={cn(
+                    "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background",
+                    isPwaMode ? "bg-amber-500" : "bg-sky-500"
+                  )}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {isPwaMode ? "로컬 환경" : "클라우드 환경"}
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* 빈 공간 */}
@@ -175,7 +198,7 @@ export function NovelsListSidebar({
         className
       )}
     >
-      {/* 헤더: 로고 + 앱명 */}
+      {/* 헤더: 로고 + 앱명 + 환경 뱃지 */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
           <Image
@@ -185,7 +208,18 @@ export function NovelsListSidebar({
             height={32}
             className="rounded"
           />
-          <span className="font-semibold text-lg">4ndSYS</span>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg">4ndSYS</span>
+            <Badge
+              variant="secondary"
+              className={cn(
+                "text-xs px-1.5 py-0",
+                isPwaMode ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
+              )}
+            >
+              {isPwaMode ? "로컬" : "클라우드"}
+            </Badge>
+          </div>
         </div>
       </div>
 

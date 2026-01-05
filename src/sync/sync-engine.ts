@@ -43,6 +43,7 @@ export class SyncEngine {
   private _isSyncing = false;
   private _pendingCount = 0;
   private _lastError: string | null = null;
+  private _initialPullComplete = false;
   private listeners: Set<() => void> = new Set();
 
   get status(): SyncStatus {
@@ -55,6 +56,18 @@ export class SyncEngine {
 
   get lastError(): string | null {
     return this._lastError;
+  }
+
+  get initialPullComplete(): boolean {
+    return this._initialPullComplete;
+  }
+
+  /**
+   * 초기 pull 완료 표시 (비회원/오프라인용)
+   */
+  markInitialPullComplete(): void {
+    this._initialPullComplete = true;
+    this.notifyListeners();
   }
 
   /**
@@ -911,9 +924,11 @@ export class SyncEngine {
       }
 
       await this.updatePendingCount();
+      this._initialPullComplete = true;
       this.setStatus("idle");
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
+      this._initialPullComplete = true; // 에러가 나도 초기 pull 시도는 완료
       this.setStatus("error", errorMsg);
       throw error;
     }

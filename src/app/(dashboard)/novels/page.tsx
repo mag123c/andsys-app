@@ -1,10 +1,12 @@
 "use client";
 
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/hooks/useProjects";
+import { useSyncEngine } from "@/hooks/useSyncEngine";
 import {
   ProjectCard,
+  ProjectCardSkeleton,
   CreateProjectDialog,
   EmptyProjects,
 } from "@/components/features/project";
@@ -12,6 +14,10 @@ import {
 export default function ProjectsPage() {
   const { projects, isLoading, error, createProject, updateProject, deleteProject } =
     useProjects();
+  const { initialPullComplete } = useSyncEngine();
+
+  // 스켈레톤 표시 조건: 로컬 로딩 중 OR 초기 동기화 미완료
+  const showSkeleton = isLoading || !initialPullComplete;
 
   const handleCreate = async (data: Parameters<typeof createProject>[0]) => {
     try {
@@ -40,11 +46,22 @@ export default function ProjectsPage() {
     }
   };
 
-  if (isLoading) {
+  if (showSkeleton) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <>
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold">내 소설</h1>
+            <p className="text-muted-foreground mt-1">불러오는 중...</p>
+          </div>
+        </header>
+        {/* 6개: 3열 그리드에서 2행 분량 */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProjectCardSkeleton key={i} />
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -74,14 +91,23 @@ export default function ProjectsPage() {
         <EmptyProjects />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-            />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.3) }}
+              >
+                <ProjectCard
+                  project={project}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </>

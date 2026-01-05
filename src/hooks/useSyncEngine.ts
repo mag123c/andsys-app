@@ -34,6 +34,7 @@ interface UseSyncEngineReturn {
   pendingCount: number;
   lastError: string | null;
   isPwaMode: boolean;
+  initialPullComplete: boolean;
   syncNow: () => Promise<SyncResult>;
 }
 
@@ -71,6 +72,12 @@ export function useSyncEngine(): UseSyncEngineReturn {
     (callback) => syncEngine.subscribe(callback),
     () => syncEngine.lastError,
     () => null
+  );
+
+  const initialPullComplete = useSyncExternalStore(
+    (callback) => syncEngine.subscribe(callback),
+    () => syncEngine.initialPullComplete,
+    () => true // SSR에서는 완료된 것으로 간주
   );
 
   // 수동 동기화
@@ -152,6 +159,13 @@ export function useSyncEngine(): UseSyncEngineReturn {
       // 초기 로딩 시에는 조용히 실패 (서버 연결 문제일 수 있음)
     });
   }, [userId, isOnline]);
+
+  // 비회원이거나 오프라인이면 초기 pull 완료로 표시 (스켈레톤 해제용)
+  useEffect(() => {
+    if (auth.status === "guest" || !isOnline) {
+      syncEngine.markInitialPullComplete();
+    }
+  }, [auth.status, isOnline]);
 
   // Supabase Realtime 구독
   useEffect(() => {
@@ -322,6 +336,7 @@ export function useSyncEngine(): UseSyncEngineReturn {
     pendingCount,
     lastError,
     isPwaMode,
+    initialPullComplete,
     syncNow,
   };
 }
