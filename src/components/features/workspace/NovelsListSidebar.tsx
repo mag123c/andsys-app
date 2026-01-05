@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Book, Download, ExternalLink } from "lucide-react";
+import { Book, Check, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { usePWAMode } from "@/hooks/usePWAMode";
@@ -73,8 +73,12 @@ export function NovelsListSidebar({
 }: NovelsListSidebarProps) {
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { canInstall, isInstalled, install, openInApp, showInstallButton } = usePWAInstall();
+  const { canInstall, isInstalled, install, showInstallButton } = usePWAInstall();
   const isPwaMode = usePWAMode();
+
+  // 클라우드 환경 = 회원 + 브라우저 (자동 동기화)
+  // 로컬 환경 = 비회원, 또는 PWA (수동 동기화)
+  const isCloud = auth.status === "authenticated" && !isPwaMode;
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -107,13 +111,13 @@ export function NovelsListSidebar({
                 <span
                   className={cn(
                     "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background",
-                    isPwaMode ? "bg-amber-500" : "bg-sky-500"
+                    isCloud ? "bg-sky-500" : "bg-amber-500"
                   )}
                 />
               </div>
             </TooltipTrigger>
             <TooltipContent side="right">
-              {isPwaMode ? "로컬 환경" : "클라우드 환경"}
+              {isCloud ? "클라우드 환경" : "로컬 환경"}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -150,29 +154,32 @@ export function NovelsListSidebar({
             );
           })}
           {showInstallButton && (
-            <button
-              onClick={isInstalled ? openInApp : canInstall ? install : undefined}
-              disabled={!canInstall && !isInstalled}
-              className={cn(
-                "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
-                canInstall || isInstalled
-                  ? "hover:bg-accent/50 cursor-pointer"
-                  : "opacity-50 cursor-not-allowed"
-              )}
-              title={
-                isInstalled
-                  ? "앱에서 열기"
-                  : canInstall
+            isInstalled ? (
+              <span
+                className="flex items-center justify-center w-8 h-8 rounded-md text-emerald-500"
+                title="앱 설치됨"
+              >
+                <Check className="h-4 w-4" />
+              </span>
+            ) : (
+              <button
+                onClick={canInstall ? install : undefined}
+                disabled={!canInstall}
+                className={cn(
+                  "flex items-center justify-center w-8 h-8 rounded-md transition-colors",
+                  canInstall
+                    ? "hover:bg-accent/50 cursor-pointer"
+                    : "opacity-50 cursor-not-allowed"
+                )}
+                title={
+                  canInstall
                     ? "앱 다운로드"
                     : "이 브라우저에서는 앱 설치를 지원하지 않습니다"
-              }
-            >
-              {isInstalled ? (
-                <ExternalLink className="h-4 w-4 text-sky-500" />
-              ) : (
+                }
+              >
                 <Download className="h-4 w-4 text-sky-500" />
-              )}
-            </button>
+              </button>
+            )
           )}
         </nav>
 
@@ -214,10 +221,10 @@ export function NovelsListSidebar({
               variant="secondary"
               className={cn(
                 "text-xs px-1.5 py-0",
-                isPwaMode ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" : "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400"
+                isCloud ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
               )}
             >
-              {isPwaMode ? "로컬" : "클라우드"}
+              {isCloud ? "클라우드" : "로컬"}
             </Badge>
           </div>
         </div>
@@ -265,33 +272,31 @@ export function NovelsListSidebar({
           })}
           {showInstallButton && (
             <li>
-              <button
-                onClick={isInstalled ? openInApp : canInstall ? install : undefined}
-                disabled={!canInstall && !isInstalled}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm w-full transition-colors",
-                  canInstall || isInstalled
-                    ? "text-muted-foreground hover:bg-accent/50 hover:text-foreground cursor-pointer"
-                    : "text-muted-foreground/50 cursor-not-allowed"
-                )}
-                title={
-                  !canInstall && !isInstalled
-                    ? "이 브라우저에서는 앱 설치를 지원하지 않습니다"
-                    : undefined
-                }
-              >
-                {isInstalled ? (
-                  <>
-                    <ExternalLink className="h-4 w-4 text-sky-500" />
-                    <span>앱에서 열기</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 text-sky-500" />
-                    <span>앱 다운로드</span>
-                  </>
-                )}
-              </button>
+              {isInstalled ? (
+                <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-600 dark:text-emerald-400">
+                  <Check className="h-4 w-4" />
+                  <span>앱 설치됨</span>
+                </span>
+              ) : (
+                <button
+                  onClick={canInstall ? install : undefined}
+                  disabled={!canInstall}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm w-full transition-colors",
+                    canInstall
+                      ? "text-muted-foreground hover:bg-accent/50 hover:text-foreground cursor-pointer"
+                      : "text-muted-foreground/50 cursor-not-allowed"
+                  )}
+                  title={
+                    !canInstall
+                      ? "이 브라우저에서는 앱 설치를 지원하지 않습니다"
+                      : undefined
+                  }
+                >
+                  <Download className="h-4 w-4 text-sky-500" />
+                  <span>앱 다운로드</span>
+                </button>
+              )}
             </li>
           )}
         </ul>

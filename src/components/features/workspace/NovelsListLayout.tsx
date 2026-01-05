@@ -45,6 +45,7 @@ export function NovelsListLayout({ children }: NovelsListLayoutProps) {
           <NovelsListSidebar
             collapsed={false}
             onToggle={() => setMobileOpen(false)}
+            className="border-r-0"
           />
         </SheetContent>
       </Sheet>
