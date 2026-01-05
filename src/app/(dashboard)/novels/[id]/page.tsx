@@ -28,6 +28,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     createChapter,
     deleteChapter,
     updateChapter,
+    updateChapterOrder,
     reorderChapters,
   } = useChapters(id);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -72,6 +73,26 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       }
     },
     [updateChapter]
+  );
+
+  const handleUpdateChapterOrder = useCallback(
+    async (chapterId: string, newOrder: number) => {
+      try {
+        const result = await updateChapterOrder(chapterId, newOrder);
+        if (result.swapped && result.swappedWithChapter) {
+          toast.success(
+            `${newOrder}화로 변경되었습니다. "${result.swappedWithChapter.title}"와 위치가 교환되었습니다.`
+          );
+        } else {
+          toast.success(`${newOrder}화로 변경되었습니다.`);
+        }
+        return result;
+      } catch {
+        toast.error("회차 번호 변경에 실패했습니다.");
+        throw new Error("회차 번호 변경에 실패했습니다.");
+      }
+    },
+    [updateChapterOrder]
   );
 
   const handleReorderChapters = useCallback(
@@ -153,6 +174,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             projectId={project.id}
             onDelete={handleDeleteChapter}
             onUpdate={handleUpdateChapter}
+            onUpdateOrder={handleUpdateChapterOrder}
             onReorder={handleReorderChapters}
           />
         )}

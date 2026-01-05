@@ -20,7 +20,7 @@ interface EditorPageProps {
 export default function EditorPage({ params }: EditorPageProps) {
   const { id: projectId, chapterId } = use(params);
   const { project, isLoading: isProjectLoading } = useProject(projectId);
-  const { chapters, isLoading: isChaptersLoading } = useChapters(projectId);
+  const { chapters, isLoading: isChaptersLoading, reorderChapters } = useChapters(projectId);
   const {
     chapter,
     isLoading: isChapterLoading,
@@ -114,6 +114,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       onTitleChange={handleTitleChange}
       onContentChange={updateContent}
       onPlotChange={updatePlot}
+      onReorderChapters={reorderChapters}
     >
       <Editor
         initialContent={chapter.content}

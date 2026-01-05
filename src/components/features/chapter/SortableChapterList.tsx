@@ -21,18 +21,31 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Chapter, UpdateChapterInput } from "@/repositories/types";
 import { ChapterCard } from "./ChapterCard";
 
+interface UpdateOrderResult {
+  swapped: boolean;
+  swappedWithChapter?: {
+    id: string;
+    title: string;
+    previousOrder: number;
+  };
+}
+
 interface SortableChapterItemProps {
   chapter: Chapter;
   projectId: string;
+  chapters: Chapter[];
   onDelete: (id: string) => void;
   onUpdate: (data: UpdateChapterInput) => Promise<void>;
+  onUpdateOrder: (newOrder: number) => Promise<UpdateOrderResult>;
 }
 
 function SortableChapterItem({
   chapter,
   projectId,
+  chapters,
   onDelete,
   onUpdate,
+  onUpdateOrder,
 }: SortableChapterItemProps) {
   const {
     attributes,
@@ -54,8 +67,10 @@ function SortableChapterItem({
       <ChapterCard
         chapter={chapter}
         projectId={projectId}
+        chapters={chapters}
         onDelete={onDelete}
         onUpdate={onUpdate}
+        onUpdateOrder={onUpdateOrder}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </div>
@@ -67,6 +82,7 @@ interface SortableChapterListProps {
   projectId: string;
   onDelete: (id: string) => void;
   onUpdate: (chapterId: string, data: UpdateChapterInput) => Promise<void>;
+  onUpdateOrder: (chapterId: string, newOrder: number) => Promise<UpdateOrderResult>;
   onReorder: (chapterIds: string[]) => Promise<void>;
 }
 
@@ -75,6 +91,7 @@ export function SortableChapterList({
   projectId,
   onDelete,
   onUpdate,
+  onUpdateOrder,
   onReorder,
 }: SortableChapterListProps) {
   const [items, setItems] = useState(chapters);
@@ -124,8 +141,10 @@ export function SortableChapterList({
               key={chapter.id}
               chapter={chapter}
               projectId={projectId}
+              chapters={chapters}
               onDelete={onDelete}
               onUpdate={(data) => onUpdate(chapter.id, data)}
+              onUpdateOrder={(newOrder) => onUpdateOrder(chapter.id, newOrder)}
             />
           ))}
         </div>

@@ -12,6 +12,7 @@ import {
   createChapterUseCase,
   deleteChapterUseCase,
   reorderChaptersUseCase,
+  updateChapterOrderUseCase,
 } from "@/application/chapter";
 
 interface CreateChapterData {
@@ -20,12 +21,22 @@ interface CreateChapterData {
   plot?: string | null;
 }
 
+interface UpdateChapterOrderResult {
+  swapped: boolean;
+  swappedWithChapter?: {
+    id: string;
+    title: string;
+    previousOrder: number;
+  };
+}
+
 interface UseChaptersReturn {
   chapters: Chapter[];
   isLoading: boolean;
   error: Error | null;
   createChapter: (data: CreateChapterData) => Promise<Chapter>;
   updateChapter: (id: string, data: UpdateChapterInput) => Promise<Chapter>;
+  updateChapterOrder: (id: string, newOrder: number) => Promise<UpdateChapterOrderResult>;
   deleteChapter: (id: string) => Promise<void>;
   reorderChapters: (chapterIds: string[]) => Promise<void>;
   refetch: () => Promise<void>;
@@ -100,8 +111,27 @@ export function useChapters(projectId: string): UseChaptersReturn {
     []
   );
 
+  const updateChapterOrder = useCallback(
+    async (id: string, newOrder: number): Promise<UpdateChapterOrderResult> => {
+      const result = await updateChapterOrderUseCase({
+        chapterId: id,
+        newOrder,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to update chapter order");
+      }
+
+      return {
+        swapped: result.swapped,
+        swappedWithChapter: result.swappedWithChapter,
+      };
+    },
+    []
+  );
+
   const deleteChapter = useCallback(async (id: string): Promise<void> => {
-    // UseCase로 챕터 삭제 (삭제 후 order 자동 재정렬 포함)
+    // UseCase로 챕터 삭제 (다른 챕터 order는 유지, 빈 번호 허용)
     const result = await deleteChapterUseCase({ chapterId: id });
 
     if (!result.success) {
@@ -139,6 +169,7 @@ export function useChapters(projectId: string): UseChaptersReturn {
     error,
     createChapter,
     updateChapter,
+    updateChapterOrder,
     deleteChapter,
     reorderChapters,
     refetch,
