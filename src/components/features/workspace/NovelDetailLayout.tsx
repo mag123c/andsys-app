@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -76,6 +77,7 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>네비게이션</SheetTitle>
+            <SheetDescription>소설 메뉴를 탐색합니다</SheetDescription>
           </SheetHeader>
           <NovelSidebar
             project={project}
@@ -83,6 +85,8 @@ export function NovelDetailLayout({ children }: NovelDetailLayoutProps) {
             characters={characters}
             collapsed={false}
             onToggle={() => setMobileOpen(false)}
+            showToggle={false}
+            hideBorder
             onRelationshipClick={() => {
               setMobileOpen(false);
               setRelationshipDialogOpen(true);
