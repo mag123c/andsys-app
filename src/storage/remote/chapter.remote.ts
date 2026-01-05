@@ -19,6 +19,7 @@ interface ChapterRow {
   order: number;
   status: string;
   plot: string | null;
+  font_family: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,6 +35,7 @@ function toChapter(row: ChapterRow): Chapter {
     order: row.order,
     status: row.status as Chapter["status"],
     plot: row.plot,
+    fontFamily: row.font_family,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -121,6 +123,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
     if (data.title !== undefined) updateData.title = data.title;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.plot !== undefined) updateData.plot = data.plot;
+    if (data.fontFamily !== undefined) updateData.font_family = data.fontFamily;
     if (data.content !== undefined) {
       updateData.content = data.content;
       updateData.content_text = extractText(data.content);

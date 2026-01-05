@@ -30,7 +30,7 @@ UseCase → Repository 인터페이스 → Local 구현체 (여기) → IndexedD
 
 ## 스키마 버전
 
-현재: **v8** (2024-12-XX plot 필드 추가)
+현재: **v9** (2026-01-05 fontFamily 필드 추가)
 
 > 상세 마이그레이션 히스토리: `.claude/ai-context/technical/schema-history.json`
 

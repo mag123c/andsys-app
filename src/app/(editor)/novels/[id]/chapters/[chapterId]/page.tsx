@@ -29,6 +29,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     updateContent,
     updateTitle,
     updatePlot,
+    updateFontFamily,
     saveNow,
   } = useEditor(chapterId);
   const { synopsis, isLoading: isSynopsisLoading } = useSynopsis(projectId);
@@ -117,7 +118,9 @@ export default function EditorPage({ params }: EditorPageProps) {
       <Editor
         initialContent={chapter.content}
         onUpdate={updateContent}
+        chapterFont={chapter.fontFamily}
         defaultFont={settings.defaultFont}
+        onChapterFontChange={updateFontFamily}
       />
     </EditorLayout>
   );

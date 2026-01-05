@@ -18,6 +18,7 @@ function toChapter(local: LocalChapter): Chapter {
     order: local.order,
     status: local.status,
     plot: local.plot,
+    fontFamily: local.fontFamily,
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
   };
@@ -67,6 +68,7 @@ export class ChapterLocalRepository implements ChapterRepository {
       order: maxOrder + 1,
       status: "draft",
       plot: data.plot ?? null,
+      fontFamily: data.fontFamily ?? null,
       createdAt: now,
       updatedAt: now,
       syncStatus: isGuest ? "synced" : "pending",

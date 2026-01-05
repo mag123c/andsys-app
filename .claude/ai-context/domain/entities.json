@@ -45,6 +45,7 @@
         "order": { "type": "integer", "required": true },
         "status": { "type": "enum", "values": ["draft", "published"], "default": "draft" },
         "plot": { "type": "string", "nullable": true, "purpose": "플롯 메모" },
+        "fontFamily": { "type": "string", "nullable": true, "purpose": "회차별 기본 글꼴" },
         "createdAt": { "type": "datetime" },
         "updatedAt": { "type": "datetime" },
         "syncStatus": { "type": "enum", "values": ["synced", "pending", "conflict"], "storage": "local" },

@@ -5,6 +5,12 @@ export {
 } from "./create-chapter.usecase";
 
 export {
+  deleteChapterUseCase,
+  type DeleteChapterUseCaseInput,
+  type DeleteChapterUseCaseOutput,
+} from "./delete-chapter.usecase";
+
+export {
   reorderChaptersUseCase,
   type ReorderChaptersInput,
   type ReorderChaptersOutput,

@@ -13,8 +13,12 @@ interface EditorProps {
   className?: string;
   editable?: boolean;
   showToolbar?: boolean;
+  /** 회차별 글꼴 (Chapter.fontFamily) */
+  chapterFont?: string | null;
   /** 기본 글꼴 (사용자 설정에서 가져옴) */
   defaultFont?: string;
+  /** 회차 글꼴 변경 콜백 */
+  onChapterFontChange?: (fontFamily: string | null) => void;
 }
 
 export function Editor({
@@ -23,7 +27,9 @@ export function Editor({
   className,
   editable = true,
   showToolbar = true,
+  chapterFont,
   defaultFont,
+  onChapterFontChange,
 }: EditorProps) {
   // 확장 기능을 useMemo로 안정화하여 중복 등록 방지
   const extensions = useMemo(() => createEditorExtensions(), []);
@@ -57,15 +63,23 @@ export function Editor({
     }
   }, [editor, initialContent]);
 
+  // 폰트 우선순위: 회차별 글꼴 > 전역 기본 글꼴
+  const effectiveFont = chapterFont || defaultFont;
+
   return (
     <div className={cn("flex flex-col", className)}>
       {showToolbar && editable && (
-        <EditorToolbar editor={editor} defaultFont={defaultFont} />
+        <EditorToolbar
+          editor={editor}
+          defaultFont={defaultFont}
+          chapterFont={chapterFont}
+          onChapterFontChange={onChapterFontChange}
+        />
       )}
       <EditorContent
         editor={editor}
         className="flex-1 overflow-auto"
-        style={defaultFont ? { fontFamily: defaultFont } : undefined}
+        style={effectiveFont ? { fontFamily: effectiveFont } : undefined}
       />
     </div>
   );

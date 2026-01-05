@@ -6,7 +6,7 @@
     "name": "4ndsys",
     "implementation": "src/storage/local/db.ts"
   },
-  "currentVersion": 8,
+  "currentVersion": 9,
   "migrations": [
     {
       "version": 1,
@@ -90,6 +90,16 @@
         "chapters: plot 필드 추가"
       ],
       "reason": "챕터별 플롯 메모 기능",
+      "upgrade": "기존 데이터에 null 기본값 설정"
+    },
+    {
+      "version": 9,
+      "date": "2026-01-05",
+      "description": "회차별 글꼴 필드 추가",
+      "changes": [
+        "chapters: fontFamily 필드 추가"
+      ],
+      "reason": "회차별 기본 글꼴 설정 기능",
       "upgrade": "기존 데이터에 null 기본값 설정"
     }
   ],

@@ -14,7 +14,8 @@ interface UseEditorReturn {
   saveStatus: SaveStatus;
   updateContent: (content: JSONContent) => void;
   updateTitle: (title: string) => Promise<void>;
-  updatePlot: (plot: string | null) => Promise<void>;
+  updatePlot: (plot: string | null) => void;
+  updateFontFamily: (fontFamily: string | null) => Promise<void>;
   saveNow: () => Promise<void>;
 }
 
@@ -27,7 +28,9 @@ export function useEditor(chapterId: string): UseEditorReturn {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
 
   const pendingContentRef = useRef<JSONContent | null>(null);
+  const pendingPlotRef = useRef<string | null | undefined>(undefined);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const plotDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef(false);
   const chapterIdRef = useRef(chapterId);
 
@@ -58,25 +61,35 @@ export function useEditor(chapterId: string): UseEditorReturn {
 
   // 동기적 저장 (페이지 이탈 시 사용)
   const saveSync = useCallback(() => {
-    if (pendingContentRef.current && !isSavingRef.current) {
+    const hasPendingContent = pendingContentRef.current !== null;
+    const hasPendingPlot = pendingPlotRef.current !== undefined;
+
+    if ((hasPendingContent || hasPendingPlot) && !isSavingRef.current) {
       isSavingRef.current = true;
       // fire-and-forget이지만, IndexedDB는 동기적으로 작업을 시작함
+      const updateData: UpdateChapterInput = {};
+      if (hasPendingContent) {
+        updateData.content = pendingContentRef.current!;
+      }
+      if (hasPendingPlot) {
+        updateData.plot = pendingPlotRef.current!;
+      }
+
       chapterLocalRepository
-        .update(chapterIdRef.current, {
-          content: pendingContentRef.current,
-        })
+        .update(chapterIdRef.current, updateData)
         .catch(console.error)
         .finally(() => {
           isSavingRef.current = false;
         });
       pendingContentRef.current = null;
+      pendingPlotRef.current = undefined;
     }
   }, []);
 
   // beforeunload 및 visibilitychange 이벤트 핸들러
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (pendingContentRef.current) {
+      if (pendingContentRef.current || pendingPlotRef.current !== undefined) {
         saveSync();
         // 브라우저에 저장 중임을 알림
         e.preventDefault();
@@ -86,7 +99,7 @@ export function useEditor(chapterId: string): UseEditorReturn {
 
     const handleVisibilityChange = () => {
       // 탭이 백그라운드로 갈 때 저장
-      if (document.visibilityState === "hidden" && pendingContentRef.current) {
+      if (document.visibilityState === "hidden" && (pendingContentRef.current || pendingPlotRef.current !== undefined)) {
         saveSync();
       }
     };
@@ -105,6 +118,9 @@ export function useEditor(chapterId: string): UseEditorReturn {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (plotDebounceTimerRef.current) {
+        clearTimeout(plotDebounceTimerRef.current);
       }
       // 언마운트 시 동기적 저장 시도
       saveSync();
@@ -138,10 +154,23 @@ export function useEditor(chapterId: string): UseEditorReturn {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
+    if (plotDebounceTimerRef.current) {
+      clearTimeout(plotDebounceTimerRef.current);
+      plotDebounceTimerRef.current = null;
+    }
 
+    const updateData: UpdateChapterInput = {};
     if (pendingContentRef.current) {
-      await save({ content: pendingContentRef.current });
+      updateData.content = pendingContentRef.current;
       pendingContentRef.current = null;
+    }
+    if (pendingPlotRef.current !== undefined) {
+      updateData.plot = pendingPlotRef.current;
+      pendingPlotRef.current = undefined;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await save(updateData);
     }
   }, [save]);
 
@@ -172,8 +201,27 @@ export function useEditor(chapterId: string): UseEditorReturn {
   );
 
   const updatePlot = useCallback(
-    async (plot: string | null) => {
-      await save({ plot });
+    (plot: string | null) => {
+      pendingPlotRef.current = plot;
+      setSaveStatus("unsaved");
+
+      if (plotDebounceTimerRef.current) {
+        clearTimeout(plotDebounceTimerRef.current);
+      }
+
+      plotDebounceTimerRef.current = setTimeout(async () => {
+        if (pendingPlotRef.current !== undefined) {
+          await save({ plot: pendingPlotRef.current });
+          pendingPlotRef.current = undefined;
+        }
+      }, DEBOUNCE_MS);
+    },
+    [save]
+  );
+
+  const updateFontFamily = useCallback(
+    async (fontFamily: string | null) => {
+      await save({ fontFamily });
     },
     [save]
   );
@@ -186,6 +234,7 @@ export function useEditor(chapterId: string): UseEditorReturn {
     updateContent,
     updateTitle,
     updatePlot,
+    updateFontFamily,
     saveNow,
   };
 }
