@@ -598,6 +598,9 @@ export class SyncEngine {
               title: local.title,
               content: local.content,
               status: local.status,
+              order: local.order,
+              plot: local.plot,
+              fontFamily: local.fontFamily,
             });
           }
         }
@@ -1262,7 +1265,13 @@ export class SyncEngine {
     const id = record.id as string;
     const local = await db.chapters.get(id);
 
-    if (type === "INSERT" || !local) {
+    // pending 상태면 무조건 스킵 (로컬 변경 보존)
+    if (local?.syncStatus === "pending") {
+      return;
+    }
+
+    if (!local) {
+      // 로컬에 없으면 새로 추가
       await db.chapters.put({
         id,
         projectId: record.project_id as string,
@@ -1279,7 +1288,8 @@ export class SyncEngine {
         syncStatus: "synced",
         lastSyncedAt: new Date(),
       });
-    } else if (local.syncStatus !== "pending") {
+    } else {
+      // synced 상태이고 서버가 더 최신이면 업데이트
       const localTime = local.updatedAt.getTime();
       const remoteTime = new Date(record.updated_at as string).getTime();
 

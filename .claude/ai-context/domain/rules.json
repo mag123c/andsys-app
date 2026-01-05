@@ -49,13 +49,9 @@
       "implementation": "lib/image-utils.ts → resizeImage()"
     },
     "CHAPTER_ORDER": {
-      "description": "챕터는 order 필드로 정렬, 생성 시 자동 증가",
-      "implementation": "hooks/useChapters.ts → createChapter()"
-    },
-    "CHAPTER_REORDER_ON_DELETE": {
-      "description": "챕터 삭제 시 남은 챕터들의 order를 자동으로 재정렬 (1부터 연속)",
-      "reason": "중간 화수가 비는 현상 방지",
-      "implementation": "application/chapter/delete-chapter.usecase.ts"
+      "description": "챕터는 order 필드로 정렬, 생성 시 자동 증가, 삭제 시 재정렬하지 않음 (빈 번호 허용)",
+      "implementation": "hooks/useChapters.ts → createChapter()",
+      "note": "사용자가 회차 번호를 직접 편집하거나 드래그로 재정렬 가능"
     },
     "CHARACTER_ORDER": {
       "description": "캐릭터는 order 필드로 정렬, 드래그앤드롭으로 재정렬 가능",

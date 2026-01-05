@@ -19,5 +19,5 @@ export type CreateChapterInput = Pick<Chapter, "projectId" | "title"> &
   Partial<Pick<Chapter, "content" | "plot" | "fontFamily">>;
 
 export type UpdateChapterInput = Partial<
-  Pick<Chapter, "title" | "content" | "status" | "plot" | "fontFamily">
+  Pick<Chapter, "title" | "content" | "status" | "plot" | "fontFamily" | "order">
 >;

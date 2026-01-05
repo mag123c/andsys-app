@@ -124,6 +124,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
     if (data.status !== undefined) updateData.status = data.status;
     if (data.plot !== undefined) updateData.plot = data.plot;
     if (data.fontFamily !== undefined) updateData.font_family = data.fontFamily;
+    if (data.order !== undefined) updateData.order = data.order;
     if (data.content !== undefined) {
       updateData.content = data.content;
       updateData.content_text = extractText(data.content);
