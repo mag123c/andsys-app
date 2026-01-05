@@ -10,6 +10,7 @@ import { chapterLocalRepository } from "@/storage/local/chapter.local";
 import { db } from "@/storage/local/db";
 import {
   createChapterUseCase,
+  deleteChapterUseCase,
   reorderChaptersUseCase,
 } from "@/application/chapter";
 
@@ -55,6 +56,7 @@ export function useChapters(projectId: string): UseChaptersReturn {
           order: ch.order,
           status: ch.status,
           plot: ch.plot,
+          fontFamily: ch.fontFamily,
           createdAt: ch.createdAt,
           updatedAt: ch.updatedAt,
         }));
@@ -99,7 +101,13 @@ export function useChapters(projectId: string): UseChaptersReturn {
   );
 
   const deleteChapter = useCallback(async (id: string): Promise<void> => {
-    await chapterLocalRepository.delete(id);
+    // UseCase로 챕터 삭제 (삭제 후 order 자동 재정렬 포함)
+    const result = await deleteChapterUseCase({ chapterId: id });
+
+    if (!result.success) {
+      throw new Error(result.error || "Failed to delete chapter");
+    }
+
     // useLiveQuery가 자동으로 업데이트하므로 setState 불필요
   }, []);
 

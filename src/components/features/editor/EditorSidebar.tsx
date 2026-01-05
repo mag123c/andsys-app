@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { FolderOpen } from "lucide-react";
 import type { Project, Chapter } from "@/repositories/types";
@@ -7,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { formatCharacterCount, formatEpisodeNumber } from "@/lib/format";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { SidebarProfile } from "@/components/features/workspace";
+import { SettingsModal } from "@/components/features/settings";
 
 interface EditorSidebarProps {
   project: Project;
@@ -26,6 +28,7 @@ export function EditorSidebar({
   className,
 }: EditorSidebarProps) {
   const { auth } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";
@@ -34,26 +37,30 @@ export function EditorSidebar({
 
   if (collapsed) {
     return (
-      <aside className={cn("flex flex-col h-full w-12", className)}>
-        <div className="flex-1 flex flex-col items-center py-4 gap-2">
-          <Link
-            href={`/novels/${project.id}`}
-            className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
-            title={project.title}
-          >
-            <FolderOpen className="h-4 w-4" />
-          </Link>
-        </div>
-        <SidebarProfile
-          isLoading={isLoading}
-          isGuest={isGuest}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          collapsed={true}
-          onToggle={onToggle}
-          showToggle={!!onToggle}
-        />
-      </aside>
+      <>
+        <aside className={cn("flex flex-col h-full w-12", className)}>
+          <div className="flex-1 flex flex-col items-center py-4 gap-2">
+            <Link
+              href={`/novels/${project.id}`}
+              className="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
+              title={project.title}
+            >
+              <FolderOpen className="h-4 w-4" />
+            </Link>
+          </div>
+          <SidebarProfile
+            isLoading={isLoading}
+            isGuest={isGuest}
+            userName={userName}
+            avatarUrl={avatarUrl}
+            collapsed={true}
+            onToggle={onToggle}
+            showToggle={!!onToggle}
+            onSettingsClick={() => setSettingsOpen(true)}
+          />
+        </aside>
+        <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      </>
     );
   }
 
@@ -106,7 +113,9 @@ export function EditorSidebar({
         collapsed={false}
         onToggle={onToggle}
         showToggle={!!onToggle}
+        onSettingsClick={() => setSettingsOpen(true)}
       />
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </aside>
   );
 }

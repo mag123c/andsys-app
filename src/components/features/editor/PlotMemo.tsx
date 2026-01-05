@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ChevronDown, FileText } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -21,25 +21,6 @@ export function PlotMemo({
 }: PlotMemoProps) {
   const [expanded, setExpanded] = useLocalStorageBoolean(PLOT_EXPANDED_KEY, false);
   const [draft, setDraft] = useState(plot ?? "");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 최신 값 참조용 ref (cleanup에서 사용)
-  const draftRef = useRef(draft);
-  const plotRef = useRef(plot);
-  const onPlotChangeRef = useRef(onPlotChange);
-
-  // ref 동기화
-  useEffect(() => {
-    draftRef.current = draft;
-  }, [draft]);
-
-  useEffect(() => {
-    plotRef.current = plot;
-  }, [plot]);
-
-  useEffect(() => {
-    onPlotChangeRef.current = onPlotChange;
-  }, [onPlotChange]);
 
   // 외부 plot이 변경되면 draft 동기화
   useEffect(() => {
@@ -47,39 +28,16 @@ export function PlotMemo({
     setDraft(plot ?? "");
   }, [plot]);
 
-  // debounced save
+  // 즉시 콜백 호출 (debounce는 useEditor에서 처리)
   const handleChange = useCallback(
     (value: string) => {
       setDraft(value);
-
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
+      if (onPlotChange) {
+        onPlotChange(value.trim() || null);
       }
-
-      debounceRef.current = setTimeout(() => {
-        if (onPlotChange) {
-          onPlotChange(value.trim() || null);
-        }
-      }, 500);
     },
     [onPlotChange]
   );
-
-  // cleanup on unmount - 저장되지 않은 내용 저장
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-
-      // 저장되지 않은 내용이 있으면 즉시 저장
-      const currentDraft = draftRef.current.trim() || null;
-      const currentPlot = plotRef.current;
-      if (onPlotChangeRef.current && currentDraft !== currentPlot) {
-        onPlotChangeRef.current(currentDraft);
-      }
-    };
-  }, []);
 
   const hasContent = !!plot?.trim();
 

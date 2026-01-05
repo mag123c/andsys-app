@@ -31,6 +31,7 @@ application/
 │   └── index.ts
 ├── chapter/
 │   ├── create-chapter.usecase.ts   # 챕터 생성 + 유효성 검증
+│   ├── delete-chapter.usecase.ts   # 챕터 삭제 + 순서 재정렬
 │   ├── reorder-chapters.usecase.ts # 순서 변경 + 유효성 검증
 │   └── index.ts
 └── index.ts                         # 모듈 export
@@ -42,6 +43,7 @@ application/
 |---------|------|------|
 | `deleteProjectUseCase` | CASCADE_DELETE | 프로젝트 + 모든 하위 데이터 삭제 |
 | `createChapterUseCase` | - | 프로젝트 존재 검증 후 챕터 생성 |
+| `deleteChapterUseCase` | CHAPTER_REORDER_ON_DELETE | 챕터 삭제 + 남은 챕터 순서 재정렬 |
 | `reorderChaptersUseCase` | - | 챕터 ID 유효성 검증 후 순서 변경 |
 
 ## 사용 예시
@@ -105,7 +107,6 @@ export async function xxxUseCase(
 | UseCase | 우선순위 | 설명 |
 |---------|---------|------|
 | `migrateGuestDataUseCase` | 높음 | 게스트→회원 데이터 마이그레이션 |
-| `deleteChapterUseCase` | 중간 | 챕터 삭제 + 순서 재정렬 |
 | `archiveProjectUseCase` | 낮음 | 프로젝트 보관 처리 |
 
 ## 의존성
@@ -115,4 +116,4 @@ export async function xxxUseCase(
 - `repositories/types/` - 타입 정의
 
 ---
-최종 수정: 2026-01-02
+최종 수정: 2026-01-05

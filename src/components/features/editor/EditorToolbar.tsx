@@ -27,9 +27,18 @@ interface EditorToolbarProps {
   editor: Editor | null;
   /** 기본 글꼴 (사용자 설정에서 가져옴) */
   defaultFont?: string;
+  /** 회차별 글꼴 (Chapter.fontFamily) */
+  chapterFont?: string | null;
+  /** 회차 글꼴 변경 콜백 */
+  onChapterFontChange?: (fontFamily: string | null) => void;
 }
 
-export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
+export function EditorToolbar({
+  editor,
+  defaultFont,
+  chapterFont,
+  onChapterFontChange,
+}: EditorToolbarProps) {
   // 선택 변경 시 툴바 리렌더 트리거
   const [, forceUpdate] = useState(0);
 
@@ -47,9 +56,10 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
 
   if (!editor) return null;
 
-  // Tiptap에서 설정된 폰트가 없으면 defaultFont 사용
+  // 폰트 우선순위: Tiptap 선택 텍스트 > 회차별 글꼴 > 전역 기본 글꼴
   const tiptapFont = editor.getAttributes("textStyle").fontFamily || "";
-  const currentFont = tiptapFont || defaultFont || "";
+  const effectiveChapterFont = chapterFont || defaultFont || "";
+  const currentFont = tiptapFont || effectiveChapterFont;
 
   // 현재 폰트의 표시 이름 찾기
   const currentFontName = EDITOR_FONTS.find((f) => f.value === currentFont)?.name || currentFont;
@@ -60,11 +70,12 @@ export function EditorToolbar({ editor, defaultFont }: EditorToolbarProps) {
 
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-      {/* 폰트 선택 */}
+      {/* 폰트 선택 - 회차 기본 글꼴로 저장 */}
       <Select
         value={currentFont || undefined}
         onValueChange={(value) => {
-          editor.chain().focus().setFontFamily(value).run();
+          // 회차 기본 글꼴로 저장
+          onChapterFontChange?.(value);
         }}
       >
         <SelectTrigger className="h-8 w-[120px] text-xs">

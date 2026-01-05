@@ -111,6 +111,7 @@ export async function createChunhyangMockup(
             order: chapter.order,
             status: "draft",
             plot: null,
+            fontFamily: null,
             createdAt: now,
             updatedAt: now,
             syncStatus: userId ? "pending" : "synced",
