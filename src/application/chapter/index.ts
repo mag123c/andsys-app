@@ -15,3 +15,9 @@ export {
   type ReorderChaptersInput,
   type ReorderChaptersOutput,
 } from "./reorder-chapters.usecase";
+
+export {
+  updateChapterOrderUseCase,
+  type UpdateChapterOrderInput,
+  type UpdateChapterOrderOutput,
+} from "./update-chapter-order.usecase";

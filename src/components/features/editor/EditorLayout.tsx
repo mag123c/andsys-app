@@ -49,6 +49,7 @@ interface EditorLayoutProps {
   onTitleChange?: (title: string) => Promise<void>;
   onContentChange?: (content: JSONContent) => void;
   onPlotChange?: (plot: string | null) => void;
+  onReorderChapters?: (chapterIds: string[]) => Promise<void>;
 }
 
 export function EditorLayout({
@@ -65,6 +66,7 @@ export function EditorLayout({
   onTitleChange,
   onContentChange,
   onPlotChange,
+  onReorderChapters,
 }: EditorLayoutProps) {
   const { auth } = useAuth();
   const { settings } = useUserSettings();
@@ -212,6 +214,7 @@ export function EditorLayout({
           currentChapterId={currentChapter.id}
           collapsed={leftSidebarCollapsed}
           onToggle={handleLeftSidebarToggle}
+          onReorder={onReorderChapters}
         />
       </aside>
 
@@ -226,6 +229,7 @@ export function EditorLayout({
             project={project}
             chapters={chapters}
             currentChapterId={currentChapter.id}
+            onReorder={onReorderChapters}
           />
         </SheetContent>
       </Sheet>

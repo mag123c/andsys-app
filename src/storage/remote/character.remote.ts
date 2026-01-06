@@ -145,6 +145,7 @@ export class CharacterRemoteRepository implements CharacterRepository {
     if (data.gender !== undefined) updateData.gender = data.gender;
     if (data.race !== undefined) updateData.race = data.race;
     if (data.imageUrl !== undefined) updateData.image_url = data.imageUrl;
+    if (data.order !== undefined) updateData.order = data.order;
     if (data.height !== undefined) updateData.height = data.height;
     if (data.weight !== undefined) updateData.weight = data.weight;
     if (data.appearance !== undefined) updateData.appearance = data.appearance;

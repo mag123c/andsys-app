@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { MoreVertical, Trash2, GripVertical, Pencil } from "lucide-react";
+import { MoreVertical, Trash2, GripVertical, Pencil, AlertTriangle } from "lucide-react";
 import type { Chapter, UpdateChapterInput } from "@/repositories/types";
 import { formatCharacterCount, formatDateTime, formatEpisodeNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -34,33 +34,74 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
+interface UpdateOrderResult {
+  swapped: boolean;
+  swappedWithChapter?: {
+    id: string;
+    title: string;
+    previousOrder: number;
+  };
+}
+
 interface ChapterCardProps {
   chapter: Chapter;
   projectId: string;
+  chapters: Chapter[];
   onDelete: (id: string) => void;
   onUpdate?: (data: UpdateChapterInput) => Promise<void>;
+  onUpdateOrder?: (newOrder: number) => Promise<UpdateOrderResult>;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export function ChapterCard({
   chapter,
   projectId,
+  chapters,
   onDelete,
   onUpdate,
+  onUpdateOrder,
   dragHandleProps,
 }: ChapterCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editTitle, setEditTitle] = useState(chapter.title);
+  const [editOrder, setEditOrder] = useState(chapter.order);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // 다이얼로그 열릴 때 현재 값으로 초기화
+  useEffect(() => {
+    if (showEditDialog) {
+      setEditTitle(chapter.title);
+      setEditOrder(chapter.order);
+    }
+  }, [showEditDialog, chapter.title, chapter.order]);
+
+  // 충돌하는 챕터 찾기
+  const conflictChapter = useMemo(() => {
+    if (editOrder === chapter.order) return null;
+    return chapters.find((ch) => ch.id !== chapter.id && ch.order === editOrder);
+  }, [chapters, chapter.id, chapter.order, editOrder]);
+
+  const hasOrderChanged = editOrder !== chapter.order;
+  const hasTitleChanged = editTitle.trim() !== chapter.title;
+  const hasChanges = hasOrderChanged || hasTitleChanged;
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editTitle.trim() || !onUpdate) return;
+    if (!hasChanges) return;
 
     setIsUpdating(true);
     try {
-      await onUpdate({ title: editTitle.trim() });
+      // 회차 번호 변경
+      if (hasOrderChanged && onUpdateOrder) {
+        await onUpdateOrder(editOrder);
+      }
+
+      // 제목 변경
+      if (hasTitleChanged && onUpdate) {
+        await onUpdate({ title: editTitle.trim() });
+      }
+
       setShowEditDialog(false);
     } finally {
       setIsUpdating(false);
@@ -69,6 +110,7 @@ export function ChapterCard({
 
   const handleOpenEditDialog = () => {
     setEditTitle(chapter.title);
+    setEditOrder(chapter.order);
     setShowEditDialog(true);
   };
 
@@ -123,11 +165,11 @@ export function ChapterCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {onUpdate && (
+            {(onUpdate || onUpdateOrder) && (
               <>
                 <DropdownMenuItem onClick={handleOpenEditDialog}>
                   <Pencil className="mr-2 h-4 w-4" />
-                  제목 수정
+                  수정
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>
@@ -169,12 +211,33 @@ export function ChapterCard({
         <DialogContent>
           <form onSubmit={handleEditSubmit}>
             <DialogHeader>
-              <DialogTitle>회차 제목 수정</DialogTitle>
+              <DialogTitle>회차 수정</DialogTitle>
               <DialogDescription>
-                회차의 제목을 수정합니다.
+                회차의 번호와 제목을 수정합니다.
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4">
+            <div className="py-4 space-y-4">
+              {onUpdateOrder && (
+                <div className="grid gap-2">
+                  <Label htmlFor="chapter-order">회차 번호</Label>
+                  <Input
+                    id="chapter-order"
+                    type="number"
+                    min={1}
+                    value={editOrder}
+                    onChange={(e) => setEditOrder(Math.max(1, parseInt(e.target.value) || 1))}
+                    disabled={isUpdating}
+                  />
+                  {conflictChapter && (
+                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      <span>
+                        {conflictChapter.order}화 &quot;{conflictChapter.title}&quot;와 위치가 교환됩니다
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label htmlFor="chapter-title">제목</Label>
                 <Input
@@ -182,7 +245,7 @@ export function ChapterCard({
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   disabled={isUpdating}
-                  autoFocus
+                  autoFocus={!onUpdateOrder}
                 />
               </div>
             </div>
@@ -197,7 +260,7 @@ export function ChapterCard({
               </Button>
               <Button
                 type="submit"
-                disabled={isUpdating || !editTitle.trim() || editTitle.trim() === chapter.title}
+                disabled={isUpdating || !editTitle.trim() || !hasChanges}
               >
                 저장
               </Button>
