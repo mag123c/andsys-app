@@ -585,6 +585,8 @@ export class SyncEngine {
             word_count: local.wordCount,
             order: local.order,
             status: local.status,
+            plot: local.plot,
+            font_family: local.fontFamily,
             created_at: local.createdAt.toISOString(),
             updated_at: local.updatedAt.toISOString(),
           });

@@ -96,6 +96,7 @@ export class ChapterRemoteRepository implements ChapterRepository {
       order: maxOrder + 1,
       status: "draft",
       plot: data.plot ?? null,
+      font_family: data.fontFamily ?? null,
     };
 
     const { data: created, error } = await this.supabase
