@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Book, Check, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { usePWAMode } from "@/hooks/usePWAMode";
 import { SidebarProfile } from "./SidebarProfile";
 import { SettingsModal } from "@/components/features/settings";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
@@ -75,11 +74,10 @@ export function NovelsListSidebar({
   const { auth } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { canInstall, isInstalled, install, showInstallButton } = usePWAInstall();
-  const isPwaMode = usePWAMode();
 
-  // 클라우드 환경 = 회원 + 브라우저 (자동 동기화)
-  // 로컬 환경 = 비회원, 또는 PWA (수동 동기화)
-  const isCloud = auth.status === "authenticated" && !isPwaMode;
+  // 클라우드 = 로그인 상태 (서버에 백업됨)
+  // 로컬 = 비로그인 상태 (브라우저에만 저장, 삭제 시 복구 불가)
+  const isCloud = auth.status === "authenticated";
 
   const isLoading = auth.status === "loading";
   const isGuest = auth.status === "guest";

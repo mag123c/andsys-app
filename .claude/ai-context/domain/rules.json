@@ -8,21 +8,22 @@
       "entities": ["chapters", "synopses", "characters", "relationships", "versions"],
       "implementation": "hooks/useProject.ts → deleteProject()"
     },
-    "ENVIRONMENT_BASED_SYNC": {
-      "description": "환경에 따른 동기화 방식 분리",
-      "local": {
-        "description": "로컬 환경 (PWA): 수동 동기화만",
+    "LOGIN_BASED_SYNC": {
+      "description": "로그인 여부에 따른 동기화 방식 분리",
+      "guest": {
+        "description": "비로그인 (로컬 모드): 동기화 없음",
         "autoSync": false,
-        "syncTrigger": "수동 버튼 클릭",
-        "loginRequired": "동기화 시에만"
+        "storage": "IndexedDB만",
+        "badge": "로컬"
       },
-      "cloud": {
-        "description": "클라우드 환경 (브라우저): 자동 동기화",
+      "member": {
+        "description": "로그인 (클라우드 모드): 서버 백업",
         "autoSync": true,
-        "syncTrigger": "저장 후 debounce 2초",
-        "loginRequired": "동기화 사용 시"
+        "syncTrigger": "저장 후 debounce 2초 (브라우저), 수동 버튼 (PWA)",
+        "storage": "IndexedDB + Supabase",
+        "badge": "클라우드"
       },
-      "implementation": "sync/sync-engine.ts, hooks/usePWAMode.ts"
+      "implementation": "sync/sync-engine.ts, hooks/useSyncEngine.ts"
     },
     "ONE_SYNOPSIS_PER_PROJECT": {
       "description": "프로젝트당 시놉시스 1개만 존재",
@@ -68,28 +69,31 @@
     }
   },
   "policies": {
-    "local": {
-      "description": "로컬 환경 (PWA 앱) 정책",
-      "autoSync": false,
+    "guest": {
+      "description": "비로그인 사용자 (로컬 모드)",
+      "badge": "로컬",
       "storage": "IndexedDB only",
-      "loginRequired": false,
-      "syncButton": "설정 또는 헤더에 수동 동기화 버튼",
-      "syncRequiresLogin": true,
-      "limitations": ["공유 기능 제한 (향후 개선 가능)"]
+      "sync": false,
+      "risk": "브라우저 데이터 삭제 시 복구 불가",
+      "limitations": ["서버 백업 없음", "다른 기기 접근 불가", "공유 기능 제한"]
     },
-    "cloud": {
-      "description": "클라우드 환경 (브라우저) 정책",
-      "member": {
-        "autoSync": true,
-        "storage": "IndexedDB + Supabase",
-        "realtime": "Supabase Realtime 구독",
-        "multiDevice": true
+    "member": {
+      "description": "로그인 사용자 (클라우드 모드)",
+      "badge": "클라우드",
+      "storage": "IndexedDB + Supabase",
+      "sync": {
+        "browser": "자동 (debounce 2초)",
+        "pwa": "수동 버튼"
       },
-      "nonMember": {
-        "autoSync": false,
-        "storage": "IndexedDB only",
-        "note": "비로그인 시 로컬 환경과 동일하게 IndexedDB만 사용"
-      }
+      "realtime": "Supabase Realtime 구독",
+      "multiDevice": true,
+      "benefit": "브라우저 데이터 삭제해도 로그인하면 복구"
+    },
+    "pwa": {
+      "description": "PWA 설치 시 추가 정책",
+      "note": "설치 방식의 차이일 뿐, 로그인 여부가 데이터 안전성 결정",
+      "offlineSupport": "Chrome/Edge에서 완전 지원",
+      "syncMethod": "수동 버튼 (오프라인 작업 지원 위해)"
     }
   },
   "autosave": {

@@ -8,19 +8,24 @@
       "description": "인터넷 연결이 없는 상태. 네트워크 끊김",
       "behavior": "IndexedDB만 사용, 서버 통신 불가"
     },
-    "로컬 환경": {
-      "en": "local environment",
-      "description": "PWA 앱으로 사용하는 환경 (standalone 모드)",
-      "behavior": "IndexedDB 사용, 동기화는 수동 버튼으로만",
-      "sync": "수동",
-      "login": "동기화 시에만 필요"
+    "로컬 모드": {
+      "en": "local mode",
+      "description": "비로그인 상태. 데이터가 브라우저에만 저장됨",
+      "behavior": "IndexedDB만 사용, 서버 백업 없음",
+      "badge": "사이드바에 '로컬' 뱃지 표시",
+      "risk": "브라우저 데이터 삭제 시 복구 불가"
     },
-    "클라우드 환경": {
-      "en": "cloud environment",
-      "description": "웹 브라우저에서 사용하는 환경",
-      "behavior": "IndexedDB + Supabase 자동 동기화 (회원만)",
-      "sync": "자동 (debounce 2초)",
-      "login": "동기화 기능 사용 시 필요"
+    "클라우드 모드": {
+      "en": "cloud mode",
+      "description": "로그인 상태. 데이터가 서버에 백업됨",
+      "behavior": "IndexedDB + Supabase 동기화",
+      "badge": "사이드바에 '클라우드' 뱃지 표시",
+      "benefit": "브라우저 데이터 삭제해도 로그인하면 복구 가능"
+    },
+    "PWA": {
+      "en": "Progressive Web App",
+      "description": "앱처럼 설치하여 사용하는 방식. 오프라인 지원",
+      "note": "설치 방식의 차이일 뿐, 데이터 저장 방식은 로그인 여부로 결정"
     }
   },
   "terms": {
@@ -73,14 +78,17 @@
       }
     },
     "비회원": {
-      "en": "non-member",
-      "description": "로그인하지 않은 사용자. 로컬 환경에서는 정상 사용, 동기화 시 가입 필요",
-      "note": "로컬 환경에서는 가입 강요 없음"
+      "en": "guest",
+      "description": "로그인하지 않은 사용자. 브라우저에만 데이터 저장됨",
+      "mode": "로컬 모드",
+      "risk": "브라우저 데이터 삭제 시 복구 불가"
     },
     "회원": {
       "en": "member",
-      "description": "로그인 사용자. 클라우드 환경에서 자동 동기화, 로컬 환경에서 수동 동기화 가능",
-      "identifier": "userId"
+      "description": "로그인 사용자. 서버에 데이터 백업됨",
+      "mode": "클라우드 모드",
+      "identifier": "userId",
+      "benefit": "어떤 기기에서든 로그인하면 데이터 접근 가능"
     }
   }
 }
