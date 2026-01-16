@@ -52,6 +52,11 @@ const edgeTypes: EdgeTypes = {
 const NODE_WIDTH = 120;
 const NODE_HEIGHT = 60;
 
+// RELATIONSHIP_TYPES를 Map으로 캐싱 (O(1) 조회)
+const RELATIONSHIP_TYPE_MAP = new Map(
+  RELATIONSHIP_TYPES.map((t) => [t.type, t])
+);
+
 /**
  * 두 노드의 위치를 기반으로 최적의 핸들 방향 계산
  * 엣지가 꼬이지 않도록 상대 위치에 따라 적절한 방향 선택
@@ -145,9 +150,24 @@ function RelationshipGraphInner({
     );
   }, []);
 
+  // selectedTypes를 Set으로 캐싱 (O(1) 조회)
+  const selectedTypesSet = useMemo(() => new Set(selectedTypes), [selectedTypes]);
+
+  // characters를 Map으로 캐싱 (O(1) 조회)
+  const characterMap = useMemo(
+    () => new Map(characters.map((c) => [c.id, c])),
+    [characters]
+  );
+
+  // relationships를 Map으로 캐싱 (O(1) 조회)
+  const relationshipMap = useMemo(
+    () => new Map(relationships.map((r) => [r.id, r])),
+    [relationships]
+  );
+
   const filteredRelationships = useMemo(
-    () => relationships.filter((r) => selectedTypes.includes(r.type)),
-    [relationships, selectedTypes]
+    () => relationships.filter((r) => selectedTypesSet.has(r.type)),
+    [relationships, selectedTypesSet]
   );
 
   // 관계가 있는 캐릭터들을 그래프에 추가 (초기화 또는 새 관계 추가 시)
@@ -257,7 +277,7 @@ function RelationshipGraphInner({
       // 노드가 그래프에 없으면 스킵
       if (!sourcePos || !targetPos) return;
 
-      const typeConfig = RELATIONSHIP_TYPES.find((t) => t.type === relationship.type);
+      const typeConfig = RELATIONSHIP_TYPE_MAP.get(relationship.type);
       const color = typeConfig?.color || "#6B7280";
 
       // 노드 위치 기반 최적 핸들 계산
@@ -317,7 +337,7 @@ function RelationshipGraphInner({
       const characterId = event.dataTransfer.getData("application/character-id");
       if (!characterId) return;
 
-      const character = characters.find((c) => c.id === characterId);
+      const character = characterMap.get(characterId);
       if (!character) return;
 
       // 이미 그래프에 있으면 무시
@@ -355,7 +375,7 @@ function RelationshipGraphInner({
       setNodes((nds) => [...nds, newNode]);
       setGraphNodeIds((prev) => new Set([...prev, characterId]));
     },
-    [characters, graphNodeIds, screenToFlowPosition, setNodes]
+    [characterMap, graphNodeIds, screenToFlowPosition, setNodes]
   );
 
   // 드래그 시작 핸들러 (CharacterPanel에서 사용)
@@ -437,12 +457,12 @@ function RelationshipGraphInner({
     (_event: React.MouseEvent, edge: Edge) => {
       if (readonly || !onEdit) return;
 
-      const relationship = relationships.find((r) => r.id === edge.id);
+      const relationship = relationshipMap.get(edge.id);
       if (relationship) {
         onEdit(relationship);
       }
     },
-    [readonly, onEdit, relationships]
+    [readonly, onEdit, relationshipMap]
   );
 
   // 그래프에 있는 노드 ID (CharacterPanel용 메모이제이션)

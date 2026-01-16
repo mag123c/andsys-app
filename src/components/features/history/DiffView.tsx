@@ -60,7 +60,8 @@ function LineDiffBlock({ lines }: { lines: LineDiff[] }) {
 }
 
 // JSON 객체 필드는 소설 작가에게 불필요하므로 필터링
-const HIDDEN_FIELDS = ["content", "snapshot"];
+// Set.has()로 O(1) 조회 (기존 includes() O(n) 대비 성능 향상)
+const HIDDEN_FIELDS_SET = new Set(["content", "snapshot"]);
 
 function isSimpleValue(value: unknown): boolean {
   if (value === null || value === undefined) return true;
@@ -74,7 +75,7 @@ function FieldDiffBlock({ fields }: { fields: FieldDiff[] }) {
   // JSON 객체 필드와 숨김 필드 제외
   const visibleFields = fields.filter(
     (f) =>
-      !HIDDEN_FIELDS.includes(f.field) &&
+      !HIDDEN_FIELDS_SET.has(f.field) &&
       isSimpleValue(f.oldValue) &&
       isSimpleValue(f.newValue)
   );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, Loader2 } from "lucide-react";
 import { useProject } from "@/hooks/useProject";
 import { useChapters } from "@/hooks/useChapters";
 import { useCharacters } from "@/hooks/useCharacters";
@@ -22,8 +23,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { NovelSidebar } from "./NovelSidebar";
-import { RelationshipGraph } from "@/components/features/relationship";
 import { useLocalStorageBoolean } from "@/hooks/useLocalStorage";
+
+// Dynamic import: React Flow (~150-200KB) 번들 분리
+const RelationshipGraph = dynamic(
+  () => import("@/components/features/relationship/RelationshipGraph").then((m) => m.RelationshipGraph),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  }
+);
 
 const SIDEBAR_COLLAPSED_KEY = "4ndsys:novel-sidebar-collapsed";
 

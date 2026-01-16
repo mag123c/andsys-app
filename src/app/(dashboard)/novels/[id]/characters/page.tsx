@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { Loader2, Plus, Network } from "lucide-react";
 import { useCharacters } from "@/hooks/useCharacters";
@@ -19,7 +20,19 @@ import {
   EmptyCharacters,
   RelationshipEditorDialog,
 } from "@/components/features/character";
-import { RelationshipGraph } from "@/components/features/relationship";
+
+// Dynamic import: React Flow (~150-200KB) 번들 분리
+const RelationshipGraph = dynamic(
+  () => import("@/components/features/relationship/RelationshipGraph").then((m) => m.RelationshipGraph),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  }
+);
 
 interface CharactersPageProps {
   params: Promise<{ id: string }>;
