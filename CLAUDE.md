@@ -45,6 +45,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 에디터 설정 | `technical/editor-config.json` | editor 작업 | Tiptap 확장, 폰트 7개, 자동저장 |
 | 스키마 히스토리 | `technical/schema-history.json` | DB 변경 | Dexie v1~v8 마이그레이션 |
 | 컴포넌트 맵 | `components/dependency-map.json` | 필요시 | PWA 포함 컴포넌트, 훅 의존성 |
+| **디자인 시스템** | `design/paper-ink-redesign.md` | 디자인 작업 | Paper & Ink 리디자인 스펙, 진행 상황 |
 
 ### Behavior (`.claude/skills/`)
 
@@ -65,7 +66,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `/developer` | 데이터 계층, 로직, Repository, 타입 정의 |
 | `/frontend` | RSC 보안, 서버/클라이언트 분리, UI 컴포넌트 |
 | `/reviewer` | 코드 리뷰 (버그/보안/성능/가독성) |
-| `/verify` | 자체 검증 루프 (빌드/린트/테스트/E2E) |
+| `/verify` | 자체 검증 루프 (빌드/린트/테스트/E2E) |\
+| `VS Design Diverge skill` | 디자인 |
 
 ### Commands (`.claude/commands/`)
 
@@ -93,6 +95,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | DB 스키마 변경 (Dexie 마이그레이션) | `schema-history.json` |
 | 라우트 추가/변경 | `routes.json` |
 | 컴포넌트 구조 파악 | `dependency-map.json` |
+| **디자인/UI 변경** | `design/paper-ink-redesign.md` |
 
 ### Token Estimation
 
@@ -248,5 +251,6 @@ Next.js 16 (App Router, Turbopack) + React 19 + shadcn/ui + Tailwind CSS 4 + Sup
     | PWA 관련 변경 | `pwa-config.json` |
     | 새 컴포넌트/훅 추가 | `dependency-map.json` |
     | 새 도메인 용어 | `glossary.json` |
+    | 디자인/UI 컴포넌트 변경 | `design/paper-ink-redesign.md` |
 
 2. 필요하다면, 추가적인 문서/JSON을 생성해서 관리하고, 업데이트합니다.

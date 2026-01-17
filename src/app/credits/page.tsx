@@ -113,14 +113,14 @@ export default function CreditsPage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-3xl font-bold">크레딧</h1>
+        <h1 className="font-serif text-3xl font-bold tracking-tight">크레딧</h1>
         <p className="mt-2 text-muted-foreground">
           4ndSYS는 다음의 오픈소스 프로젝트와 폰트를 사용합니다.
         </p>
 
         {/* 폰트 섹션 */}
         <section className="mt-12">
-          <h2 className="text-xl font-semibold">폰트</h2>
+          <h2 className="font-serif text-xl font-semibold">폰트</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             에디터에서 사용할 수 있는 폰트 목록입니다.
           </p>
@@ -151,7 +151,7 @@ export default function CreditsPage() {
 
         {/* 오픈소스 라이브러리 섹션 */}
         <section className="mt-12">
-          <h2 className="text-xl font-semibold">오픈소스 라이브러리</h2>
+          <h2 className="font-serif text-xl font-semibold">오픈소스 라이브러리</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             이 서비스를 만드는 데 사용된 주요 라이브러리입니다.
           </p>
@@ -182,7 +182,7 @@ export default function CreditsPage() {
 
         {/* 라이선스 설명 */}
         <section className="mt-12">
-          <h2 className="text-xl font-semibold">라이선스 안내</h2>
+          <h2 className="font-serif text-xl font-semibold">라이선스 안내</h2>
           <div className="mt-4 space-y-3 text-sm text-muted-foreground">
             <p>
               <strong className="text-foreground">OFL 1.1</strong> (SIL Open

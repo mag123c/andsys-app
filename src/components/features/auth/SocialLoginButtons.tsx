@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -51,15 +52,19 @@ export function SocialLoginButtons() {
     <div className="space-y-3">
       <Button
         variant="outline"
-        className="w-full"
+        size="lg"
+        className="w-full h-11 font-sans"
         onClick={() => handleOAuthLogin("google")}
         disabled={loadingProvider !== null}
       >
         {loadingProvider === "google" ? (
-          "로그인 중..."
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-muted-foreground">연결 중...</span>
+          </>
         ) : (
           <>
-            <GoogleIcon className="mr-2 h-5 w-5" />
+            <GoogleIcon className="h-5 w-5" />
             Google로 계속하기
           </>
         )}
@@ -67,15 +72,19 @@ export function SocialLoginButtons() {
 
       <Button
         variant="outline"
-        className="w-full"
+        size="lg"
+        className="w-full h-11 font-sans"
         onClick={() => handleOAuthLogin("discord")}
         disabled={loadingProvider !== null}
       >
         {loadingProvider === "discord" ? (
-          "로그인 중..."
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-muted-foreground">연결 중...</span>
+          </>
         ) : (
           <>
-            <DiscordIcon className="mr-2 h-5 w-5" />
+            <DiscordIcon className="h-5 w-5" />
             Discord로 계속하기
           </>
         )}

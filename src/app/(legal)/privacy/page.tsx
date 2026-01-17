@@ -21,7 +21,7 @@ export default function PrivacyPage() {
     <div className="space-y-6">
       {/* 헤더 */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">개인정보처리방침</h1>
+        <h1 className="font-serif text-3xl font-bold tracking-tight">개인정보처리방침</h1>
         <p className="text-muted-foreground">
           시행일: 2025년 12월 26일
         </p>

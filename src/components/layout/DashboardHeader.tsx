@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FilePenLine, LogOut, Settings } from "lucide-react";
+import { Feather, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,9 +27,11 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-4xl px-4">
         <div className="flex h-14 items-center justify-between">
-          <Link href="/novels" className="flex items-center gap-2">
-            <FilePenLine className="h-6 w-6" />
-            <span className="text-xl font-bold">4ndSYS</span>
+          <Link href="/novels" className="flex items-center gap-2.5 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary transition-shadow group-hover:shadow-md">
+              <Feather className="h-4.5 w-4.5 text-primary-foreground" />
+            </div>
+            <span className="font-serif text-lg font-medium tracking-tight">4ndSYS</span>
           </Link>
 
           <div className="flex items-center gap-2">

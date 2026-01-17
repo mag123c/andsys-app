@@ -32,12 +32,12 @@ export function InstallPrompt() {
   if (!initialized || !canInstall || dismissed) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card text-card-foreground border-4 border-foreground shadow-[inset_-4px_-4px_0_0_rgba(0,0,0,0.15),inset_4px_4px_0_0_rgba(255,255,255,0.3),8px_8px_0_0_rgba(0,0,0,0.4)] p-4 z-50">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card text-card-foreground border border-border rounded-lg shadow-paper-lg p-4 z-50">
       <div className="flex items-start gap-3">
-        <Download className="h-5 w-5 mt-0.5 text-primary" />
+        <Download className="h-5 w-5 mt-0.5 text-accent" />
         <div className="flex-1">
-          <p className="font-pixel text-xs uppercase tracking-wider">앱으로 설치하기</p>
-          <p className="font-retro text-base text-muted-foreground mt-1">
+          <p className="font-sans text-sm font-medium">앱으로 설치하기</p>
+          <p className="font-sans text-sm text-muted-foreground mt-1">
             홈 화면에 추가하여 더 빠르게 접속하세요
           </p>
           <div className="flex gap-2 mt-3">

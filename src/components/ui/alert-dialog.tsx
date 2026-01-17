@@ -36,11 +36,9 @@ function AlertDialogOverlay({
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
       className={cn(
-        // Pixel/Retro 오버레이
+        // Paper & Ink 오버레이
         "fixed inset-0 z-50",
-        "bg-[var(--pixel-dark)]/80",
-        // 스캔라인 패턴
-        "bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)]",
+        "bg-background/80 backdrop-blur-sm",
         // 애니메이션
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -63,20 +61,19 @@ function AlertDialogContent({
         <AlertDialogPrimitive.Content
           data-slot="alert-dialog-content"
           className={cn(
-            // Pixel/Retro AlertDialog
+            // Paper & Ink AlertDialog
             "w-full max-w-lg grid gap-4 p-6 outline-none",
             "bg-card text-card-foreground",
-            // 픽셀 보더
-            "border-4 border-foreground",
-            // 3D 픽셀 효과
-            "shadow-[inset_-4px_-4px_0_0_rgba(0,0,0,0.15),inset_4px_4px_0_0_rgba(255,255,255,0.3),8px_8px_0_0_rgba(0,0,0,0.5)]",
+            // 보더 시스템
+            "border border-border rounded-lg",
+            "shadow-lg",
             // 애니메이션
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          "duration-100",
-          className
-        )}
+            "duration-200",
+            className
+          )}
           {...props}
         />
       </div>
@@ -91,7 +88,7 @@ function AlertDialogHeader({
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-1.5 text-center sm:text-left", className)}
       {...props}
     />
   )
@@ -106,6 +103,7 @@ function AlertDialogFooter({
       data-slot="alert-dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "pt-4 border-t border-border",
         className
       )}
       {...props}
@@ -121,7 +119,7 @@ function AlertDialogTitle({
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
       className={cn(
-        "font-pixel text-sm leading-tight tracking-wider uppercase",
+        "font-serif text-lg font-medium leading-tight tracking-tight",
         className
       )}
       {...props}
@@ -137,7 +135,7 @@ function AlertDialogDescription({
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
       className={cn(
-        "font-retro text-base text-muted-foreground leading-relaxed",
+        "font-sans text-sm text-muted-foreground leading-relaxed",
         className
       )}
       {...props}

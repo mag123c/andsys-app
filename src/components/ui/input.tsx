@@ -8,28 +8,23 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       data-slot="input"
       className={cn(
-        // Base: Pixel/Retro Input 스타일
-        "flex h-10 w-full min-w-0 bg-card px-4 py-2",
-        "font-retro text-lg transition-all duration-100 outline-none",
-        // 픽셀 보더 시스템
-        "border-4 border-foreground",
-        "shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1)]",
+        // Base: Paper & Ink Input 스타일 - 깔끔하고 가독성 좋은
+        "flex h-10 w-full min-w-0 bg-card px-3 py-2",
+        "font-sans text-sm transition-all duration-200 outline-none",
+        // 보더 시스템
+        "border border-border rounded-md",
         // 파일 인풋 스타일
-        "file:text-foreground file:inline-flex file:h-7 file:border-0 file:border-r-4 file:border-foreground file:bg-secondary file:px-3 file:text-sm file:font-pixel file:mr-3 file:uppercase file:tracking-wider",
+        "file:text-foreground file:inline-flex file:h-7 file:border-0 file:bg-secondary file:px-3 file:text-sm file:font-medium file:mr-3 file:rounded-md",
         // 플레이스홀더
-        "placeholder:text-muted-foreground/60 placeholder:font-retro",
+        "placeholder:text-muted-foreground/60",
         // 셀렉션 색상
-        "selection:bg-primary/30 selection:text-foreground",
+        "selection:bg-accent/20 selection:text-foreground",
         // 포커스 상태
-        "focus:border-primary focus:bg-card",
-        "focus:shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1),0_0_0_2px_var(--primary)]",
+        "focus:border-ring focus:ring-2 focus:ring-ring/20",
         // 비활성화 상태
-        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale",
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted",
         // 에러 상태
-        "aria-invalid:border-destructive",
-        "aria-invalid:focus:border-destructive aria-invalid:focus:shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1),0_0_0_2px_var(--destructive)]",
-        // 모바일 최적화
-        "md:h-10 md:text-base",
+        "aria-invalid:border-destructive aria-invalid:focus:ring-destructive/20",
         className
       )}
       {...props}
@@ -37,30 +32,27 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   )
 }
 
-// Textarea 변형 추가
+// Textarea 컴포넌트
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
       data-slot="textarea"
       className={cn(
-        // Base: Pixel/Retro Textarea 스타일
-        "flex min-h-[120px] w-full bg-card px-4 py-3",
-        "font-retro text-lg transition-all duration-100 outline-none resize-none",
-        // 픽셀 보더 시스템
-        "border-4 border-foreground",
-        "shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1)]",
+        // Base: Paper & Ink Textarea 스타일
+        "flex min-h-[120px] w-full bg-card px-3 py-2",
+        "font-sans text-sm transition-all duration-200 outline-none resize-none",
+        // 보더 시스템
+        "border border-border rounded-md",
         // 플레이스홀더
-        "placeholder:text-muted-foreground/60 placeholder:font-retro",
+        "placeholder:text-muted-foreground/60",
         // 셀렉션 색상
-        "selection:bg-primary/30 selection:text-foreground",
+        "selection:bg-accent/20 selection:text-foreground",
         // 포커스 상태
-        "focus:border-primary focus:bg-card",
-        "focus:shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1),0_0_0_2px_var(--primary)]",
+        "focus:border-ring focus:ring-2 focus:ring-ring/20",
         // 비활성화 상태
-        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale",
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted",
         // 에러 상태
-        "aria-invalid:border-destructive",
-        "aria-invalid:focus:border-destructive aria-invalid:focus:shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.15),inset_-2px_-2px_0_0_rgba(255,255,255,0.1),0_0_0_2px_var(--destructive)]",
+        "aria-invalid:border-destructive aria-invalid:focus:ring-destructive/20",
         className
       )}
       {...props}
@@ -75,30 +67,26 @@ function SearchInput({
 }: React.ComponentProps<"input">) {
   return (
     <div className="relative">
-      {/* 픽셀 돋보기 아이콘 */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+      {/* 돋보기 아이콘 */}
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
         <svg
           width="16"
           height="16"
-          viewBox="0 0 16 16"
-          fill="currentColor"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           className="text-muted-foreground"
         >
-          {/* 픽셀 아트 돋보기 */}
-          <rect x="4" y="2" width="6" height="2" />
-          <rect x="2" y="4" width="2" height="2" />
-          <rect x="10" y="4" width="2" height="2" />
-          <rect x="2" y="6" width="2" height="2" />
-          <rect x="10" y="6" width="2" height="2" />
-          <rect x="4" y="8" width="6" height="2" />
-          <rect x="10" y="10" width="2" height="2" />
-          <rect x="12" y="12" width="2" height="2" />
-          <rect x="14" y="14" width="2" height="2" />
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
         </svg>
       </div>
       <Input
         type="search"
-        className={cn("pl-12", className)}
+        className={cn("pl-10", className)}
         {...props}
       />
     </div>

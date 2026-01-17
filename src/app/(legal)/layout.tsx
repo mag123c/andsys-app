@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FilePenLine } from "lucide-react";
+import { Feather } from "lucide-react";
 
 export default function LegalLayout({
   children,
@@ -10,9 +10,11 @@ export default function LegalLayout({
     <div className="min-h-screen flex flex-col">
       <header className="border-b">
         <div className="container mx-auto px-4 h-14 flex items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <FilePenLine className="h-6 w-6" />
-            <span className="text-xl font-bold">4ndSYS</span>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary transition-shadow group-hover:shadow-md">
+              <Feather className="h-4.5 w-4.5 text-primary-foreground" />
+            </div>
+            <span className="font-serif text-lg font-medium tracking-tight">4ndSYS</span>
           </Link>
         </div>
       </header>

@@ -5,136 +5,106 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  // Base: Pixel/Retro 뱃지 스타일
+  // Base: Paper & Ink 뱃지 스타일 - 미니멀하고 세련된
   [
-    "inline-flex items-center justify-center gap-1.5 px-3 py-1",
-    "font-pixel text-[10px] uppercase tracking-wider",
+    "inline-flex items-center justify-center gap-1 px-2.5 py-0.5",
+    "font-sans text-xs font-medium",
     "w-fit whitespace-nowrap shrink-0 select-none",
     "[&>svg]:size-3 [&>svg]:pointer-events-none",
-    "transition-all duration-100",
+    "transition-colors duration-200",
+    "rounded-md",
   ].join(" "),
   {
     variants: {
       variant: {
-        // Default: 기본 픽셀 뱃지
+        // Default: 기본 뱃지
         default: [
           "bg-primary text-primary-foreground",
-          "border-2 border-foreground/30",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-          "[a&]:hover:translate-x-[-1px] [a&]:hover:translate-y-[-1px]",
-          "[a&]:hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.4)]",
         ].join(" "),
 
         // Secondary: 보조 뱃지
         secondary: [
           "bg-secondary text-secondary-foreground",
-          "border-2 border-foreground/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.2)]",
-          "[a&]:hover:bg-secondary/80",
         ].join(" "),
 
         // Destructive: 경고/위험
         destructive: [
           "bg-destructive text-white",
-          "border-2 border-foreground/30",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-          // 깜빡임 효과
-          "animate-pulse",
-          "[a&]:hover:animate-none [a&]:hover:brightness-110",
         ].join(" "),
 
         // Outline: 아웃라인 뱃지
         outline: [
           "bg-transparent text-foreground",
-          "border-2 border-current",
-          "shadow-[2px_2px_0_0_currentColor]",
-          "[a&]:hover:bg-primary/10 [a&]:hover:text-primary [a&]:hover:border-primary",
-        ].join(" "),
-
-        // Pixel: 순수 픽셀 스타일 (Game Boy)
-        pixel: [
-          "bg-background text-foreground",
-          "border-2 border-foreground",
-          "shadow-[2px_2px_0_0_var(--foreground)]",
-          "[a&]:hover:bg-foreground [a&]:hover:text-background",
-        ].join(" "),
-
-        // Quest: 퀘스트 아이템 뱃지
-        quest: [
-          "bg-[var(--pixel-gold)] text-[var(--pixel-dark)]",
-          "border-2 border-[var(--pixel-dark)]/30",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-        ].join(" "),
-
-        // Rare: 레어 아이템 (보라색)
-        rare: [
-          "bg-[var(--pixel-purple)] text-white",
-          "border-2 border-white/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-        ].join(" "),
-
-        // Epic: 에픽 아이템 (주황색)
-        epic: [
-          "bg-[var(--pixel-coral)] text-white",
-          "border-2 border-white/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-        ].join(" "),
-
-        // Legendary: 전설 아이템 (금색 + 깜빡임)
-        legendary: [
-          "bg-gradient-to-r from-[var(--pixel-gold)] via-[var(--pixel-cream)] to-[var(--pixel-gold)]",
-          "text-[var(--pixel-dark)]",
-          "border-2 border-[var(--pixel-dark)]/30",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]",
-          "animate-shimmer bg-[length:200%_100%]",
+          "border border-border",
         ].join(" "),
 
         // Success: 성공/완료
         success: [
-          "bg-[var(--pixel-green)] text-white",
-          "border-2 border-foreground/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.3)]",
+          "bg-emerald-100 text-emerald-800",
+          "dark:bg-emerald-900/30 dark:text-emerald-400",
         ].join(" "),
 
         // Warning: 경고
         warning: [
-          "bg-[var(--pixel-gold)] text-[var(--pixel-dark)]",
-          "border-2 border-foreground/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.3)]",
+          "bg-amber-100 text-amber-800",
+          "dark:bg-amber-900/30 dark:text-amber-400",
         ].join(" "),
 
         // Info: 정보
         info: [
-          "bg-[var(--pixel-blue)] text-white",
-          "border-2 border-foreground/20",
-          "shadow-[2px_2px_0_0_rgba(0,0,0,0.3)]",
+          "bg-sky-100 text-sky-800",
+          "dark:bg-sky-900/30 dark:text-sky-400",
         ].join(" "),
 
-        // HP: 체력 바 스타일
+        // Muted: 연한 뱃지
+        muted: [
+          "bg-muted text-muted-foreground",
+        ].join(" "),
+
+        // Pixel: 액센트 뱃지 (기존 pixel variant 호환용)
+        pixel: [
+          "bg-accent text-accent-foreground",
+        ].join(" "),
+
+        // Quest: 강조 뱃지 (기존 quest variant 호환용)
+        quest: [
+          "bg-accent text-accent-foreground",
+        ].join(" "),
+
+        // HP: 상태 뱃지 (기존 hp variant 호환용)
         hp: [
-          "bg-[var(--pixel-red)] text-white",
-          "border-2 border-[var(--pixel-dark)]",
-          "shadow-[inset_-2px_-2px_0_0_rgba(0,0,0,0.3),inset_2px_2px_0_0_rgba(255,255,255,0.2)]",
+          "bg-rose-100 text-rose-800",
+          "dark:bg-rose-900/30 dark:text-rose-400",
         ].join(" "),
 
-        // MP: 마나 바 스타일
+        // MP: 상태 뱃지 (기존 mp variant 호환용)
         mp: [
-          "bg-[var(--pixel-blue)] text-white",
-          "border-2 border-[var(--pixel-dark)]",
-          "shadow-[inset_-2px_-2px_0_0_rgba(0,0,0,0.3),inset_2px_2px_0_0_rgba(255,255,255,0.2)]",
+          "bg-sky-100 text-sky-800",
+          "dark:bg-sky-900/30 dark:text-sky-400",
         ].join(" "),
 
-        // XP: 경험치 바 스타일
-        xp: [
-          "bg-[var(--pixel-green)] text-white",
-          "border-2 border-[var(--pixel-dark)]",
-          "shadow-[inset_-2px_-2px_0_0_rgba(0,0,0,0.3),inset_2px_2px_0_0_rgba(255,255,255,0.2)]",
+        // Legendary: 전설 등급 (기존 legendary variant 호환용)
+        legendary: [
+          "bg-amber-100 text-amber-900",
+          "dark:bg-amber-900/30 dark:text-amber-300",
+        ].join(" "),
+
+        // Epic: 에픽 등급 (기존 epic variant 호환용)
+        epic: [
+          "bg-purple-100 text-purple-800",
+          "dark:bg-purple-900/30 dark:text-purple-400",
+        ].join(" "),
+
+        // Rare: 레어 등급 (기존 rare variant 호환용)
+        rare: [
+          "bg-blue-100 text-blue-800",
+          "dark:bg-blue-900/30 dark:text-blue-400",
         ].join(" "),
       },
       size: {
-        default: "h-6 px-3 text-[10px]",
-        sm: "h-5 px-2 text-[8px]",
-        lg: "h-7 px-4 text-xs",
+        default: "h-5 px-2.5 text-xs",
+        sm: "h-4 px-2 text-[10px]",
+        lg: "h-6 px-3 text-sm",
       },
     },
     defaultVariants: {

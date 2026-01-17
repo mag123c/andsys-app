@@ -19,12 +19,12 @@ export default function Icon() {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ color: "#0ea5e9" }}
+        style={{ color: "#8B7355" }}
       >
-        {/* FilePenLine icon */}
-        <path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
-        <path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
-        <path d="M8 18h1" />
+        {/* Feather icon - Paper & Ink 디자인 시스템 */}
+        <path d="M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z" />
+        <path d="M16 8 2 22" />
+        <path d="M17.5 15H9" />
       </svg>
     ),
     {

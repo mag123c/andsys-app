@@ -4,11 +4,10 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  // Pixel/Retro Alert: RPG 시스템 메시지 스타일
+  // Paper & Ink Alert: 깔끔한 알림 스타일
   [
     "relative w-full p-4",
-    "border-4 border-foreground",
-    "shadow-[inset_-4px_-4px_0_0_rgba(0,0,0,0.1),inset_4px_4px_0_0_rgba(255,255,255,0.2),4px_4px_0_0_rgba(0,0,0,0.4)]",
+    "border rounded-lg",
     "grid has-[>svg]:grid-cols-[calc(var(--spacing)*5)_1fr] grid-cols-[0_1fr]",
     "has-[>svg]:gap-x-3 gap-y-1 items-start",
     "[&>svg]:size-5 [&>svg]:translate-y-0.5 [&>svg]:text-current",
@@ -16,49 +15,42 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        // Default: 기본 시스템 메시지
+        // Default: 기본 알림
         default: [
           "bg-card text-card-foreground",
-          "border-foreground/70",
+          "border-border",
         ].join(" "),
 
-        // Destructive: 경고/에러 메시지
+        // Destructive: 경고/에러
         destructive: [
           "bg-destructive/10 text-destructive",
-          "border-destructive",
+          "border-destructive/30",
           "[&>svg]:text-destructive",
           "*:data-[slot=alert-description]:text-destructive/80",
-          // 경고 깜빡임
-          "animate-pulse",
         ].join(" "),
 
-        // Success: 성공 메시지 (퀘스트 완료 스타일)
+        // Success: 성공
         success: [
-          "bg-[var(--pixel-green)]/10 text-[var(--pixel-green)]",
-          "border-[var(--pixel-green)]",
-          "[&>svg]:text-[var(--pixel-green)]",
+          "bg-emerald-50 text-emerald-900",
+          "border-emerald-200",
+          "[&>svg]:text-emerald-600",
+          "dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-800",
         ].join(" "),
 
-        // Warning: 주의 메시지
+        // Warning: 주의
         warning: [
-          "bg-[var(--pixel-gold)]/10 text-[var(--pixel-dark)]",
-          "border-[var(--pixel-gold)]",
-          "[&>svg]:text-[var(--pixel-gold)]",
+          "bg-amber-50 text-amber-900",
+          "border-amber-200",
+          "[&>svg]:text-amber-600",
+          "dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800",
         ].join(" "),
 
-        // Info: 정보 메시지 (NPC 대화 스타일)
+        // Info: 정보
         info: [
-          "bg-[var(--pixel-blue)]/10 text-[var(--pixel-blue)]",
-          "border-[var(--pixel-blue)]",
-          "[&>svg]:text-[var(--pixel-blue)]",
-        ].join(" "),
-
-        // Quest: 퀘스트 알림 (황금 테두리)
-        quest: [
-          "bg-card text-card-foreground",
-          "border-[var(--pixel-gold)]",
-          // 반짝임 효과
-          "before:absolute before:inset-2 before:border-2 before:border-[var(--pixel-gold)]/30 before:pointer-events-none",
+          "bg-sky-50 text-sky-900",
+          "border-sky-200",
+          "[&>svg]:text-sky-600",
+          "dark:bg-sky-900/20 dark:text-sky-200 dark:border-sky-800",
         ].join(" "),
       },
     },
@@ -89,7 +81,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="alert-title"
       className={cn(
         "col-start-2 min-h-4",
-        "font-pixel text-xs uppercase tracking-wider",
+        "font-sans text-sm font-medium",
         className
       )}
       {...props}
@@ -106,7 +98,7 @@ function AlertDescription({
       data-slot="alert-description"
       className={cn(
         "col-start-2 grid justify-items-start gap-1",
-        "font-retro text-base leading-relaxed",
+        "font-sans text-sm leading-relaxed",
         "text-muted-foreground",
         "[&_p]:leading-relaxed",
         className
