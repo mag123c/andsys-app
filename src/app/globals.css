@@ -112,6 +112,8 @@
   --pixel-blue: #5B7DB8;
   --pixel-yellow: #F0C040;
   --pixel-purple: #8B5BB8;
+  --pixel-dark: #1A1C2C;
+  --pixel-gold: #F0C040;
 
   /* Semantic colors */
   --background: #F0D9B5;
@@ -162,6 +164,11 @@
    어두운 던전 + 네온 글로우
    ============================================ */
 .dark {
+  /* Dark mode pixel colors */
+  --pixel-dark: #0D0E14;
+  --pixel-gold: #FFD966;
+  --pixel-cream: #E8E0D0;
+
   --background: #1A1C2C;
   --foreground: #F4F4F4;
   --card: #252840;

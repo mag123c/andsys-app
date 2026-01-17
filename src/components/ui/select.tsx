@@ -84,18 +84,24 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
-  align = "center",
+  position = "popper",
+  align = "start",
+  sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         data-slot="select-content"
+        position={position}
+        align={align}
+        sideOffset={sideOffset}
         className={cn(
           // Pixel/Retro Select Content: 드롭다운 메뉴 스타일
-          "relative z-50 min-w-[8rem] overflow-hidden",
+          "relative z-50 overflow-hidden",
           "bg-popover text-popover-foreground",
+          // popper 모드: 트리거 너비에 맞춤
+          "min-w-[var(--radix-select-trigger-width)]",
           // 픽셀 보더
           "border-4 border-foreground",
           "shadow-[inset_-4px_-4px_0_0_rgba(0,0,0,0.1),inset_4px_4px_0_0_rgba(255,255,255,0.2),8px_8px_0_0_rgba(0,0,0,0.5)]",
@@ -105,22 +111,13 @@ function SelectContent({
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
           "duration-100",
-          // 위치 조정
-          position === "popper" &&
-            "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
           className
         )}
-        position={position}
-        align={align}
         {...props}
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
-          className={cn(
-            "p-2",
-            position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
-          )}
+          className="p-2 max-h-[min(var(--radix-select-content-available-height),300px)]"
         >
           {children}
         </SelectPrimitive.Viewport>
