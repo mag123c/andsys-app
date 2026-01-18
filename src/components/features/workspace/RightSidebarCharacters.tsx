@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Search, Users, Plus, Network } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Search, Users, Plus, Network, Loader2 } from "lucide-react";
 import type { Character, Relationship, UpdateCharacterInput, CreateRelationshipInput } from "@/repositories/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,19 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { CharacterWikiCard } from "./CharacterWikiCard";
-import { RelationshipGraph } from "@/components/features/relationship";
+
+// Dynamic import: React Flow (~150-200KB) 번들 분리
+const RelationshipGraph = dynamic(
+  () => import("@/components/features/relationship/RelationshipGraph").then((m) => m.RelationshipGraph),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  }
+);
 
 interface RightSidebarCharactersProps {
   characters: Character[];

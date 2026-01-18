@@ -1,12 +1,20 @@
 /**
- * 어드민 이메일 목록 (환경변수에서 가져옴)
+ * 어드민 이메일 Set (환경변수에서 가져옴, 모듈 레벨 캐싱)
+ * Set.has()로 O(1) 조회 (기존 includes() O(n) 대비 성능 향상)
  */
-function getAdminEmails(): string[] {
+let adminEmailsSet: Set<string> | null = null;
+
+function getAdminEmailsSet(): Set<string> {
+  if (adminEmailsSet) return adminEmailsSet;
+
   const emails = process.env.ADMIN_EMAILS || "";
-  return emails
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
+  adminEmailsSet = new Set(
+    emails
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean)
+  );
+  return adminEmailsSet;
 }
 
 /**
@@ -14,6 +22,5 @@ function getAdminEmails(): string[] {
  */
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  const adminEmails = getAdminEmails();
-  return adminEmails.includes(email.toLowerCase());
+  return getAdminEmailsSet().has(email.toLowerCase());
 }

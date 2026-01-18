@@ -1,4 +1,15 @@
-/* 웹폰트 - 소설 에디터용 (반드시 최상단에 위치) */
+/* ============================================
+   4ndSYS Design System
+
+   테마 구조:
+   - data-design-theme="default": 기본 테마 (shadcn/ui)
+   - data-design-theme="digital": 디지털 테마 (픽셀/레트로)
+   - .dark: 다크 모드 (테마와 독립적)
+   ============================================ */
+
+/* ============================================
+   Web Fonts - 소설 에디터용 (모든 테마 공통)
+   ============================================ */
 /* Pretendard - 현대적인 고딕체 */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 /* Google Fonts - Noto Sans/Serif KR */
@@ -9,6 +20,19 @@
 @import url("https://cdn.jsdelivr.net/gh/leetaewook/gmarket-sans-dynamic-subset/GmarketSans.css");
 /* 마루 부리 - 네이버 디지털 명조체 */
 @import url("https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css");
+
+/* Pixel/Retro 전용 폰트 (디지털 테마) */
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+
+/* 둥근모꼴 - 한글 픽셀 폰트 */
+@font-face {
+  font-family: "DungGeunMo";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* 리디바탕 - 전자책 최적화 명조체 (눈누 CDN) */
 @font-face {
@@ -24,11 +48,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================
+   Tailwind v4 Theme Configuration
+   ============================================ */
 @theme inline {
+  /* Colors - CSS 변수 매핑 */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,6 +84,12 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Border Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -67,6 +99,10 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* ============================================
+   DEFAULT THEME: Light Mode
+   shadcn/ui 기본 스타일
+   ============================================ */
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -102,6 +138,9 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* ============================================
+   DEFAULT THEME: Dark Mode
+   ============================================ */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -136,11 +175,491 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ============================================
+   DIGITAL THEME: Light Mode
+   "Pixel Writer's Quest" - 레트로 RPG 게임 UI
+   ============================================ */
+[data-design-theme="digital"] {
+  --radius: 0px;
+
+  /* Game Boy Color inspired palette */
+  --pixel-green: #5B8C5A;
+  --pixel-green-light: #7AB87A;
+  --pixel-green-dark: #3D5C3C;
+  --pixel-cream: #F0D9B5;
+  --pixel-cream-dark: #D4BC94;
+  --pixel-red: #E85D75;
+  --pixel-blue: #5B7DB8;
+  --pixel-yellow: #F0C040;
+  --pixel-purple: #8B5BB8;
+  --pixel-dark: #1A1C2C;
+  --pixel-gold: #F0C040;
+
+  /* Semantic colors */
+  --background: #F0D9B5;
+  --foreground: #1A1C2C;
+  --card: #FDF6E8;
+  --card-foreground: #1A1C2C;
+  --popover: #FDF6E8;
+  --popover-foreground: #1A1C2C;
+  --primary: #5B8C5A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #D4BC94;
+  --secondary-foreground: #1A1C2C;
+  --muted: #E8D5B5;
+  --muted-foreground: #5C5C5C;
+  --accent: #E85D75;
+  --accent-foreground: #FFFFFF;
+  --destructive: #C73E3E;
+  --border: #1A1C2C;
+  --input: #1A1C2C;
+  --ring: #5B8C5A;
+
+  /* Chart Colors - RPG stats */
+  --chart-1: #5B8C5A;  /* HP Green */
+  --chart-2: #5B7DB8;  /* MP Blue */
+  --chart-3: #F0C040;  /* EXP Gold */
+  --chart-4: #E85D75;  /* Critical Red */
+  --chart-5: #8B5BB8;  /* Magic Purple */
+
+  /* Sidebar */
+  --sidebar: #E8D5B5;
+  --sidebar-foreground: #1A1C2C;
+  --sidebar-primary: #5B8C5A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #D4BC94;
+  --sidebar-accent-foreground: #1A1C2C;
+  --sidebar-border: #1A1C2C;
+  --sidebar-ring: #5B8C5A;
+
+  /* Pixel effects */
+  --pixel-shadow: #1A1C2C;
+  --pixel-highlight: #FFFFFF;
+  --scanline-opacity: 0.03;
+  --crt-glow: rgba(91, 140, 90, 0.3);
+}
+
+/* ============================================
+   DIGITAL THEME: Dark Mode
+   "Night Mode RPG" - 어두운 던전 + 네온 글로우
+   ============================================ */
+[data-design-theme="digital"].dark,
+.dark[data-design-theme="digital"] {
+  /* Dark mode pixel colors */
+  --pixel-dark: #0D0E14;
+  --pixel-gold: #FFD966;
+  --pixel-cream: #E8E0D0;
+
+  --background: #1A1C2C;
+  --foreground: #F4F4F4;
+  --card: #252840;
+  --card-foreground: #F4F4F4;
+  --popover: #252840;
+  --popover-foreground: #F4F4F4;
+  --primary: #7AB87A;
+  --primary-foreground: #1A1C2C;
+  --secondary: #3D3F58;
+  --secondary-foreground: #F4F4F4;
+  --muted: #2D3047;
+  --muted-foreground: #9CA3AF;
+  --accent: #FF6B8A;
+  --accent-foreground: #1A1C2C;
+  --destructive: #FF4444;
+  --border: #4A4E6A;
+  --input: #4A4E6A;
+  --ring: #7AB87A;
+
+  /* Chart Colors - Neon RPG */
+  --chart-1: #7AB87A;
+  --chart-2: #6B9FFF;
+  --chart-3: #FFD966;
+  --chart-4: #FF6B8A;
+  --chart-5: #B388FF;
+
+  /* Sidebar */
+  --sidebar: #1E2035;
+  --sidebar-foreground: #F4F4F4;
+  --sidebar-primary: #7AB87A;
+  --sidebar-primary-foreground: #1A1C2C;
+  --sidebar-accent: #3D3F58;
+  --sidebar-accent-foreground: #F4F4F4;
+  --sidebar-border: #4A4E6A;
+  --sidebar-ring: #7AB87A;
+
+  /* Pixel effects - Dark mode */
+  --pixel-shadow: #000000;
+  --pixel-highlight: #6B9FFF;
+  --scanline-opacity: 0.05;
+  --crt-glow: rgba(122, 184, 122, 0.4);
+}
+
+/* ============================================
+   Base Layer Styles
+   ============================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================
+   DIGITAL THEME: Typography & Effects
+   디지털 테마 전용 스타일
+   ============================================ */
+[data-design-theme="digital"] {
+  /* 픽셀 폰트 설정 */
+  --font-pixel: "Press Start 2P", "DungGeunMo", monospace;
+  --font-retro: "VT323", "DungGeunMo", monospace;
+
+  /* Tailwind 폰트 오버라이드 */
+  & {
+    font-family: "DungGeunMo", "Pretendard", system-ui, sans-serif;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    image-rendering: pixelated;
+  }
+
+  /* 픽셀 폰트 헤드라인 */
+  h1, h2, h3 {
+    font-family: var(--font-pixel);
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1rem; }
+
+  /* 레트로 터미널 스타일 코드 */
+  code, kbd, samp, pre {
+    font-family: var(--font-retro);
+    font-size: 1.1em;
+  }
+}
+
+/* CRT 스캔라인 오버레이 (디지털 테마만) */
+[data-design-theme="digital"] body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: var(--scanline-opacity);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.3) 2px,
+    rgba(0, 0, 0, 0.3) 4px
+  );
+}
+
+/* CRT 비네팅 효과 (디지털 테마만) */
+[data-design-theme="digital"] body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+}
+
+/* ============================================
+   DIGITAL THEME: Pixel Border System
+   ============================================ */
+[data-design-theme="digital"] .pixel-border {
+  border: 4px solid var(--border);
+  box-shadow:
+    4px 0 0 0 var(--border),
+    -4px 0 0 0 var(--border),
+    0 4px 0 0 var(--border),
+    0 -4px 0 0 var(--border),
+    4px 4px 0 0 var(--border),
+    -4px 4px 0 0 var(--border),
+    4px -4px 0 0 var(--border),
+    -4px -4px 0 0 var(--border);
+}
+
+[data-design-theme="digital"] .pixel-3d {
+  box-shadow:
+    inset 4px 4px 0 0 var(--pixel-highlight),
+    inset -4px -4px 0 0 var(--pixel-shadow),
+    4px 4px 0 0 var(--pixel-shadow);
+}
+
+[data-design-theme="digital"] .pixel-3d:active,
+[data-design-theme="digital"] .pixel-3d[data-state="open"] {
+  box-shadow:
+    inset -4px -4px 0 0 var(--pixel-highlight),
+    inset 4px 4px 0 0 var(--pixel-shadow);
+  transform: translate(2px, 2px);
+}
+
+[data-design-theme="digital"] .pixel-inset {
+  box-shadow:
+    inset 4px 4px 0 0 var(--pixel-shadow),
+    inset -4px -4px 0 0 var(--pixel-highlight);
+}
+
+/* ============================================
+   DIGITAL THEME: Component Styles
+   ============================================ */
+@layer components {
+  /* RPG 대화창 스타일 (디지털 테마) */
+  [data-design-theme="digital"] .rpg-dialog {
+    background: var(--card);
+    border: 4px solid var(--border);
+    padding: 16px;
+    position: relative;
+    box-shadow:
+      8px 8px 0 0 var(--pixel-shadow),
+      inset 4px 4px 0 0 rgba(255,255,255,0.2);
+  }
+
+  [data-design-theme="digital"] .rpg-dialog::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 2px solid var(--border);
+    pointer-events: none;
+  }
+
+  /* HP/MP 바 스타일 (디지털 테마) */
+  [data-design-theme="digital"] .stat-bar {
+    height: 20px;
+    background: var(--muted);
+    border: 4px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-design-theme="digital"] .stat-bar-fill {
+    height: 100%;
+    transition: width 0.3s steps(10);
+  }
+
+  [data-design-theme="digital"] .stat-bar-hp .stat-bar-fill {
+    background: linear-gradient(180deg, #7AB87A 0%, #5B8C5A 50%, #3D5C3C 100%);
+  }
+
+  [data-design-theme="digital"] .stat-bar-mp .stat-bar-fill {
+    background: linear-gradient(180deg, #6B9FFF 0%, #5B7DB8 50%, #3D5C8C 100%);
+  }
+
+  [data-design-theme="digital"] .stat-bar-exp .stat-bar-fill {
+    background: linear-gradient(180deg, #FFD966 0%, #F0C040 50%, #D4A020 100%);
+  }
+
+  /* 픽셀 글로우 효과 (디지털 테마) */
+  [data-design-theme="digital"] .pixel-glow {
+    text-shadow:
+      0 0 10px var(--crt-glow),
+      0 0 20px var(--crt-glow),
+      0 0 30px var(--crt-glow);
+  }
+
+  /* 아이템 박스 (디지털 테마) */
+  [data-design-theme="digital"] .item-box {
+    width: 64px;
+    height: 64px;
+    background: var(--muted);
+    border: 4px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 4px 4px 0 0 var(--pixel-shadow),
+      inset -4px -4px 0 0 rgba(255,255,255,0.1);
+  }
+
+  [data-design-theme="digital"] .item-box:hover {
+    background: var(--secondary);
+    cursor: pointer;
+  }
+
+  /* 레벨 뱃지 (디지털 테마) */
+  [data-design-theme="digital"] .level-badge {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    padding: 4px 8px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: 2px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* 퀘스트 마커 (디지털 테마) */
+  [data-design-theme="digital"] .quest-marker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-pixel);
+    font-size: 12px;
+    color: var(--chart-3);
+    text-shadow: 2px 2px 0 var(--pixel-shadow);
+  }
+
+  [data-design-theme="digital"] .quest-marker::before {
+    content: "!";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--chart-3);
+    color: var(--background);
+    font-weight: bold;
+    animation: quest-bounce 1s ease-in-out infinite;
+  }
+
+  @keyframes quest-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* 선택 커서 (디지털 테마) */
+  [data-design-theme="digital"] .select-cursor {
+    position: relative;
+  }
+
+  [data-design-theme="digital"] .select-cursor::before {
+    content: "▶";
+    position: absolute;
+    left: -24px;
+    color: var(--primary);
+    animation: cursor-blink 0.8s steps(1) infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* 메뉴 아이템 (디지털 테마) */
+  [data-design-theme="digital"] .menu-item {
+    font-family: "DungGeunMo", "Pretendard", system-ui, sans-serif;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.1s steps(1);
+    border-left: 4px solid transparent;
+  }
+
+  [data-design-theme="digital"] .menu-item:hover,
+  [data-design-theme="digital"] .menu-item[data-highlighted] {
+    background: var(--secondary);
+    border-left-color: var(--primary);
+  }
+
+  [data-design-theme="digital"] .menu-item[data-state="checked"]::after {
+    content: "✓";
+    margin-left: 8px;
+    color: var(--primary);
+  }
+
+  /* 8bit 스타일 로딩 (디지털 테마) */
+  @keyframes pixel-loading {
+    0% { content: "▓░░░░░░░"; }
+    12.5% { content: "▓▓░░░░░░"; }
+    25% { content: "▓▓▓░░░░░"; }
+    37.5% { content: "▓▓▓▓░░░░"; }
+    50% { content: "▓▓▓▓▓░░░"; }
+    62.5% { content: "▓▓▓▓▓▓░░"; }
+    75% { content: "▓▓▓▓▓▓▓░"; }
+    87.5% { content: "▓▓▓▓▓▓▓▓"; }
+    100% { content: "▓░░░░░░░"; }
+  }
+
+  [data-design-theme="digital"] .pixel-loader::after {
+    font-family: var(--font-retro);
+    font-size: 24px;
+    content: "▓░░░░░░░";
+    animation: pixel-loading 1s steps(1) infinite;
+  }
+
+  /* 다이얼로그 텍스트 타이핑 효과 (디지털 테마) */
+  [data-design-theme="digital"] .typing-text {
+    overflow: hidden;
+    border-right: 4px solid var(--foreground);
+    white-space: nowrap;
+    animation:
+      typing 2s steps(40, end),
+      blink-caret 0.75s step-end infinite;
+  }
+
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--foreground) }
+  }
+}
+
+/* ============================================
+   DIGITAL THEME: Utility Classes
+   ============================================ */
+@layer utilities {
+  /* 픽셀 텍스트 그림자 (디지털 테마) */
+  [data-design-theme="digital"] .text-shadow-pixel {
+    text-shadow: 2px 2px 0 var(--pixel-shadow);
+  }
+
+  [data-design-theme="digital"] .text-shadow-pixel-lg {
+    text-shadow: 4px 4px 0 var(--pixel-shadow);
+  }
+
+  /* 네온 글로우 (디지털 테마 다크 모드용) */
+  [data-design-theme="digital"] .neon-glow {
+    text-shadow:
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor;
+  }
+
+  /* 픽셀 완벽 정렬 (디지털 테마) */
+  [data-design-theme="digital"] .pixel-perfect {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* 스텝 애니메이션 (디지털 테마) */
+  [data-design-theme="digital"] .animate-steps {
+    animation-timing-function: steps(8);
+  }
+
+  /* 레트로 셀렉션 (디지털 테마) */
+  [data-design-theme="digital"] ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* 포커스 링 - 픽셀 스타일 (디지털 테마) */
+  [data-design-theme="digital"] .focus-pixel:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 4px var(--background),
+      0 0 0 8px var(--primary);
   }
 }

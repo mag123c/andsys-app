@@ -18,7 +18,8 @@ export function CharacterPanel({
 }: CharacterPanelProps) {
   const sortedCharacters = useMemo(() => {
     // 그래프에 없는 캐릭터를 위로
-    return [...characters].sort((a, b) => {
+    // toSorted()로 불변성 유지 (ES2023)
+    return characters.toSorted((a, b) => {
       const aOnGraph = nodesOnGraph.has(a.id);
       const bOnGraph = nodesOnGraph.has(b.id);
       if (aOnGraph === bOnGraph) return a.order - b.order;

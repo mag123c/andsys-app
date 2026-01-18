@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
+import { DesignThemeProvider } from "@/components/providers/DesignThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { UpdatePrompt, ManualInstallGuide } from "@/components/features/pwa";
 import { PWAInstallProvider } from "@/hooks/usePWAInstall";
@@ -97,14 +98,16 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <SyncProvider>
-              <PWAInstallProvider>
-                {children}
-                <Toaster />
-                <UpdatePrompt />
-                <ManualInstallGuide />
-              </PWAInstallProvider>
-            </SyncProvider>
+            <DesignThemeProvider>
+              <SyncProvider>
+                <PWAInstallProvider>
+                  {children}
+                  <Toaster />
+                  <UpdatePrompt />
+                  <ManualInstallGuide />
+                </PWAInstallProvider>
+              </SyncProvider>
+            </DesignThemeProvider>
           </AuthProvider>
         </ThemeProvider>
         <Analytics />

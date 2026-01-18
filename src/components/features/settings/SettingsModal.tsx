@@ -18,9 +18,11 @@ import {
   Type,
   Link2,
   ChevronRight,
+  Palette,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useDesignTheme } from "@/components/providers/DesignThemeProvider";
 import { useProjects } from "@/hooks/useProjects";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useUserStats } from "@/hooks/useUserStats";
@@ -58,6 +60,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const { projects } = useProjects();
   const { settings, updateSettings } = useUserSettings();
   const { theme, setTheme } = useTheme();
+  const { designTheme, setDesignTheme } = useDesignTheme();
   const [isExporting, setIsExporting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [shareLinksOpen, setShareLinksOpen] = useState(false);
@@ -268,6 +271,39 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                         >
                           <Monitor className="mr-1.5 h-4 w-4" />
                           시스템
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* 디자인 스타일 */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-2">
+                        <Palette className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-base">디자인 스타일</CardTitle>
+                      </div>
+                      <CardDescription>
+                        앱의 전체적인 디자인 스타일을 선택합니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={designTheme === "default" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setDesignTheme("default")}
+                          className="flex-1"
+                        >
+                          기본
+                        </Button>
+                        <Button
+                          variant={designTheme === "digital" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setDesignTheme("digital")}
+                          className="flex-1"
+                        >
+                          디지털
                         </Button>
                       </div>
                     </CardContent>

@@ -17,7 +17,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -61,12 +60,16 @@ export function EditorToolbar({
   const effectiveChapterFont = chapterFont || defaultFont || "";
   const currentFont = tiptapFont || effectiveChapterFont;
 
-  // 현재 폰트의 표시 이름 찾기
-  const currentFontName = EDITOR_FONTS.find((f) => f.value === currentFont)?.name || currentFont;
+  // 현재 폰트의 표시 이름
+  const currentFontName = EDITOR_FONTS.find((f) => f.value === currentFont)?.name || "폰트";
 
   // 현재 폰트 크기 (설정된 값이 없으면 기본값 12pt)
-  const currentFontSize = editor.getAttributes("textStyle").fontSize || DEFAULT_FONT_SIZE;
-  const currentFontSizeName = EDITOR_FONT_SIZES.find((s) => s.value === currentFontSize)?.name || currentFontSize.replace("pt", "");
+  const rawFontSize = editor.getAttributes("textStyle").fontSize;
+  const currentFontSize = EDITOR_FONT_SIZES.some((s) => s.value === rawFontSize)
+    ? rawFontSize
+    : DEFAULT_FONT_SIZE;
+  const currentFontSizeName = EDITOR_FONT_SIZES.find((s) => s.value === currentFontSize)?.name || "12";
+
 
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
@@ -78,8 +81,8 @@ export function EditorToolbar({
           onChapterFontChange?.(value);
         }}
       >
-        <SelectTrigger className="h-8 w-[120px] text-xs">
-          <SelectValue placeholder="폰트">{currentFontName}</SelectValue>
+        <SelectTrigger className="h-8 min-w-[100px] px-2 text-sm font-sans">
+          <span className="truncate flex-1 text-left">{currentFontName}</span>
         </SelectTrigger>
         <SelectContent>
           {EDITOR_FONTS.map((font) => (
@@ -101,8 +104,8 @@ export function EditorToolbar({
           editor.chain().focus().setFontSize(value).run();
         }}
       >
-        <SelectTrigger className="h-8 w-[70px] text-xs">
-          <SelectValue placeholder="크기">{currentFontSizeName}</SelectValue>
+        <SelectTrigger className="h-8 min-w-[60px] px-2 text-sm font-sans">
+          <span className="truncate flex-1 text-left">{currentFontSizeName}</span>
         </SelectTrigger>
         <SelectContent>
           {EDITOR_FONT_SIZES.map((size) => (

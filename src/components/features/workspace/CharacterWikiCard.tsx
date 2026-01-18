@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { User, ChevronDown, Pencil, Trash2, Plus, X } from "lucide-react";
 import type { Character, Relationship, UpdateCharacterInput, CreateRelationshipInput, RelationshipType } from "@/repositories/types";
@@ -527,6 +527,12 @@ function RelationshipEditor({
   const [selectedType, setSelectedType] = useState<RelationshipType>("friend");
   const [description, setDescription] = useState("");
 
+  // allCharacters를 Map으로 캐싱 (O(1) 조회)
+  const characterMap = useMemo(
+    () => new Map(allCharacters.map((c) => [c.id, c])),
+    [allCharacters]
+  );
+
   // 이 캐릭터와 관련된 관계만 필터링
   const relatedRelationships = relationships.filter(
     (r) => r.fromCharacterId === characterId || r.toCharacterId === characterId
@@ -564,7 +570,7 @@ function RelationshipEditor({
           {relatedRelationships.map((rel) => {
             const isFrom = rel.fromCharacterId === characterId;
             const otherId = isFrom ? rel.toCharacterId : rel.fromCharacterId;
-            const other = allCharacters.find((c) => c.id === otherId);
+            const other = characterMap.get(otherId);
             const typeLabel = RELATIONSHIP_TYPE_LABELS[rel.type] || rel.type;
             const label = rel.description || typeLabel;
 
